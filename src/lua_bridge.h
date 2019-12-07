@@ -35,17 +35,16 @@
 #include "lua_function.h"
 
 #include <string>
+#include <assert.h>
 
-class lua_bridge
-	: public luaStack
+class lua_bridge : public CLuaStack
 {
 public:
     lua_bridge( )
     {
     }
     
-	lua_bridge( lua_State* VM )
-		: luaStack( VM )
+	lua_bridge( lua_State* VM ) : CLuaStack( VM )
 	{
 		// initialize lua standard library functions
 		luaopen_base(m_pluaVM);

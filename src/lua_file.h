@@ -41,5 +41,4 @@ extern "C"
 #ifdef __cplusplus
 };
 
-#define  __int64 long long
 #endif

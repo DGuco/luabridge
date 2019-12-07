@@ -6,8 +6,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 set(SOURCE_FILES
         src/lua_stack.h
         src/lua_function.h
-        src/lua_variant.cpp
-        src/lua_bridge.cpp
+        src/lua_variant.h
         src/lua_bridge.h
         src/lua_file.h)
 

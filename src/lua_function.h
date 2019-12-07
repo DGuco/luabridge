@@ -30,9 +30,8 @@
 #pragma once
 
 #include "lua_stack.h"
-#include <boost/function.hpp>
-#include <boost/bind.hpp>
-#include <boost/type_traits.hpp>
+#include <functional>
+#include <type_traits>
 #include "../myvm/lua_vmclass.h"
 
 template<int unique_no, typename BOOST_FUNCTION>

@@ -27,18 +27,16 @@
 * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ******************************************************************************/
 
-#ifndef  __CLuaStack_H__
-#define  __CLuaStack_H__
+#ifndef  __LUA_STACK_H__
+#define  __LUA_STACK_H__
 
 #include <cstring>
 #include "lua_file.h"
 #include "lua_variant.h"
-#include "lua_bridge.h"
 
-#define
+#define  __int64 long long
 
 typedef void (*LuaOutputDebugFunction)    ( const char* FunName , const char* Msg );
-
 
 //void	SetLuaDebugOutput( LuaOutputDebugFunction pfun );
 
@@ -50,20 +48,16 @@ bool CheckLuaArg_Str( lua_State* L , int Index );
 void LuaDebugOutput( lua_State* L );
 
 __int64 StrToInt64( const char* str );
+
 class CLuaStack
 {
 public:
-    CLuaStack( )
-        : m_pluaVM( NULL )
-    {
+    CLuaStack( ) : m_pluaVM( NULL ) {}
+    CLuaStack(lua_State* luaVM) : m_pluaVM(luaVM) {}
 
-    }
-    CLuaStack(lua_State* luaVM)
-		: m_pluaVM(luaVM)
-	{
-	}
-public:
-	bool operator !()
+	CLuaStack(const CLuaStack&) = delete;
+    CLuaStack&operator=(const CLuaStack& __x) = delete;
+    bool operator !()
 	{
 		return m_pluaVM == NULL;
 	}
@@ -96,7 +90,7 @@ public:
 	inline void Push(__int64 param)
 	{
 		char str[32];
-		sprintf( str , "%I64d" , param );		
+		sprintf( str , "%ld" , param );
 		lua_pushlstring(m_pluaVM, str, strlen(str) );
 	}
 	inline void Push(double param)
@@ -206,16 +200,16 @@ public:
 		lua_setglobal(m_pluaVM, name);
 	}
 
-	template<class T>
-		void DelGlobalObject(const char* name)
-	{
-		lua_getglobal(m_pluaVM, name);
-		LuaDelObject<T>(m_pluaVM);
-		lua_settop(m_pluaVM, -2);
-
-		lua_pushnil(m_pluaVM);
-		lua_setglobal(m_pluaVM, name);
-	}
+//	template<class T>
+//	void DelGlobalObject(const char* name)
+//	{
+//		lua_getglobal(m_pluaVM, name);
+//		LuaDelObject<T>(m_pluaVM);
+//		lua_settop(m_pluaVM, -2);
+//
+//		lua_pushnil(m_pluaVM);
+//		lua_setglobal(m_pluaVM, name);
+//	}
 private:
 
 	template<typename R>
@@ -223,15 +217,6 @@ private:
 	{
 		return GetValue<R>()(*this, index);
 	}
-
-	template<typename R>
-	struct GetValue
-	{
-		R operator()(CLuaStack& l, int index)
-		{
-			return;
-		}
-	};
 
 	template<>
 	struct GetValue<float>
@@ -321,7 +306,7 @@ private:
 	{
 		bool operator()(CLuaStack& l, int index)
 		{
-//            _Lua_Check_ArgNum_( l , index );
+            _Lua_Check_ArgNum_( l , index );
 			return lua_toboolean(l, index) != 0;
 		}
 	};
@@ -705,4 +690,4 @@ protected:
 };
 
 
-#endif  //__CLuaStack_H__
+#endif  //__LUA_STACK_H__

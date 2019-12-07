@@ -27,9 +27,12 @@
 * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ******************************************************************************/
 
-#pragma once
+#ifndef  __LUA_VARIANG_H__
+#define  __LUA_VARIANG_H__
+
 #include "lua_file.h"
 #include <string>
+#include <cstring>
 #include <map>
 
 enum LuaVariantType
@@ -41,10 +44,16 @@ enum LuaVariantType
 	LUAVARIANTTYPE_TABLE = 100
 };
 
-class lua_variant;
-typedef std::map<lua_variant, lua_variant> LuaTable;
+std::string TableToString(CLuaVariant* var);
 
-class lua_variant
+CLuaVariant StringToTable(const char* str);
+
+CLuaVariant StringToVariant(const char* str);
+
+class CLuaVariant;
+typedef std::map<CLuaVariant, CLuaVariant> LuaTable;
+
+class CLuaVariant
 {
 	LuaVariantType type;
 	std::string strvalue;
@@ -52,31 +61,31 @@ class lua_variant
 	bool boolvalue;
 	LuaTable tablevalue;
 public:
-	lua_variant()
+	CLuaVariant()
 	{
 		Clear();
 	}
-	lua_variant(bool value)
+	CLuaVariant(bool value)
 	{
 		Set(value);
 	}
-	lua_variant(int value)
+	CLuaVariant(int value)
 	{
 		Set(value);
 	}
-	lua_variant(double value)
+	CLuaVariant(double value)
 	{
 		Set(value);
 	}
-	lua_variant(const std::string& value)
+	CLuaVariant(const std::string& value)
 	{
 		Set(value);
 	}
-	lua_variant(const char* value)
+	CLuaVariant(const char* value)
 	{
 		Set(value);
 	}
-	lua_variant(const LuaTable& value)
+	CLuaVariant(const LuaTable& value)
 	{
 		Set(value);
 	}
@@ -100,17 +109,18 @@ public:
 			strvalue = "(false)";
 		tablevalue.clear();
 	}
-	inline void Set(int value)
+
+    inline void Set(int value)
 	{
 		Set(static_cast<double>(value));
 	}
+
 	void Set(double value)
 	{
 		boolvalue = true;
 		numvalue = value;
 		type = LUAVARIANTTYPE_NUM;
-		static char buffer[_CVTBUFSIZE];
-		strvalue = _gcvt(value, 12, buffer);
+		strvalue = std::to_string(value);
 		tablevalue.clear();
 	}
 
@@ -187,11 +197,311 @@ public:
 	}
 };
 
-inline bool operator < (const lua_variant& l, const lua_variant& r)
+inline bool operator < (const CLuaVariant& l, const CLuaVariant& r)
 {
 	return l.GetValueAsCStr() < r.GetValueAsCStr();
 }
 
-std::string TableToString(lua_variant* var);
-lua_variant StringToTable(const char* str);
-lua_variant StringToVariant(const char* str);
+std::string TableToString(CLuaVariant* var)
+{
+    std::string Result = "";
+
+    char Buff[64];
+
+    if (var != NULL)
+    {
+        Result.append("{");
+
+        LuaTable& Table = var->GetValueAsRefTable();
+
+        for (std::map<CLuaVariant, CLuaVariant>::iterator it = Table.begin(); it != Table.end(); it++)
+        {
+            const CLuaVariant* pKey   = &(it->first);
+            CLuaVariant*		  pValue = &(it->second);
+
+            switch(pKey->GetType())
+            {
+                case LUAVARIANTTYPE_NIL:
+                    Result.append("nil");
+                    break;
+                case LUAVARIANTTYPE_STR:
+                {
+                    Result.append("\"");
+                    Result.append(pKey->GetValueAsStdStr());
+                    Result.append("\"");
+                }
+                    break;
+                case LUAVARIANTTYPE_NUM:
+                {
+                    sprintf(Buff, "%.4f", pKey->GetValueAsNum());
+                    Result.append(Buff);
+                }
+                    break;
+                case LUAVARIANTTYPE_BOOL:
+                {
+                    bool BoolValue = pKey->GetValueAsBool();
+
+                    if (BoolValue == true)
+                    {
+                        Result.append("true");
+                    }
+                    else
+                    {
+                        Result.append("false");
+                    }
+                }
+                    break;
+                case LUAVARIANTTYPE_TABLE:
+                    Result.append(TableToString((CLuaVariant*)pKey));
+                    break;
+            }
+
+            Result.append("=");
+
+            switch(pValue->GetType())
+            {
+                case LUAVARIANTTYPE_NIL:
+                    Result.append("nil");
+                    break;
+                case LUAVARIANTTYPE_STR:
+                {
+                    Result.append("\"");
+                    Result.append(pValue->GetValueAsStdStr());
+                    Result.append("\"");
+                }
+                    break;
+                case LUAVARIANTTYPE_NUM:
+                {
+                    sprintf(Buff, "%.4f", pValue->GetValueAsNum());
+                    Result.append(Buff);
+                }
+                    break;
+                case LUAVARIANTTYPE_BOOL:
+                {
+                    bool BoolValue = pValue->GetValueAsBool();
+
+                    if (BoolValue == true)
+                    {
+                        Result.append("true");
+                    }
+                    else
+                    {
+                        Result.append("false");
+                    }
+                }
+                    break;
+                case LUAVARIANTTYPE_TABLE:
+                    Result.append(TableToString(pValue));
+                    break;
+            }
+
+            std::map<CLuaVariant, CLuaVariant>::iterator itTail = it;
+            itTail++;
+
+            if (itTail != Table.end())
+            {
+                Result.append(",");
+            }
+        }
+
+        Result.append("}");
+    }
+
+    return Result;
+}
+
+CLuaVariant StringToTable(const char* str)
+{
+    CLuaVariant Result;
+
+    std::string Content = str;
+    std::size_t HeadPos = Content.find_first_of("{");
+    std::size_t TailPos = Content.find_last_of("}");
+
+    if ((HeadPos != std::string::npos) && (TailPos != std::string::npos) && (TailPos > HeadPos))
+    {
+        HeadPos++;
+        Content = Content.substr(HeadPos, (TailPos-HeadPos));
+
+        std::map<CLuaVariant, CLuaVariant> Table;
+
+        if (!Content.empty())
+        {
+            std::string Key;
+            std::string Value;
+            std::string Token;
+            int TableDepth = 0;
+            bool Quotes = false;
+            int Status = 0;
+
+            for (std::string::iterator it = Content.begin(); it != Content.end(); it++)
+            {
+                char ch = *it;
+
+                switch(ch)
+                {
+                    case '{':
+                    {
+                        TableDepth++;
+                        Token.push_back(ch);
+                    }
+                        break;
+                    case '}':
+                    {
+                        TableDepth--;
+
+                        if (TableDepth < 0)
+                            TableDepth = 0;
+
+                        Token.push_back(ch);
+                    }
+                        break;
+                    case '=':
+                    {
+                        if (TableDepth > 0)
+                        {
+                            Token.push_back(ch);
+                        }
+                        else
+                        {
+                            Key = Token;
+                            Token.clear();
+                            Status = 1;
+                        }
+                    }
+                        break;
+                    case ',':
+                    {
+                        if (TableDepth > 0)
+                        {
+                            Token.push_back(ch);
+                        }
+                        else
+                        {
+                            Value = Token;
+                            Token.clear();
+                            Status = 2;
+                        }
+                    }
+                        break;
+                    case '"':
+                    {
+                        if (TableDepth > 0)
+                        {
+
+                        }
+                        else
+                        {
+                            Quotes = !Quotes;
+                        }
+
+                        Token.push_back(ch);
+                    }
+                        break;
+                    case ' ':
+                    {
+                        if (TableDepth > 0)
+                        {
+                            Token.push_back(ch);
+                        }
+                        else
+                        {
+                            if (Quotes == true)
+                            {
+                                Token.push_back(ch);
+                            }
+                        }
+                    }
+                        break;
+                    default:
+                    {
+                        Token.push_back(ch);
+                    }
+                }
+
+                if (Status == 2)
+                {
+                    Status = 0;
+
+                    CLuaVariant KeyVar   = StringToVariant(Key.c_str());
+                    CLuaVariant ValueVar = StringToVariant(Value.c_str());
+
+                    Table[KeyVar] = ValueVar;
+
+                    Key.clear();
+                    Value.clear();
+                }
+            }
+
+            if ((Status == 1) && (!Token.empty()))
+            {
+                CLuaVariant KeyVar   = StringToVariant(Key.c_str());
+                CLuaVariant ValueVar = StringToVariant(Token.c_str());
+
+                Table[KeyVar] = ValueVar;
+            }
+        }
+
+        Result.Set(Table);
+    }
+
+    return Result;
+}
+
+CLuaVariant StringToVariant(const char* str)
+{
+    CLuaVariant Result;
+
+    std::string Temp = str;
+
+    std::size_t HeadPos = std::string::npos;
+    std::size_t TailPos = std::string::npos;
+
+    if (strcmp(Temp.c_str(), "nil")==0)
+    {
+        //nil
+        Result.Clear();
+    }
+    else if (strcmp(Temp.c_str(), "true")==0)
+    {
+        //boolean
+        Result.Set(true);
+    }
+    else if (strcmp(Temp.c_str(), "false")==0)
+    {
+        //boolean
+        Result.Set(false);
+    }
+    else
+    {
+        HeadPos = Temp.find_first_of("{");
+        TailPos = Temp.find_last_of("}");
+
+        if ((HeadPos != std::string::npos) && (TailPos != std::string::npos) && (TailPos > HeadPos))
+        {
+            //Table
+            Result = StringToTable(Temp.c_str());
+        }
+        else
+        {
+            HeadPos = Temp.find_first_of("\"");
+            TailPos = Temp.find_last_of("\"");
+
+            if ((HeadPos != std::string::npos) && (TailPos != std::string::npos) && (TailPos > HeadPos))
+            {
+                //string
+                Temp = Temp.substr(HeadPos+1, (TailPos-HeadPos-1));
+                Result.Set(Temp);
+            }
+            else
+            {
+                //Number
+                Result.Set(atof(Temp.c_str()));
+            }
+        }
+    }
+
+    return Result;
+}
+
+#endif  //__LUA_VARIANG_H__
