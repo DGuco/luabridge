@@ -219,39 +219,18 @@ public:
 //		lua_pushnil(m_pluaVM);
 //		lua_setglobal(m_pluaVM, name);
 //	}
-private:
-
-
+public:
     template<typename R>
     inline R getValue(int index = -1)
     {
-        return GetValue<R>()(*this, index);
+        return CLuaValue<R>()(m_pluaVM, index);
     }
-
-public:
-    LuaTable GetTable(int index)
+    inline LuaTable GetTable(int index)
     {
-        LuaTable table;
-        lua_pushvalue(m_pluaVM, index);
-        if (lua_istable(m_pluaVM, -1)) {
-            lua_pushnil(m_pluaVM);
-            for (;;) {
-                if (lua_next(m_pluaVM, -2) == 0)
-                    break;
-                lua_pushvalue(m_pluaVM, -2);
-                lua_pushvalue(m_pluaVM, -2);
-                CLuaVariant key = getValue<CLuaVariant>(-2);
-                CLuaVariant value = getValue<CLuaVariant>(-1);
-
-                table[key] = value;
-                lua_pop(m_pluaVM, 3);
-            }
-        }
-        lua_pop(m_pluaVM, 1);
-        return table;
+        return CLuaValue<LuaTable>()(m_pluaVM, index);
     }
 
-    void PushTable(const LuaTable &table)
+    inline void PushTable(const LuaTable &table)
     {
         lua_newtable(m_pluaVM);
         LuaTable::const_iterator end = table.end();
@@ -268,10 +247,10 @@ private:
         lua_getglobal(m_pluaVM, func);
     }
 
-    template<typename R,int __ = 0>
+    template<typename R,int __>
     R endCall(int nArg);
 
-    template<int __ = 0>
+    template<int __>
     void endCall(int nArg);
 
 public:
@@ -359,7 +338,7 @@ template<typename R>
 R CLuaStack::Call(const char *func)
 {
     beginCall(func);
-    return endCall<R>(0);
+    return endCall<R,0>(0);
 }
 
 template<typename R, typename P1>
@@ -367,7 +346,7 @@ R CLuaStack::Call(const char *func, P1 p1)
 {
     beginCall(func);
     Push(p1);
-    return endCall<R>(1);
+    return endCall<R,0>(1);
 }
 
 template<typename R, typename P1, typename P2>

@@ -29,12 +29,12 @@
 #ifndef  __LUA_BRIDGE_H__
 #define  __LUA_BRIDGE_H__
 
+#include <string>
 #include "lua_file.h"
 #include "lua_stack.h"
+#if __cplusplus >= 201103L
 #include "lua_function.h"
-
-#include <string>
-#include <assert.h>
+#endif // __cplusplus >= 201103L
 
 class CLuaBridge: public CLuaStack
 {
@@ -55,7 +55,7 @@ public:
 
     bool Init(lua_State *VM)
     {
-        assert(m_pluaVM == NULL);
+        //assert(m_pluaVM == NULL);
         m_pluaVM = VM;
 
         luaopen_base(m_pluaVM);
@@ -68,8 +68,10 @@ public:
 
     ~CLuaBridge()
     {
-        //	if(m_pluaVM)
-        //		lua_close(m_pluaVM);
+        if(NULL != m_pluaVM)
+        {
+            lua_close(m_pluaVM);
+        }
     }
 
 public:
@@ -163,7 +165,42 @@ int Lua_ImplementIndex(lua_State *L)
     return 1;
 }
 
-#define LuaRegisterFunc(luaBridge, funcname, type, func)                           \
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+/**
+ * LuaRegisterCFunc:
+ * int func(int a,int b,int c)
+ * {
+ *  ......
+ *  return 0;
+ * }
+ * void func(int a,int b,int c)
+ * {
+ *  ......
+ *  do someting
+ * }
+ *
+ * LuaRegisterLuaFunc:
+ * int func(lua_State *L)
+ * {
+ *    int para1 = lua_tonumber(L,1);
+ *    int para2 = lua_tonumber(L,2);
+ *    .....
+ *    paran = lua_tonumber(L,n) or lua_tostring(L,n) ....;
+ *
+ *    .....
+ *    lua_pushnumber(L,1);  //1 return
+ *    lua_pushnumber(L,2);  //2 return
+ *    ....
+ *    lua_pushnumber(L,n);  //n return
+ *    return n;
+ * }
+ */
+#if __cplusplus >= 201103L
+#define LuaRegisterCFunc(luaBridge, funcname, type, func)                           \
     luaBridge.Register(funcname, ( LuaCFunctionWrap<type>(func) ) )
+#endif // __cplusplus >= 201103L
 
+#define LuaRegisterLuaFunc(luaBridge, funcname, func)                           \
+    luaBridge.Register(funcname, func)
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
 #endif __LUA_BRIDGE_H__

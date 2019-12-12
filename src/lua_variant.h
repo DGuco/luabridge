@@ -30,10 +30,12 @@
 #ifndef  __LUA_VARIANG_H__
 #define  __LUA_VARIANG_H__
 
-#include "lua_file.h"
+#include <stdio.h>
 #include <string>
 #include <cstring>
 #include <map>
+#include <cstdlib>
+#include "lua_file.h"
 
 enum LuaVariantType
 {
@@ -122,7 +124,9 @@ public:
         boolvalue = true;
         numvalue = value;
         type = LUAVARIANTTYPE_NUM;
-        strvalue = std::to_string(value);
+        char buf[64 + 1] = {0};
+        sprintf(buf,"%.8f",value);//保留8位小数，不够补0
+        strvalue = std::string(buf);
         tablevalue.clear();
     }
 
@@ -144,6 +148,7 @@ public:
         numvalue = strtod(value, &pos);
         tablevalue.clear();
     }
+
     void Set(const LuaTable &value)
     {
         boolvalue = true;

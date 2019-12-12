@@ -21,19 +21,17 @@ void LuaDebugOutput(lua_State *L);
 
 int64 StrToInt64(const char *str);
 
-class CLuaStack;
-
 template<typename R>
-struct GetValue
+struct CLuaValue
 {
     R operator()(lua_State *L, int index)
     {
-        throw std::runtime_error("Bad lua type");
+        throw std::runtime_error("Bad lua type for GetValue");
     }
 };
 
 template<>
-struct GetValue<float>
+struct CLuaValue<float>
 {
     float operator()(lua_State *L, int index)
     {
@@ -43,7 +41,7 @@ struct GetValue<float>
 };
 
 template<>
-struct GetValue<double>
+struct CLuaValue<double>
 {
     double operator()(lua_State *L, int index)
     {
@@ -53,7 +51,7 @@ struct GetValue<double>
 };
 
 template<>
-struct GetValue<long double>
+struct CLuaValue<long double>
 {
     long double operator()(lua_State *L, int index)
     {
@@ -63,7 +61,7 @@ struct GetValue<long double>
 };
 
 template<>
-struct GetValue<int>
+struct CLuaValue<int>
 {
     int operator()(lua_State *L, int index)
     {
@@ -73,7 +71,7 @@ struct GetValue<int>
 };
 
 template<>
-struct GetValue<long>
+struct CLuaValue<long>
 {
     long operator()(lua_State *L, int index)
     {
@@ -83,7 +81,7 @@ struct GetValue<long>
 };
 
 template<>
-struct GetValue<int64>
+struct CLuaValue<int64>
 {
     int64 operator()(lua_State *L, int index)
     {
@@ -95,7 +93,7 @@ struct GetValue<int64>
 };
 
 template<>
-struct GetValue<const char *>
+struct CLuaValue<const char *>
 {
     const char *operator()(lua_State *L, int index)
     {
@@ -105,7 +103,7 @@ struct GetValue<const char *>
 };
 
 template<>
-struct GetValue<std::string>
+struct CLuaValue<std::string>
 {
     std::string operator()(lua_State *L, int index)
     {
@@ -115,7 +113,7 @@ struct GetValue<std::string>
 };
 
 template<>
-struct GetValue<bool>
+struct CLuaValue<bool>
 {
     bool operator()(lua_State *L, int index)
     {
@@ -124,49 +122,88 @@ struct GetValue<bool>
     }
 };
 
-//template<typename R>
-//struct GetValue<R *>
-//{
-//    R *operator()(lua_State *L, int index)
-//    {
-//        R **pobj = static_cast<R **>( luaL_checkudata(L, index, R::GetLuaTypeName()));
-//        luaL_argcheck(L, pobj != NULL && *pobj != NULL, index, "Invalid object");
-//        L.Pop();
-//        return *pobj;
-//    }
-//};
+template<typename R>
+struct CLuaValue<R *>
+{
+    R *operator()(lua_State *L, int index)
+    {
+        R **pobj = static_cast<R **>( luaL_checkudata(L, index, R::GetLuaTypeName()));
+        luaL_argcheck(L, pobj != NULL && *pobj != NULL, index, "Invalid object");
+        //pop one from stack
+        lua_settop(L, (-1) - 1);
+        return *pobj;
+    }
+};
 
-//template<>
-//struct GetValue<LuaTable>
-//{
-//    LuaTable operator()(lua_State *L, int index)
-//    {
-//        return L.GetTable(index);
-//    }
-//};
-//
-//template<>
-//struct GetValue<CLuaVariant>
-//{
-//    CLuaVariant operator()(CLuaStack &l, int index)
-//    {
-//        CLuaVariant value;
-//        if (lua_istable(l, index))
-//            value.Set(l.GetTable(index));
-//        else {
-//            if (lua_isboolean(l, index))
-//                value.Set(l.getValue<bool>(index));
-//            else {
-//                if (lua_isnumber(l, index))
-//                    value.Set(l.getValue<double>(index));
-//                else if (lua_isstring(l, index))
-//                    value.Set(l.getValue<std::string>(index));
-//            }
-//        }
-//        return value;
-//    }
-//};
+template<>
+struct CLuaValue<CLuaVariant>
+{
+    LuaTable GetTable(lua_State *L,int index)
+    {
+        LuaTable table;
+        lua_pushvalue(L, index);
+        if (lua_istable(L, -1)) {
+            lua_pushnil(L);
+            for (;;) {
+                if (lua_next(L, -2) == 0)
+                    break;
+                lua_pushvalue(L, -2);
+                lua_pushvalue(L, -2);
+                CLuaVariant key = CLuaValue<CLuaVariant>()(L,-2);
+                CLuaVariant value = CLuaValue<CLuaVariant>()(L,-1);
+                table[key] = value;
+                lua_pop(L, 3);
+            }
+        }
+        lua_pop(L, 1);
+        return table;
+    }
 
+    CLuaVariant operator()(lua_State *L, int index)
+    {
+        CLuaVariant value;
+        if (lua_istable(L, index))
+            value.Set(GetTable(L,index));
+        else {
+            if (lua_isboolean(L, index))
+                value.Set(CLuaValue<bool>()(L,index));
+            else {
+                if (lua_isnumber(L, index))
+                    value.Set(CLuaValue<double>()(L,index));
+                else if (lua_isstring(L, index))
+                    value.Set(CLuaValue<std::string>()(L,index));
+            }
+        }
+        return value;
+    }
+};
+
+
+template<>
+struct CLuaValue<LuaTable>
+{
+    LuaTable operator()(lua_State *L, int index)
+    {
+        LuaTable table;
+        lua_pushvalue(L, index);
+        if (lua_istable(L, -1)) {
+            lua_pushnil(L);
+            for (;;) {
+                if (lua_next(L, -2) == 0)
+                    break;
+                lua_pushvalue(L, -2);
+                lua_pushvalue(L, -2);
+                CLuaVariant key = CLuaValue<CLuaVariant>()(L,-2);
+                CLuaVariant value = CLuaValue<CLuaVariant>()(L,-1);
+
+                table[key] = value;
+                lua_pop(L, 3);
+            }
+        }
+        lua_pop(L, 1);
+        return table;
+    }
+};
 
 void Empty_SendLuaErrorInfo(const char *, const char *)
 {}
