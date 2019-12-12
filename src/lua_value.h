@@ -12,6 +12,17 @@ using namespace std;
 
 #define int64 long long
 
+typedef void (*LuaOutputDebugFunction)(const char *FunName, const char *Msg);
+
+void DefaultDebugLuaErrorInfo(const char *FunName, const char *Msg)
+{
+    printf("===============================================================================================\n");
+    printf("Call fun:[%s] failed,msg:[%s]\n",FunName,Msg);
+    printf("===============================================================================================\n");
+}
+
+LuaOutputDebugFunction g_pfunLuaDebugOut = DefaultDebugLuaErrorInfo;
+
 bool CheckLuaArg_Num(lua_State *L, int Index);
 bool CheckLuaArg_Str(lua_State *L, int Index);
 void LuaDebugOutput(lua_State *L);
@@ -26,7 +37,7 @@ struct CLuaValue
 {
     R operator()(lua_State *L, int index)
     {
-        throw std::runtime_error("Bad lua type for GetValue");
+        throw std::runtime_error("Bad  type for CLuaValue");
     }
 };
 
@@ -205,37 +216,42 @@ struct CLuaValue<LuaTable>
     }
 };
 
-void Empty_SendLuaErrorInfo(const char *, const char *)
-{}
-
 void LuaDebugOutput(lua_State *L)
 {
     char szMsg[1024];
     lua_Debug trouble_info;
     memset(&trouble_info, 0, sizeof(lua_Debug));
-    int debug_StackNum = lua_gettop(L);
+    //int debug_StackNum = lua_gettop(L);
 
     for (int i = 0;; i++) {
         if (lua_getstack(L, i, &trouble_info) == 0)
             break;
         lua_getinfo(L, "Snl", &trouble_info);
 
-        /*sprintf( szMsg, "name:(%s) what:(%s) short:(%s) linedefined:(%d) currentline:(%d)",
+        sprintf( szMsg, "name:(%s) what:(%s) short:(%s) linedefined:(%d) currentline:(%d)",
             trouble_info.name,
             trouble_info.what,
             trouble_info.short_src,
             trouble_info.linedefined,
             trouble_info.currentline
-            );*/
+            );
         sprintf(szMsg, "%s(%d): /t%s",
                 trouble_info.short_src,
                 trouble_info.currentline,
                 trouble_info.name
         );
 
-        //g_pfunLuaDebugOut( "",szMsg );
+        g_pfunLuaDebugOut( "",szMsg );
     }
 
+}
+
+int64 StrToInt64(const char *str)
+{
+    int64 ret = atol(str);
+    if (ret != 0)
+        return ret;
+    return  0;
 }
 
 bool CheckLuaArg_Num(lua_State *L, int Index)
@@ -243,19 +259,16 @@ bool CheckLuaArg_Num(lua_State *L, int Index)
     if (lua_isnumber(L, Index))
         return true;
 
-//	printf("%s\n",lua_tostring(L,-1));
-
     lua_Debug trouble_info;
     memset(&trouble_info, 0, sizeof(lua_Debug));
-    int debug_StackNum = lua_gettop(L);
+    //int debug_StackNum = lua_gettop(L);
     if (lua_getstack(L, 0, &trouble_info) || lua_getstack(L, 1, &trouble_info))
         lua_getinfo(L, "Snl", &trouble_info);
 
     char szMsg[1024];
-
     if (lua_isnil(L, Index)) {
         sprintf(szMsg, "Lua function(%s), %d arg is null", trouble_info.name, Index);
-        //g_pfunLuaDebugOut(trouble_info.name, szMsg);
+        g_pfunLuaDebugOut(trouble_info.name, szMsg);
     }
     else if (lua_isstring(L, Index)) {
         sprintf(szMsg,
@@ -263,41 +276,16 @@ bool CheckLuaArg_Num(lua_State *L, int Index)
                 trouble_info.name,
                 Index,
                 lua_tostring(L, Index));
-        //g_pfunLuaDebugOut(trouble_info.name, szMsg);
+        g_pfunLuaDebugOut(trouble_info.name, szMsg);
     }
     else {
         sprintf(szMsg, "Lua function(%s), %d arg type error", trouble_info.name, Index);
-        //g_pfunLuaDebugOut(trouble_info.name, szMsg);
+        g_pfunLuaDebugOut(trouble_info.name, szMsg);
     }
-
 
     LuaDebugOutput(L);
 
     return false;
-}
-
-int64 StrToInt64(const char *str)
-{
-    int64 ret = atoi(str);
-    if (ret != 0)
-        return ret;
-    return  0;
-//    return _strtoi64(str, NULL, 16);
-//
-//    __int64 ret = 0;
-//    for( int i = 0 ; str[i] != 0 ; i++ )
-//    {
-//        ret *= 16;
-//        if( str[i] <= '9' )
-//            ret += str[i] - '0';
-//        else if( str[i] <= 'F' )
-//            ret += (str[i] - 'A' + 10);
-//        else if( str[i] <= 'f' )
-//            ret += (str[i] - 'a' + 10);
-//    }
-//
-//    return ret;
-
 }
 
 bool CheckLuaArg_Str(lua_State *L, int Index)
@@ -309,19 +297,19 @@ bool CheckLuaArg_Str(lua_State *L, int Index)
 
     lua_Debug trouble_info;
     memset(&trouble_info, 0, sizeof(lua_Debug));
-    int debug_StackNum = lua_gettop(L);
+    //int debug_StackNum = lua_gettop(L);
     if (lua_getstack(L, 1, &trouble_info) || lua_getstack(L, 0, &trouble_info))
         lua_getinfo(L, "Snl", &trouble_info);
 
     if (lua_isnil(L, Index)) {
-        sprintf(szMsg, "Lua func(%s) arg-[%d] arg dosent exist", trouble_info.name, Index);
-        //g_pfunLuaDebugOut(trouble_info.name, szMsg);
+        sprintf(szMsg, "Lua func(%s) arg-[%d] arg is null", trouble_info.name, Index);
+        g_pfunLuaDebugOut(trouble_info.name, szMsg);
     }
     else {
         sprintf(szMsg, "Lua func(%s) arg-[%d] arg type error", trouble_info.name, Index);
-        //g_pfunLuaDebugOut(trouble_info.name, szMsg);
+        g_pfunLuaDebugOut(trouble_info.name, szMsg);
     }
-/*
+
     sprintf( szMsg, "name:(%s) namewhat:(%s) what:(%s) source:(%s) short:(%s) linedefined:(%d) currentline:(%d)\n",
         trouble_info.name,
         trouble_info.namewhat,
@@ -333,7 +321,7 @@ bool CheckLuaArg_Str(lua_State *L, int Index)
         );
 
 	g_pfunLuaDebugOut( trouble_info.name,szMsg );
-*/
+
     LuaDebugOutput(L);
     return false;
 }

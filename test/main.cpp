@@ -5,20 +5,10 @@
 #include <stdio.h>
 #include "../src/lua_bridge.h"
 
-
-//int LuaFnAdd(lua_State* l)
-//{
-//    int a = lua_tonumber(l, 1);
-//    int b = lua_tonumber(l, 2);
-//    lua_pushnumber(l,a + b);
-//    return 1;
-//}
-
 int Add(int a,int b)
 {
     return a + b;
 }
-
 
 int LuaFnAdd(lua_State *L)
 {
@@ -38,7 +28,7 @@ int main(void) {
     lua_State *L = luaL_newstate();
     CLuaBridge luaBridge;
     luaBridge.Init(L);
-    //LuaRegisterFunc(luaBridge,"Add",int(int,int),Add);
+    LuaRegisterCFunc(luaBridge,"Add",int(int,int),Add);
     luaBridge.LoadFile("../test/111111.lua");
     LuaRegisterLuaFunc(luaBridge,"LuaFnAdd",LuaFnAdd);
     int ret = luaBridge.Call<int>("x11111_test");

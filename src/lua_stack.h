@@ -36,9 +36,7 @@
 #include "lua_value.h"
 
 
-typedef void (*LuaOutputDebugFunction)(const char *FunName, const char *Msg);
-
-//void	SetLuaDebugOutput( LuaOutputDebugFunction pfun );
+void SetLuaDebugOutput(LuaOutputDebugFunction pfun);
 
 class CLuaStack
 {
@@ -225,6 +223,7 @@ public:
     {
         return CLuaValue<R>()(m_pluaVM, index);
     }
+
     inline LuaTable GetTable(int index)
     {
         return CLuaValue<LuaTable>()(m_pluaVM, index);
@@ -247,11 +246,11 @@ private:
         lua_getglobal(m_pluaVM, func);
     }
 
-    template<typename R,int __>
-    R endCall(int nArg);
+    template<typename R, int __>
+    R endCall(const char *func, int nArg);
 
     template<int __>
-    void endCall(int nArg);
+    void endCall(const char *func, int nArg);
 
 public:
     // Call Lua function
@@ -316,11 +315,12 @@ protected:
     lua_State *m_pluaVM;
 };
 
-template<typename R,int __>
-R CLuaStack::endCall(int nArg)
+template<typename R, int __>
+R CLuaStack::endCall(const char *func, int nArg)
 {
     if (lua_pcall(m_pluaVM, nArg, 1, 0) != 0) {
-        Pop(); // Pop error message
+        DefaultDebugLuaErrorInfo(func,lua_tostring(m_pluaVM, -1));
+        //Pop(); // Pop error message
         return 0;
     }
 
@@ -328,17 +328,19 @@ R CLuaStack::endCall(int nArg)
 }
 
 template<int __>
-void CLuaStack::endCall(int nArg)
+void CLuaStack::endCall(const char *func, int nArg)
 {
-    if (lua_pcall(m_pluaVM, nArg, 0, 0) != 0)
-        Pop(); // Pop error message
+    if (lua_pcall(m_pluaVM, nArg, 0, 0) != 0) {
+        DefaultDebugLuaErrorInfo(func,lua_tostring(m_pluaVM, -1));
+        // Pop(); // Pop error message
+    }
 }
 
 template<typename R>
 R CLuaStack::Call(const char *func)
 {
     beginCall(func);
-    return endCall<R,0>(0);
+    return endCall<R, 0>(func,0);
 }
 
 template<typename R, typename P1>
@@ -346,7 +348,7 @@ R CLuaStack::Call(const char *func, P1 p1)
 {
     beginCall(func);
     Push(p1);
-    return endCall<R,0>(1);
+    return endCall<R, 0>(func,1);
 }
 
 template<typename R, typename P1, typename P2>
@@ -355,7 +357,7 @@ R CLuaStack::Call(const char *func, P1 p1, P2 p2)
     beginCall(func);
     Push(p1);
     Push(p2);
-    return endCall<R>(2);
+    return endCall<R>(func,2);
 }
 
 template<typename R, typename P1, typename P2, typename P3>
@@ -365,7 +367,7 @@ R CLuaStack::Call(const char *func, P1 p1, P2 p2, P3 p3)
     Push(p1);
     Push(p2);
     Push(p3);
-    return endCall<R>(3);
+    return endCall<R>(func,3);
 }
 
 template<typename R, typename P1, typename P2, typename P3, typename P4>
@@ -376,7 +378,7 @@ R CLuaStack::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4)
     Push(p2);
     Push(p3);
     Push(p4);
-    return endCall<R>(4);
+    return endCall<R>(func,4);
 }
 
 template<typename R, typename P1, typename P2, typename P3, typename P4, typename P5>
@@ -388,7 +390,7 @@ R CLuaStack::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5)
     Push(p3);
     Push(p4);
     Push(p5);
-    return endCall<R>(5);
+    return endCall<R>(func,5);
 }
 
 template<typename R, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6>
@@ -401,7 +403,7 @@ R CLuaStack::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6)
     Push(p4);
     Push(p5);
     Push(p6);
-    return endCall<R>(6);
+    return endCall<R>(func,6);
 }
 
 template<typename R, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7>
@@ -415,7 +417,7 @@ R CLuaStack::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7
     Push(p5);
     Push(p6);
     Push(p7);
-    return endCall<R>(7);
+    return endCall<R>(func,7);
 }
 
 template<typename R, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8>
@@ -430,7 +432,7 @@ R CLuaStack::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7
     Push(p6);
     Push(p7);
     Push(p8);
-    return endCall<R>(8);
+    return endCall<R>(func,8);
 }
 
 template<typename R, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8, typename P9>
@@ -446,7 +448,7 @@ R CLuaStack::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7
     Push(p7);
     Push(p8);
     Push(p9);
-    return endCall<R>(9);
+    return endCall<R>(func,9);
 }
 
 template<typename R, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8, typename P9, typename P10>
@@ -463,7 +465,7 @@ R CLuaStack::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7
     Push(p8);
     Push(p9);
     Push(p10);
-    return endCall<R>(10);
+    return endCall<R>(func,10);
 }
 
 const char *CLuaStack::Call(const char *func, const char *sig, ...)

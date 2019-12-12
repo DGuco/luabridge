@@ -32,9 +32,6 @@
 #include <string>
 #include "lua_file.h"
 #include "lua_stack.h"
-#if __cplusplus >= 201103L
-#include "lua_function.h"
-#endif // __cplusplus >= 201103L
 
 class CLuaBridge: public CLuaStack
 {
@@ -195,7 +192,9 @@ int Lua_ImplementIndex(lua_State *L)
  *    return n;
  * }
  */
+
 #if __cplusplus >= 201103L
+#include "lua_function.h"
 #define LuaRegisterCFunc(luaBridge, funcname, type, func)                           \
     luaBridge.Register(funcname, ( LuaCFunctionWrap<type>(func) ) )
 #endif // __cplusplus >= 201103L
