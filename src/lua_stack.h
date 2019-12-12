@@ -268,10 +268,10 @@ private:
         lua_getglobal(m_pluaVM, func);
     }
 
-    template<typename R,typename VOID>
+    template<typename R,int __ = 0>
     R endCall(int nArg);
 
-    template<typename VOID>
+    template<int __ = 0>
     void endCall(int nArg);
 
 public:
@@ -311,7 +311,6 @@ public:
 
     template<typename R, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8, typename P9, typename P10>
     R Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8, P9 p9, P10 p10);
-public:
     /************************************************************************
     * Here:
     * This function "const char* Call(const char*, const char*, ...)" is come from "Programming in Lua"
@@ -332,111 +331,13 @@ public:
      */
     // 例1︰ double f; const char* error_msg = lua.Call("test01", "nnnn:f", 1,2,3,4,&f);
     // 例2︰ const char* s; int len; const char* error_msg = lua.Call("test01", "S:S", 11, "Hello\0World", &len, &s);
-    const char *Call(const char *func, const char *sig, ...)
-    {
-        va_list vl;
-        va_start(vl, sig);
-
-        lua_getglobal(m_pluaVM, func);
-
-        /* 壓入調用參數 */
-        int narg = 0;
-        while (*sig) {  /* push arguments */
-            switch (*sig++) {
-                case 'f':    /* 浮點數 */
-                case 'e':    /* 浮點數 */
-                    lua_pushnumber(m_pluaVM, va_arg(vl, double));
-                    break;
-
-                case 'i':    /* 整數 */
-                case 'n':    /* 整數 */
-                case 'd':    /* 整數 */
-                    lua_pushnumber(m_pluaVM, va_arg(vl, int));
-                    break;
-
-                case 'b':    /* 布爾值 */
-                    lua_pushboolean(m_pluaVM, va_arg(vl, int));
-                    break;
-
-                case 's':    /* 字元串 */
-                    lua_pushstring(m_pluaVM, va_arg(vl, char *));
-                    break;
-
-                case 'S':    /* 字元串 */
-                {
-                    int len = va_arg(vl, int);
-                    lua_pushlstring(m_pluaVM, va_arg(vl, char *), len);
-                }
-                    break;
-
-                case '>':
-                case ':':
-                    goto L_LuaCall;
-
-                default:
-                    //assert(("Lua call option is invalid!", false));
-                    //error(m_pluaVM, "invalid option (%c)", *(sig - 1));
-                    lua_pushnumber(m_pluaVM, 0);
-            }
-            narg++;
-            luaL_checkstack(m_pluaVM, 1, "too many arguments");
-        }
-
-        L_LuaCall:
-        int nres = static_cast<int>(strlen(sig));
-        const char *sresult = NULL;
-        if (lua_pcall(m_pluaVM, narg, nres, 0) != 0) {
-            sresult = lua_tostring(m_pluaVM, -1);
-            nres = 1;
-        }
-        else {
-            // 取得返回值
-            int index = -nres;
-            while (*sig) {
-                switch (*sig++) {
-                    case 'f':    /* 浮点数 float*/
-                    case 'e':    /* 浮点数 float*/
-                        *va_arg(vl, double *) = lua_tonumber(m_pluaVM, index);
-                        break;
-
-                    case 'i':    /* 整数 */
-                    case 'n':    /* 整数 */
-                    case 'd':    /* 整数 */
-                        *va_arg(vl, int *) = static_cast<int>(lua_tonumber(m_pluaVM, index));
-                        break;
-
-                    case 'b':    /* bool */
-                        *va_arg(vl, int *) = static_cast<int>(lua_toboolean(m_pluaVM, index));
-                        break;
-
-                    case 's':    /* string */
-                        *va_arg(vl, const char **) = lua_tostring(m_pluaVM, index);
-                        break;
-
-                    case 'S':    /* string */
-                        *va_arg(vl, int *) = static_cast<int>(lua_strlen(m_pluaVM, index));
-                        *va_arg(vl, const char **) = lua_tostring(m_pluaVM, index);
-                        break;
-
-                    default:
-                        //assert(("Lua call invalid option!", false));
-                        //error(m_pluaVM, "invalid option (%c)", *(sig - 1));
-                        ;
-                }
-                index++;
-            }
-        }
-        va_end(vl);
-
-        lua_pop(m_pluaVM, nres);
-        return sresult;
-    }
+    const char *Call(const char *func, const char *sig, ...);
 
 protected:
     lua_State *m_pluaVM;
 };
 
-template<typename R,typename VOID>
+template<typename R,int __>
 R CLuaStack::endCall(int nArg)
 {
     if (lua_pcall(m_pluaVM, nArg, 1, 0) != 0) {
@@ -447,7 +348,7 @@ R CLuaStack::endCall(int nArg)
     return Pop<R>();
 }
 
-template<typename VOID>
+template<int __>
 void CLuaStack::endCall(int nArg)
 {
     if (lua_pcall(m_pluaVM, nArg, 0, 0) != 0)
@@ -584,6 +485,106 @@ R CLuaStack::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7
     Push(p9);
     Push(p10);
     return endCall<R>(10);
+}
+
+const char *CLuaStack::Call(const char *func, const char *sig, ...)
+{
+    va_list vl;
+    va_start(vl, sig);
+
+    lua_getglobal(m_pluaVM, func);
+
+    /* 壓入調用參數 */
+    int narg = 0;
+    while (*sig) {  /* push arguments */
+        switch (*sig++) {
+            case 'f':    /* 浮點數 */
+            case 'e':    /* 浮點數 */
+                lua_pushnumber(m_pluaVM, va_arg(vl, double));
+                break;
+
+            case 'i':    /* 整數 */
+            case 'n':    /* 整數 */
+            case 'd':    /* 整數 */
+                lua_pushnumber(m_pluaVM, va_arg(vl, int));
+                break;
+
+            case 'b':    /* 布爾值 */
+                lua_pushboolean(m_pluaVM, va_arg(vl, int));
+                break;
+
+            case 's':    /* 字元串 */
+                lua_pushstring(m_pluaVM, va_arg(vl, char *));
+                break;
+
+            case 'S':    /* 字元串 */
+            {
+                int len = va_arg(vl, int);
+                lua_pushlstring(m_pluaVM, va_arg(vl, char *), len);
+            }
+                break;
+
+            case '>':
+            case ':':
+                goto L_LuaCall;
+
+            default:
+                //assert(("Lua call option is invalid!", false));
+                //error(m_pluaVM, "invalid option (%c)", *(sig - 1));
+                lua_pushnumber(m_pluaVM, 0);
+        }
+        narg++;
+        luaL_checkstack(m_pluaVM, 1, "too many arguments");
+    }
+
+    L_LuaCall:
+    int nres = static_cast<int>(strlen(sig));
+    const char *sresult = NULL;
+    if (lua_pcall(m_pluaVM, narg, nres, 0) != 0) {
+        sresult = lua_tostring(m_pluaVM, -1);
+        nres = 1;
+    }
+    else {
+        // 取得返回值
+        int index = -nres;
+        while (*sig) {
+            switch (*sig++) {
+                case 'f':    /* 浮点数 float*/
+                case 'e':    /* 浮点数 float*/
+                    *va_arg(vl, double *) = lua_tonumber(m_pluaVM, index);
+                    break;
+
+                case 'i':    /* 整数 */
+                case 'n':    /* 整数 */
+                case 'd':    /* 整数 */
+                    *va_arg(vl, int *) = static_cast<int>(lua_tonumber(m_pluaVM, index));
+                    break;
+
+                case 'b':    /* bool */
+                    *va_arg(vl, int *) = static_cast<int>(lua_toboolean(m_pluaVM, index));
+                    break;
+
+                case 's':    /* string */
+                    *va_arg(vl, const char **) = lua_tostring(m_pluaVM, index);
+                    break;
+
+                case 'S':    /* string */
+                    *va_arg(vl, int *) = static_cast<int>(lua_strlen(m_pluaVM, index));
+                    *va_arg(vl, const char **) = lua_tostring(m_pluaVM, index);
+                    break;
+
+                default:
+                    //assert(("Lua call invalid option!", false));
+                    //error(m_pluaVM, "invalid option (%c)", *(sig - 1));
+                    ;
+            }
+            index++;
+        }
+    }
+    va_end(vl);
+
+    lua_pop(m_pluaVM, nres);
+    return sresult;
 }
 
 #endif  //__LUA_STACK_H__

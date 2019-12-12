@@ -86,7 +86,6 @@ public:
     bool LoadBuffer(const char *buffer, size_t size)
     {
         return (luaL_loadbuffer(m_pluaVM, buffer, size, "LuaWrap") || lua_pcall(m_pluaVM, 0, LUA_MULTRET, 0));
-        //return luaL_dobuffer(m_pluaVM, buffer, size, "LuaWrap") == 0;
     }
 
     void Register(const char *func, lua_CFunction f)

@@ -30,13 +30,8 @@ int main(void) {
     luaBridge.Init(L);
     LuaRegisterFunc(luaBridge,"LuaFnAdd",int(int,int),LuaFnAdd);
     luaBridge.LoadFile("../test/111111.lua");
-    lua_getglobal(L,"x11111_test");
-    int ret = lua_pcall(L,0,0,0);
-    if (ret != 0)
-    {
-        const char* mes = lua_tostring(L,-1);
-        printf("pcall error %s\n",mes);
-    }
+    int ret = luaBridge.Call<int>("x11111_test");
+    printf("ret = %d\n",ret);
     lua_close(L);
     return 0;
 }

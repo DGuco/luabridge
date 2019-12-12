@@ -5,5 +5,6 @@ function x11111_test()
     local y = 2
     local addNum = LuaFnAdd(x,y);
     print("addNum = "..addNum)
+    return addNum;
 end
 
