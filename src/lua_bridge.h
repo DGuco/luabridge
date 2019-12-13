@@ -36,10 +36,6 @@
 class CLuaBridge: public CLuaStack
 {
 public:
-    CLuaBridge()
-    {
-    }
-
     CLuaBridge(lua_State *VM)
         : CLuaStack(VM)
     {
@@ -48,19 +44,6 @@ public:
         luaopen_table(m_pluaVM);
         luaopen_string(m_pluaVM);
         luaopen_math(m_pluaVM);
-    }
-
-    bool Init(lua_State *VM)
-    {
-        //assert(m_pluaVM == NULL);
-        m_pluaVM = VM;
-
-        luaopen_base(m_pluaVM);
-        luaopen_table(m_pluaVM);
-        luaopen_string(m_pluaVM);
-        luaopen_math(m_pluaVM);
-
-        return true;
     }
 
     ~CLuaBridge()
@@ -105,61 +88,296 @@ public:
     {
         return m_pluaVM;
     }
+
+    // Call Lua function
+    //   func:	Lua function name
+    //   R:		Return type. (void, float, double, int, long, bool, const char*, std::string)
+    // Sample:	double f = lua.Call<double>("test0", 1.0, 3, "param");
+    template<typename R>
+    R Call(const char *func);
+
+    template<typename R, typename P1>
+    R Call(const char *func, P1 p1);
+
+    template<typename R, typename P1, typename P2>
+    R Call(const char *func, P1 p1, P2 p2);
+
+    template<typename R, typename P1, typename P2, typename P3>
+    R Call(const char *func, P1 p1, P2 p2, P3 p3);
+
+    template<typename R, typename P1, typename P2, typename P3, typename P4>
+    R Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4);
+
+    template<typename R, typename P1, typename P2, typename P3, typename P4, typename P5>
+    R Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5);
+
+    template<typename R, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6>
+    R Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6);
+
+    template<typename R, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7>
+    R Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7);
+
+    template<typename R, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8>
+    R Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8);
+
+    template<typename R, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8, typename P9>
+    R Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8, P9 p9);
+
+    template<typename R, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8, typename P9, typename P10>
+    R Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8, P9 p9, P10 p10);
+    /************************************************************************
+    * Here:
+    * This function "const char* Call(const char*, const char*, ...)" is come from "Programming in Lua"
+    *
+    * BOOK:	Programming in Lua
+    *		by Roberto Ierusalimschy
+    *		Lua.org, December 2003
+    *		ISBN 85-903798-1-7
+    ************************************************************************/
+    /**
+     *
+     * @param func 函数名
+     * @param sig  函数签名
+     * 格式如p*[:r*]或p*[>r*], 冒号或者大于号前面为参数，后面为返回值，每个字母为每一个参数的类型
+     * 类型表示为 f 或 e 表示float； i 或 n 或 d 表示整数； b 表示bool； s 表示字元串S 表示char* 数组，前面是长度，后面是char*指针
+     * @param ...
+     * @return  返回 返回值如果为 NULL， 表示调用成功。否则返回错误信息
+     */
+    // 例1︰ double f; const char* error_msg = lua.Call("test01", "nnnn:f", 1,2,3,4,&f);
+    // 例2︰ const char* s; int len; const char* error_msg = lua.Call("test01", "S:S", 11, "Hello\0World", &len, &s);
+    const char *Call(const char *func, const char *sig, ...);
 };
 
-template<class T>
-int LuaNewObject(lua_State *L)
+template<typename R>
+R CLuaBridge::Call(const char *func)
 {
-    T *obj = new T;
-    T **pobj = static_cast<T **>( lua_newuserdata((L), sizeof(T *)));
-    *pobj = obj;
-
-    luaL_getmetatable(L, T::GetLuaTypeName());
-    lua_setmetatable(L, -2);
-
-    return 1;  /* new userdatum is already on the stack */
+    SafeBeginCall(func);
+    return SafeEndCall<R, 0>(func, 0);
 }
 
-template<class T>
-int LuaDelObject(lua_State *L)
+template<typename R, typename P1>
+R CLuaBridge::Call(const char *func, P1 p1)
 {
-    T **pobj = static_cast<T **>( luaL_checkudata(L, -1, T::GetLuaTypeName()));
-    luaL_argcheck(L, pobj != NULL, -1, "Ojbect type missing");
-
-    delete *pobj;
-    *pobj = NULL;
-
-    return 0;
+    SafeBeginCall(func);
+    Push(p1);
+    return SafeEndCall<R, 0>(func, 1);
 }
 
-template<const char *GetLuaTypeName()>
-int Lua_ImplementIndex(lua_State *L)
+template<typename R, typename P1, typename P2>
+R CLuaBridge::Call(const char *func, P1 p1, P2 p2)
 {
-    int narg = lua_gettop(L);
-    if (lua_isstring(L, -1)) {
-        const char *index = lua_tostring(L, -1);
-        luaL_getmetatable(L, GetLuaTypeName());
-        lua_pushstring(L, index);
-        lua_gettable(L, -2);
-        lua_remove(L, -2);
-        if (!lua_isnil(L, -1))
-            return 1;
-        lua_settop(L, -2);
-    }
-    int narg2 = lua_gettop(L);
+    SafeBeginCall(func);
+    Push(p1);
+    Push(p2);
+    return SafeEndCall<R, 0>(func, 2);
+}
 
-    luaL_getmetatable(L, GetLuaTypeName());
-    lua_pushstring(L, "__getindex");
-    lua_gettable(L, -2);
-    lua_remove(L, -2);
-    if (!lua_isnil(L, -1)) {
-        for (int i = 1; i <= narg; ++i)
-            lua_pushvalue(L, i);
-        lua_pcall(L, narg, LUA_MULTRET, 0);
-        int nnewtop = lua_gettop(L);
-        return lua_gettop(L) - narg;
+template<typename R, typename P1, typename P2, typename P3>
+R CLuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3)
+{
+    SafeBeginCall(func);
+    Push(p1);
+    Push(p2);
+    Push(p3);
+    return SafeEndCall<R, 0>(func, 3);
+}
+
+template<typename R, typename P1, typename P2, typename P3, typename P4>
+R CLuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4)
+{
+    SafeBeginCall(func);
+    Push(p1);
+    Push(p2);
+    Push(p3);
+    Push(p4);
+    return SafeEndCall<R>(func, 4);
+}
+
+template<typename R, typename P1, typename P2, typename P3, typename P4, typename P5>
+R CLuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5)
+{
+    SafeBeginCall(func);
+    Push(p1);
+    Push(p2);
+    Push(p3);
+    Push(p4);
+    Push(p5);
+    return SafeEndCall<R, 0>(func, 5);
+}
+
+template<typename R, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6>
+R CLuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6)
+{
+    SafeBeginCall(func);
+    Push(p1);
+    Push(p2);
+    Push(p3);
+    Push(p4);
+    Push(p5);
+    Push(p6);
+    return SafeEndCall<R>(func, 6);
+}
+
+template<typename R, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7>
+R CLuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7)
+{
+    SafeBeginCall(func);
+    Push(p1);
+    Push(p2);
+    Push(p3);
+    Push(p4);
+    Push(p5);
+    Push(p6);
+    Push(p7);
+    return SafeEndCall<R, 0>(func, 7);
+}
+
+template<typename R, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8>
+R CLuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8)
+{
+    SafeBeginCall(func);
+    Push(p1);
+    Push(p2);
+    Push(p3);
+    Push(p4);
+    Push(p5);
+    Push(p6);
+    Push(p7);
+    Push(p8);
+    return SafeEndCall<R, 0>(func, 8);
+}
+
+template<typename R, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8, typename P9>
+R CLuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8, P9 p9)
+{
+    SafeBeginCall(func);
+    Push(p1);
+    Push(p2);
+    Push(p3);
+    Push(p4);
+    Push(p5);
+    Push(p6);
+    Push(p7);
+    Push(p8);
+    Push(p9);
+    return SafeEndCall<R, 0>(func, 9);
+}
+
+template<typename R, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8, typename P9, typename P10>
+R CLuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8, P9 p9, P10 p10)
+{
+    SafeBeginCall(func);
+    Push(p1);
+    Push(p2);
+    Push(p3);
+    Push(p4);
+    Push(p5);
+    Push(p6);
+    Push(p7);
+    Push(p8);
+    Push(p9);
+    Push(p10);
+    return SafeEndCall<R, 0>(func, 10);
+}
+
+const char *CLuaBridge::Call(const char *func, const char *sig, ...)
+{
+    va_list vl;
+    va_start(vl, sig);
+
+    lua_getglobal(m_pluaVM, func);
+
+    /* 壓入調用參數 */
+    int narg = 0;
+    while (*sig) {  /* push arguments */
+        switch (*sig++) {
+        case 'f':    /* 浮點數 */
+        case 'e':    /* 浮點數 */
+            lua_pushnumber(m_pluaVM, va_arg(vl, double));
+            break;
+
+        case 'i':    /* 整數 */
+        case 'n':    /* 整數 */
+        case 'd':    /* 整數 */
+            lua_pushnumber(m_pluaVM, va_arg(vl, int));
+            break;
+
+        case 'b':    /* 布爾值 */
+            lua_pushboolean(m_pluaVM, va_arg(vl, int));
+            break;
+
+        case 's':    /* 字元串 */
+            lua_pushstring(m_pluaVM, va_arg(vl, char *));
+            break;
+
+        case 'S':    /* 字元串 */
+        {
+            int len = va_arg(vl, int);
+            lua_pushlstring(m_pluaVM, va_arg(vl, char *), len);
+        }
+            break;
+
+        case '>':
+        case ':':
+            goto L_LuaCall;
+
+        default:
+            //assert(("Lua call option is invalid!", false));
+            //error(m_pluaVM, "invalid option (%c)", *(sig - 1));
+            lua_pushnumber(m_pluaVM, 0);
+        }
+        narg++;
+        luaL_checkstack(m_pluaVM, 1, "too many arguments");
     }
-    return 1;
+
+    L_LuaCall:
+    int nres = static_cast<int>(strlen(sig));
+    const char *sresult = NULL;
+    if (lua_pcall(m_pluaVM, narg, nres, 0) != 0) {
+        sresult = lua_tostring(m_pluaVM, -1);
+        nres = 1;
+    }
+    else {
+        // 取得返回值
+        int index = -nres;
+        while (*sig) {
+            switch (*sig++) {
+            case 'f':    /* 浮点数 float*/
+            case 'e':    /* 浮点数 float*/
+                *va_arg(vl, double *) = lua_tonumber(m_pluaVM, index);
+                break;
+
+            case 'i':    /* 整数 */
+            case 'n':    /* 整数 */
+            case 'd':    /* 整数 */
+                *va_arg(vl, int *) = static_cast<int>(lua_tonumber(m_pluaVM, index));
+                break;
+
+            case 'b':    /* bool */
+                *va_arg(vl, int *) = static_cast<int>(lua_toboolean(m_pluaVM, index));
+                break;
+
+            case 's':    /* string */
+                *va_arg(vl, const char **) = lua_tostring(m_pluaVM, index);
+                break;
+
+            case 'S':    /* string */
+                *va_arg(vl, int *) = static_cast<int>(lua_strlen(m_pluaVM, index));
+                *va_arg(vl, const char **) = lua_tostring(m_pluaVM, index);
+                break;
+
+            default:
+                //assert(("Lua call invalid option!", false));
+                //error(m_pluaVM, "invalid option (%c)", *(sig - 1));
+                ;
+            }
+            index++;
+        }
+    }
+    va_end(vl);
+
+    lua_pop(m_pluaVM, nres);
+    return sresult;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
