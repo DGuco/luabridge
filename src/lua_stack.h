@@ -240,7 +240,7 @@ protected:
     {
         //记录调用前的堆栈索引
         m_iTopIndex = lua_gettop(m_pluaVM);
-        lua_getglobal(m_pluaVM, fusnc);
+        lua_getglobal(m_pluaVM, func);
     }
 
     template<typename R, int __>
