@@ -197,9 +197,9 @@ private:
             lua_settop(m_pluaVM, m_iTopIndex);
         }
         else {
+            R r =  Pop<R>();
             //恢复调用前的堆栈索引
             lua_settop(m_pluaVM, m_iTopIndex);
-            return Pop<R>();
         }
     }
 
