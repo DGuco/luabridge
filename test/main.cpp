@@ -31,16 +31,14 @@ int main(void) {
     luaBridge.LoadFile("../test/111111.lua");
     LuaRegisterLuaFunc(luaBridge,"LuaFnAdd",LuaFnAdd);
     printf("luaState top = %d\n",lua_gettop(luaBridge));
-    printf("==========================================\n");
     int ret = luaBridge.Call<int>("x11111_test",1,2);
     printf("ret = %d\n",ret);
-    ret = luaBridge.Call<int>("x11111_test",10,20);
-    printf("ret = %d\n",ret);
-    ret = luaBridge.Call<int>("x11111_test",100,200);
-    printf("ret = %d\n",ret);
-    ret = luaBridge.Call<int>("x11111_test",1000,2000);
-    printf("ret = %d\n",ret);
-    printf("==========================================\n");
+//    ret = luaBridge.Call<int>("x11111_test",10,20);
+//    printf("ret = %d\n",ret);
+//    ret = luaBridge.Call<int>("x11111_test",100,200);
+//    printf("ret = %d\n",ret);
+//    ret = luaBridge.Call<int>("x11111_test",1000,2000);
+//    printf("ret = %d\n",ret);
     printf("luaState top = %d\n",lua_gettop(luaBridge));
     return 0;
 }

@@ -208,13 +208,13 @@ public:
     }
 
     /**
-     * check lua param type and num
-     * @param L
+     * 检测lua 堆栈中的参数类型
      * @param Index
+     * @param isLuaError 如果类型错误是否抛出lua异常
      * @return
      */
-    bool CheckLuaArg_Num(int Index);
-    bool CheckLuaArg_Str(int Index);
+    bool CheckLuaArg_Num(int Index, bool isLuaError = true);
+    bool CheckLuaArg_Str(int Index, bool isLuaError = true);
     /**
      * print lua stack info 打印lua 堆栈信息
      * @param L
@@ -234,7 +234,14 @@ public:
      * @param Msg
      */
     void DefaultDebugLuaErrorInfo(const char *FunName, const char *Msg);
+    template<class T>
+    int LuaNewObject(lua_State *L);
 
+    template<class T>
+    int LuaDelObject(lua_State *L);
+
+    template<const char *GetLuaTypeName()>
+    int LuaImplementIndex(lua_State *L);
 protected:
     inline void SafeBeginCall(const char *func)
     {
@@ -248,14 +255,14 @@ protected:
     {
         if (lua_pcall(m_pluaVM, nArg, 1, 0) != 0) {
             DefaultDebugLuaErrorInfo(func,lua_tostring(m_pluaVM, -1));
-            //Pop(); // Pop error message
-            return 0;
+            //恢复调用前的堆栈索引
+            lua_settop(m_pluaVM,m_iTopIndex);
         }
-
-        R r =  Pop<R>();
-        //恢复调用前的堆栈索引
-        lua_settop(m_pluaVM,m_iTopIndex);
-        return r;
+        else{
+            //恢复调用前的堆栈索引
+            lua_settop(m_pluaVM,m_iTopIndex);
+            return  Pop<R>();
+        }
     }
 
     template<int __>
@@ -266,16 +273,17 @@ protected:
         }
         lua_settop(m_pluaVM,m_iTopIndex);
     }
-//	template<class T>
-//	void DelGlobalObject(const char* name)
-//	{
-//		lua_getglobal(m_pluaVM, name);
-//		LuaDelObject<T>(m_pluaVM);
-//		lua_settop(m_pluaVM, -2);
-//
-//		lua_pushnil(m_pluaVM);
-//		lua_setglobal(m_pluaVM, name);
-//	}
+
+	template<class T>
+	void DelGlobalObject(const char* name)
+	{
+		lua_getglobal(m_pluaVM, name);
+		LuaDelObject<T>(m_pluaVM);
+		lua_settop(m_pluaVM, -2);
+
+		lua_pushnil(m_pluaVM);
+		lua_setglobal(m_pluaVM, name);
+	}
 private:
     template<typename R,int __>
     struct CLuaValue
@@ -468,6 +476,7 @@ protected:
 
 void CLuaStack::LuaStackInfo()
 {
+    printf("==========================Lua stack info start=====================================\n" );
     char szMsg[1024];
     lua_Debug trouble_info;
     memset(&trouble_info, 0, sizeof(lua_Debug));
@@ -483,20 +492,20 @@ void CLuaStack::LuaStackInfo()
                  trouble_info.what,
                  trouble_info.short_src,
                  trouble_info.linedefined,
-                 trouble_info.currentline
-        );
+                 trouble_info.currentline);
+        printf( "%s\n",szMsg );
         sprintf(szMsg, "%s(%d): /t%s",
                 trouble_info.short_src,
                 trouble_info.currentline,
-                trouble_info.name
-        );
+                trouble_info.name);
 
-        DefaultDebugLuaErrorInfo( "",szMsg );
+        printf( "%s\n",szMsg );
     }
+    printf("==========================Lua stack info start=====================================\n" );
 
 }
 
-bool CLuaStack::CheckLuaArg_Num(int Index)
+bool CLuaStack::CheckLuaArg_Num(int Index, bool isLuaError)
 {
     if (lua_isnumber(m_pluaVM, Index))
         return true;
@@ -510,7 +519,6 @@ bool CLuaStack::CheckLuaArg_Num(int Index)
     char szMsg[1024];
     if (lua_isnil(m_pluaVM, Index)) {
         sprintf(szMsg, "Lua function(%s), %d arg is null", trouble_info.name, Index);
-        DefaultDebugLuaErrorInfo(trouble_info.name, szMsg);
     }
     else if (lua_isstring(m_pluaVM, Index)) {
         sprintf(szMsg,
@@ -518,19 +526,20 @@ bool CLuaStack::CheckLuaArg_Num(int Index)
                 trouble_info.name,
                 Index,
                 lua_tostring(m_pluaVM, Index));
-        DefaultDebugLuaErrorInfo(trouble_info.name, szMsg);
     }
     else {
         sprintf(szMsg, "Lua function(%s), %d arg type error", trouble_info.name, Index);
-        DefaultDebugLuaErrorInfo(trouble_info.name, szMsg);
     }
 
     LuaStackInfo();
-
+    if (isLuaError)
+    {
+        LuaAssert(false,szMsg);
+    }
     return false;
 }
 
-bool CLuaStack::CheckLuaArg_Str(int Index)
+bool CLuaStack::CheckLuaArg_Str(int Index, bool isLuaError)
 {
     if (lua_isstring(m_pluaVM, Index))
         return true;
@@ -545,11 +554,9 @@ bool CLuaStack::CheckLuaArg_Str(int Index)
 
     if (lua_isnil(m_pluaVM, Index)) {
         sprintf(szMsg, "Lua func(%s) arg-[%d] arg is null", trouble_info.name, Index);
-        DefaultDebugLuaErrorInfo(trouble_info.name, szMsg);
     }
     else {
         sprintf(szMsg, "Lua func(%s) arg-[%d] arg type error", trouble_info.name, Index);
-        DefaultDebugLuaErrorInfo(trouble_info.name, szMsg);
     }
 
     sprintf( szMsg, "name:(%s) namewhat:(%s) what:(%s) source:(%s) short:(%s) linedefined:(%d) currentline:(%d)\n",
@@ -561,10 +568,11 @@ bool CLuaStack::CheckLuaArg_Str(int Index)
              trouble_info.linedefined,
              trouble_info.currentline
     );
-
-    DefaultDebugLuaErrorInfo( trouble_info.name,szMsg );
-
     LuaStackInfo();
+    if (isLuaError)
+    {
+        LuaAssert(false,szMsg);
+    }
     return false;
 }
 
@@ -587,13 +595,11 @@ void CLuaStack::LuaAssert(bool condition, const char *err_msg)
 
 void CLuaStack::DefaultDebugLuaErrorInfo(const char *FunName, const char *Msg)
 {
-    printf("===============================================================================================\n");
     printf("Call fun:[%s] failed,msg:[%s]\n",FunName,Msg);
-    printf("===============================================================================================\n");
 }
 
 template<class T>
-int LuaNewObject(lua_State *L)
+int CLuaStack::LuaNewObject(lua_State *L)
 {
     T *obj = new T;
     T **pobj = static_cast<T **>( lua_newuserdata((L), sizeof(T *)));
@@ -606,7 +612,7 @@ int LuaNewObject(lua_State *L)
 }
 
 template<class T>
-int LuaDelObject(lua_State *L)
+int CLuaStack::LuaDelObject(lua_State *L)
 {
     T **pobj = static_cast<T **>( luaL_checkudata(L, -1, T::GetLuaTypeName()));
     luaL_argcheck(L, pobj != NULL, -1, "Ojbect type missing");
@@ -618,7 +624,7 @@ int LuaDelObject(lua_State *L)
 }
 
 template<const char *GetLuaTypeName()>
-int Lua_ImplementIndex(lua_State *L)
+int CLuaStack::LuaImplementIndex(lua_State *L)
 {
     int narg = lua_gettop(L);
     if (lua_isstring(L, -1)) {
@@ -641,7 +647,7 @@ int Lua_ImplementIndex(lua_State *L)
         for (int i = 1; i <= narg; ++i)
             lua_pushvalue(L, i);
         lua_pcall(L, narg, LUA_MULTRET, 0);
-        int nnewtop = lua_gettop(L);
+        lua_gettop(L);
         return lua_gettop(L) - narg;
     }
     return 1;

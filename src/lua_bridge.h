@@ -33,6 +33,14 @@
 #include "lua_file.h"
 #include "lua_stack.h"
 
+#define SCRIPI_NAME_MAX_LEN 128
+
+struct ScriptRecord
+{
+    char sriptName[SCRIPI_NAME_MAX_LEN];
+
+};
+
 class CLuaBridge: public CLuaStack
 {
 public:
