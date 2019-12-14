@@ -10,7 +10,7 @@ set(SOURCE_FILES
         src/lua_variant.h
         src/lua_bridge.h
         src/lua_file.h
-        src/lua_value.h)
+        )
 
 include_directories(
         /usr/include/
