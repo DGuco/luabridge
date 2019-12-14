@@ -5,40 +5,50 @@
 #include <stdio.h>
 #include "../src/lua_bridge.h"
 
-int Add(int a,int b)
+
+#define  TEST_SCRIPT_ID 1
+
+int Add(int a, int b)
 {
     return a + b;
 }
 
 int LuaFnAdd(lua_State *L)
 {
-    int a = lua_tonumber(L,1);
-    int b = lua_tonumber(L,2);
-    printf("a = %d,b = %d\n",a,b);
-    lua_pushnumber(L,a + b);
+    int a = lua_tonumber(L, 1);
+    int b = lua_tonumber(L, 2);
+    printf("a = %d,b = %d\n", a, b);
+    lua_pushnumber(L, a + b);
     return 1;
 }
 
-int main(void) {
-//    luaL_openlibs(L);
+void TestScript()
+{
+    //    luaL_openlibs(L);
 //
 //    luaL_dofile(L, "../test/111111.lua");
 //    lua_register(L, "LuaFnAdd",LuaFnAdd);
 
     lua_State *L = luaL_newstate();
     CLuaBridge luaBridge(L);
-    LuaRegisterCFunc(luaBridge,"Add",int(int,int),Add);
-    luaBridge.LoadFile("../test/111111.lua");
-    LuaRegisterLuaFunc(luaBridge,"LuaFnAdd",LuaFnAdd);
-    printf("luaState top = %d\n",lua_gettop(luaBridge));
-    int ret = luaBridge.Call<int>("x11111_test",1,2);
-    printf("ret = %d\n",ret);
+    LuaRegisterCFunc(luaBridge, "Add", int(int, int), Add);
+    luaBridge.LoadFile(TEST_SCRIPT_ID, "../test/111111.lua");
+    LuaRegisterLuaFunc(luaBridge, "LuaFnAdd", LuaFnAdd);
+    printf("luaState top = %d\n", lua_gettop(luaBridge));
+    int ret = luaBridge.Call<int>(TEST_SCRIPT_ID, "x11111_test", 1, 2);
+    printf("ret = %d\n", ret);
 //    ret = luaBridge.Call<int>("x11111_test",10,20);
 //    printf("ret = %d\n",ret);
 //    ret = luaBridge.Call<int>("x11111_test",100,200);
 //    printf("ret = %d\n",ret);
 //    ret = luaBridge.Call<int>("x11111_test",1000,2000);
 //    printf("ret = %d\n",ret);
-    printf("luaState top = %d\n",lua_gettop(luaBridge));
+    printf("luaState top = %d\n", lua_gettop(luaBridge));
+}
+
+int main(void)
+{
+    TestScript();
+    int a = 1;
     return 0;
 }

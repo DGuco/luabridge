@@ -29,16 +29,29 @@
 #ifndef  __LUA_BRIDGE_H__
 #define  __LUA_BRIDGE_H__
 
+#include <map>
 #include <string>
+#include <utility>
 #include "lua_file.h"
 #include "lua_stack.h"
 
-#define SCRIPI_NAME_MAX_LEN 128
+#define MAX_SCRIPT_PATH_LEN 128
+typedef int SCRIPT_ID;
 
 struct ScriptRecord
 {
-    char sriptName[SCRIPI_NAME_MAX_LEN];
+    ScriptRecord(SCRIPT_ID scriptId,
+                 const char* filePath,
+                 bool needReload)
+        : scriptId(scriptId), needReload(needReload)
+    {
+        memset(this->filePath,0,MAX_SCRIPT_PATH_LEN);
+        memcpy(this->filePath,filePath,MAX_SCRIPT_PATH_LEN - 1);
+    }
 
+    SCRIPT_ID scriptId;
+    char filePath[MAX_SCRIPT_PATH_LEN];
+    bool needReload;
 };
 
 class CLuaBridge: public CLuaStack
@@ -56,26 +69,31 @@ public:
 
     ~CLuaBridge()
     {
-        if(NULL != m_pluaVM)
-        {
+        if (NULL != m_pluaVM) {
             lua_close(m_pluaVM);
         }
     }
 
 public:
-    bool LoadFile(const char *filename)
+    bool LoadFile(SCRIPT_ID scriptId, const char *filePath)
     {
-        return luaL_dofile(m_pluaVM, filename) == 0;
+        bool ret = luaL_dofile(m_pluaVM, filePath) == 0;
+        std::map<SCRIPT_ID, ScriptRecord>::iterator it = scriptMap.find(scriptId);
+        if (it == scriptMap.end()) {
+            scriptMap.insert(std::make_pair(scriptId, ScriptRecord(scriptId,filePath, false)));
+        }
+        else{
+            it->second.needReload = false;
+        }
     }
 
-    bool LoadString(const char *buffer)
+    void ReloadScript(SCRIPT_ID scriptId)
     {
-        return LoadBuffer(buffer, strlen(buffer));
-    }
-
-    bool LoadBuffer(const char *buffer, size_t size)
-    {
-        return (luaL_loadbuffer(m_pluaVM, buffer, size, "LuaWrap") || lua_pcall(m_pluaVM, 0, LUA_MULTRET, 0));
+        std::map<SCRIPT_ID, ScriptRecord>::iterator it = scriptMap.find(scriptId);
+        if (it != scriptMap.end())
+        {
+            it->second.needReload = true;
+        }
     }
 
     void Register(const char *func, lua_CFunction f)
@@ -102,40 +120,40 @@ public:
     //   R:		Return type. (void, float, double, int, long, bool, const char*, std::string)
     // Sample:	double f = lua.Call<double>("test0", 1.0, 3, "param");
     template<typename R>
-    R Call(const char *func);
+    R Call(SCRIPT_ID scriptId, const char *func);
 
     template<typename R, typename P1>
-    R Call(const char *func, P1 p1);
+    R Call(SCRIPT_ID scriptId, const char *func, P1 p1);
 
     template<typename R, typename P1, typename P2>
-    R Call(const char *func, P1 p1, P2 p2);
+    R Call(SCRIPT_ID scriptId, const char *func, P1 p1, P2 p2);
 
     template<typename R, typename P1, typename P2, typename P3>
-    R Call(const char *func, P1 p1, P2 p2, P3 p3);
+    R Call(SCRIPT_ID scriptId, const char *func, P1 p1, P2 p2, P3 p3);
 
     template<typename R, typename P1, typename P2, typename P3, typename P4>
-    R Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4);
+    R Call(SCRIPT_ID scriptId, const char *func, P1 p1, P2 p2, P3 p3, P4 p4);
 
     template<typename R, typename P1, typename P2, typename P3, typename P4, typename P5>
-    R Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5);
+    R Call(SCRIPT_ID scriptId, const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5);
 
     template<typename R, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6>
-    R Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6);
+    R Call(SCRIPT_ID scriptId, const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6);
 
     template<typename R, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7>
-    R Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7);
+    R Call(SCRIPT_ID scriptId, const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7);
 
     template<typename R, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8>
-    R Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8);
+    R Call(SCRIPT_ID scriptId, const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8);
 
     template<typename R, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8, typename P9>
-    R Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8, P9 p9);
+    R Call(SCRIPT_ID scriptId, const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8, P9 p9);
 
     template<typename R, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8, typename P9, typename P10>
-    R Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8, P9 p9, P10 p10);
+    R Call(SCRIPT_ID scriptId, const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8, P9 p9, P10 p10);
     /************************************************************************
     * Here:
-    * This function "const char* Call(const char*, const char*, ...)" is come from "Programming in Lua"
+    * This function "const char* Call(const char* scriptName, const char*, const char*, ...)" is come from "Programming in Lua"
     *
     * BOOK:	Programming in Lua
     *		by Roberto Ierusalimschy
@@ -151,39 +169,80 @@ public:
      * @param ...
      * @return  返回 返回值如果为 NULL， 表示调用成功。否则返回错误信息
      */
-    // 例1︰ double f; const char* error_msg = lua.Call("test01", "nnnn:f", 1,2,3,4,&f);
-    // 例2︰ const char* s; int len; const char* error_msg = lua.Call("test01", "S:S", 11, "Hello\0World", &len, &s);
+    // 例1︰ double f; const char* error_msg = lua.Call(const char* scriptName, "test01", "nnnn:f", 1,2,3,4,&f);
+    // 例2︰ const char* s; int len; const char* error_msg = lua.Call(const char* scriptName, "test01", "S:S", 11, "Hello\0World", &len, &s);
     const char *Call(const char *func, const char *sig, ...);
+private:
+    inline void SafeBeginCall(SCRIPT_ID scriptId, const char *func)
+    {
+        auto it = scriptMap.find(scriptId);
+        if (it != scriptMap.end()) {
+            ScriptRecord &record = it->second;
+            if (record.needReload) {
+                LoadFile(scriptId,record.filePath);
+            }
+        }
+
+        //记录调用前的堆栈索引
+        m_iTopIndex = lua_gettop(m_pluaVM);
+        lua_getglobal(m_pluaVM, func);
+    }
+
+    template<typename R, int __>
+    inline R SafeEndCall(const char *func, int nArg)
+    {
+        if (lua_pcall(m_pluaVM, nArg, 1, 0) != 0) {
+            DefaultDebugLuaErrorInfo(func, lua_tostring(m_pluaVM, -1));
+            //恢复调用前的堆栈索引
+            lua_settop(m_pluaVM, m_iTopIndex);
+        }
+        else {
+            //恢复调用前的堆栈索引
+            lua_settop(m_pluaVM, m_iTopIndex);
+            return Pop<R>();
+        }
+    }
+
+    template<int __>
+    inline void SafeEndCall(const char *scriptName, const char *func, int nArg)
+    {
+        if (lua_pcall(m_pluaVM, nArg, 0, 0) != 0) {
+            DefaultDebugLuaErrorInfo(func, lua_tostring(m_pluaVM, -1));
+        }
+        lua_settop(m_pluaVM, m_iTopIndex);
+    }
+private:
+    std::map<SCRIPT_ID, ScriptRecord> scriptMap;
 };
 
 template<typename R>
-R CLuaBridge::Call(const char *func)
+R CLuaBridge::Call(SCRIPT_ID scriptId, const char *func)
 {
-    SafeBeginCall(func);
+    SafeBeginCall(scriptId, func);
     return SafeEndCall<R, 0>(func, 0);
 }
 
 template<typename R, typename P1>
-R CLuaBridge::Call(const char *func, P1 p1)
+R CLuaBridge::Call(SCRIPT_ID scriptId, const char *func, P1 p1)
 {
-    SafeBeginCall(func);
+    SafeBeginCall(scriptId, func);
     Push(p1);
     return SafeEndCall<R, 0>(func, 1);
 }
 
 template<typename R, typename P1, typename P2>
-R CLuaBridge::Call(const char *func, P1 p1, P2 p2)
+R CLuaBridge::Call(SCRIPT_ID scriptId, const char *func, P1 p1, P2 p2)
 {
-    SafeBeginCall(func);
+    SafeBeginCall(scriptId, func);
     Push(p1);
     Push(p2);
     return SafeEndCall<R, 0>(func, 2);
 }
 
 template<typename R, typename P1, typename P2, typename P3>
-R CLuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3)
+R CLuaBridge::Call(SCRIPT_ID scriptId, const char *func, P1 p1, P2 p2, P3 p3)
 {
-    SafeBeginCall(func);
+    SafeBeginCall(scriptId, func);
     Push(p1);
     Push(p2);
     Push(p3);
@@ -191,9 +250,9 @@ R CLuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3)
 }
 
 template<typename R, typename P1, typename P2, typename P3, typename P4>
-R CLuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4)
+R CLuaBridge::Call(SCRIPT_ID scriptId, const char *func, P1 p1, P2 p2, P3 p3, P4 p4)
 {
-    SafeBeginCall(func);
+    SafeBeginCall(scriptId, func);
     Push(p1);
     Push(p2);
     Push(p3);
@@ -202,9 +261,9 @@ R CLuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4)
 }
 
 template<typename R, typename P1, typename P2, typename P3, typename P4, typename P5>
-R CLuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5)
+R CLuaBridge::Call(SCRIPT_ID scriptId, const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5)
 {
-    SafeBeginCall(func);
+    SafeBeginCall(scriptId, func);
     Push(p1);
     Push(p2);
     Push(p3);
@@ -214,9 +273,9 @@ R CLuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5)
 }
 
 template<typename R, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6>
-R CLuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6)
+R CLuaBridge::Call(SCRIPT_ID scriptId, const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6)
 {
-    SafeBeginCall(func);
+    SafeBeginCall(scriptId, func);
     Push(p1);
     Push(p2);
     Push(p3);
@@ -227,9 +286,9 @@ R CLuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6)
 }
 
 template<typename R, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7>
-R CLuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7)
+R CLuaBridge::Call(SCRIPT_ID scriptId, const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7)
 {
-    SafeBeginCall(func);
+    SafeBeginCall(scriptId, func);
     Push(p1);
     Push(p2);
     Push(p3);
@@ -241,9 +300,9 @@ R CLuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P
 }
 
 template<typename R, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8>
-R CLuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8)
+R CLuaBridge::Call(SCRIPT_ID scriptId, const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8)
 {
-    SafeBeginCall(func);
+    SafeBeginCall(scriptId, func);
     Push(p1);
     Push(p2);
     Push(p3);
@@ -256,9 +315,9 @@ R CLuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P
 }
 
 template<typename R, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8, typename P9>
-R CLuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8, P9 p9)
+R CLuaBridge::Call(SCRIPT_ID scriptId, const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8, P9 p9)
 {
-    SafeBeginCall(func);
+    SafeBeginCall(scriptId, func);
     Push(p1);
     Push(p2);
     Push(p3);
@@ -272,9 +331,9 @@ R CLuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P
 }
 
 template<typename R, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8, typename P9, typename P10>
-R CLuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8, P9 p9, P10 p10)
+R CLuaBridge::Call(SCRIPT_ID scriptId, const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8, P9 p9, P10 p10)
 {
-    SafeBeginCall(func);
+    SafeBeginCall(scriptId, func);
     Push(p1);
     Push(p2);
     Push(p3);
@@ -326,8 +385,7 @@ const char *CLuaBridge::Call(const char *func, const char *sig, ...)
             break;
 
         case '>':
-        case ':':
-            goto L_LuaCall;
+        case ':':goto L_LuaCall;
 
         default:
             //assert(("Lua call option is invalid!", false));

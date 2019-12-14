@@ -242,37 +242,6 @@ public:
 
     template<const char *GetLuaTypeName()>
     int LuaImplementIndex(lua_State *L);
-protected:
-    inline void SafeBeginCall(const char *func)
-    {
-        //记录调用前的堆栈索引
-        m_iTopIndex = lua_gettop(m_pluaVM);
-        lua_getglobal(m_pluaVM, func);
-    }
-
-    template<typename R, int __>
-    inline R SafeEndCall(const char *func, int nArg)
-    {
-        if (lua_pcall(m_pluaVM, nArg, 1, 0) != 0) {
-            DefaultDebugLuaErrorInfo(func,lua_tostring(m_pluaVM, -1));
-            //恢复调用前的堆栈索引
-            lua_settop(m_pluaVM,m_iTopIndex);
-        }
-        else{
-            //恢复调用前的堆栈索引
-            lua_settop(m_pluaVM,m_iTopIndex);
-            return  Pop<R>();
-        }
-    }
-
-    template<int __>
-    inline void SafeEndCall(const char *func, int nArg)
-    {
-        if (lua_pcall(m_pluaVM, nArg, 0, 0) != 0) {
-            DefaultDebugLuaErrorInfo(func,lua_tostring(m_pluaVM, -1));
-        }
-        lua_settop(m_pluaVM,m_iTopIndex);
-    }
 
 	template<class T>
 	void DelGlobalObject(const char* name)
