@@ -142,7 +142,6 @@ public:
         lua_setmetatable(m_pluaVM, -2);
     }
 
-public:
     template<typename R>
     inline R Pop(int count = 1)
     {
@@ -156,7 +155,6 @@ public:
         lua_settop(m_pluaVM, (-count) - 1);
     }
 
-public:
     int GetParamCount()
     {
         return lua_gettop(m_pluaVM);
@@ -184,7 +182,6 @@ public:
         lua_setglobal(m_pluaVM, name);
     }
 
-public:
     template<typename R>
     inline R GetValue(int index = -1)
     {
@@ -556,8 +553,14 @@ void CLuaStack::LuaAssert(bool condition, const char *err_msg)
         lua_Debug ar;
         lua_getstack(m_pluaVM, 0, &ar);
         lua_getinfo(m_pluaVM, "n", &ar);
-        if (ar.name == NULL)
+        if (NULL == ar.name)
+        {
             ar.name = "?";
+        }
+        if (NULL == ar.namewhat)
+        {
+            ar.namewhat = "?";
+        }
         luaL_error(m_pluaVM, "assert fail: %s `%s' (%s)", ar.namewhat, ar.name, err_msg);
     }
 }
