@@ -35,7 +35,6 @@
 #include "lua_file.h"
 #include "lua_stack.h"
 
-#define MAX_SCRIPT_PATH_LEN 128
 typedef int SCRIPT_ID;
 
 struct ScriptRecord
@@ -43,14 +42,14 @@ struct ScriptRecord
     ScriptRecord(SCRIPT_ID scriptId,
                  const char* filePath,
                  bool needReload)
-        : scriptId(scriptId), needReload(needReload)
+        :   scriptId(scriptId),
+            filePath(filePath),
+            needReload(needReload)
     {
-        memset(this->filePath,0,MAX_SCRIPT_PATH_LEN);
-        memcpy(this->filePath,filePath,MAX_SCRIPT_PATH_LEN - 1);
     }
 
     SCRIPT_ID scriptId;
-    char filePath[MAX_SCRIPT_PATH_LEN];
+    std::string filePath;
     bool needReload;
 };
 
@@ -75,6 +74,18 @@ public:
     }
 
 public:
+    bool LoadFile(SCRIPT_ID scriptId, const std::string &filePath)
+    {
+        bool ret = luaL_dofile(m_pluaVM, filePath.c_str()) == 0;
+        std::map<SCRIPT_ID, ScriptRecord>::iterator it = scriptMap.find(scriptId);
+        if (it == scriptMap.end()) {
+            scriptMap.insert(std::make_pair(scriptId, ScriptRecord(scriptId,filePath.c_str(), false)));
+        }
+        else{
+            it->second.needReload = false;
+        }
+    }
+
     bool LoadFile(SCRIPT_ID scriptId, const char *filePath)
     {
         bool ret = luaL_dofile(m_pluaVM, filePath) == 0;
@@ -195,11 +206,13 @@ private:
             DefaultDebugLuaErrorInfo(func, lua_tostring(m_pluaVM, -1));
             //恢复调用前的堆栈索引
             lua_settop(m_pluaVM, m_iTopIndex);
+            return 0;
         }
         else {
             R r =  Pop<R>();
             //恢复调用前的堆栈索引
             lua_settop(m_pluaVM, m_iTopIndex);
+            return r;
         }
     }
 

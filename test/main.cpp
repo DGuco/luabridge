@@ -37,12 +37,16 @@ int main(void)
     LuaRegisterLuaFunc(luaBridge, "LuaFnAdd", LuaFnAdd);
     int ret = luaBridge.Call<int>(TEST_SCRIPT_ID, "x11111_test", 1, 2);
     printf("ret = %d\n", ret);
+    printf("-------------------\n");
     ret = luaBridge.Call<int>(TEST_SCRIPT_ID,"x11111_test",10,20);
     printf("ret = %d\n",ret);
+    printf("-------------------\n");
     ret = luaBridge.Call<int>(TEST_SCRIPT_ID,"x11111_test",100,200);
     printf("ret = %d\n",ret);
+    printf("-------------------\n");
     ret = luaBridge.Call<int>(TEST_SCRIPT_ID,"x11111_test",1000,2000);
     printf("ret = %d\n",ret);
+    printf("-------------------\n");
     printf("luaState top = %d\n", lua_gettop(luaBridge));
     return 0;
 }

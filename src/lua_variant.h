@@ -211,12 +211,12 @@ inline bool operator<(const CLuaVariant &l, const CLuaVariant &r)
 
 std::string TableToString(CLuaVariant *var)
 {
-    std::string Result = "";
+    std::string resultStr;
 
     char Buff[64];
 
     if (var != NULL) {
-        Result.append("{");
+        resultStr.append("{");
 
         LuaTable &Table = var->GetValueAsRefTable();
 
@@ -226,65 +226,65 @@ std::string TableToString(CLuaVariant *var)
 
             switch (pKey->GetType()) {
                 case LUAVARIANTTYPE_NIL:
-                    Result.append("nil");
+                    resultStr.append("nil");
                     break;
                 case LUAVARIANTTYPE_STR: {
-                    Result.append("\"");
-                    Result.append(pKey->GetValueAsStdStr());
-                    Result.append("\"");
+                    resultStr.append("\"");
+                    resultStr.append(pKey->GetValueAsStdStr());
+                    resultStr.append("\"");
                 }
                     break;
                 case LUAVARIANTTYPE_NUM: {
                     sprintf(Buff, "%.4f", pKey->GetValueAsNum());
-                    Result.append(Buff);
+                    resultStr.append(Buff);
                 }
                     break;
                 case LUAVARIANTTYPE_BOOL: {
-                    bool BoolValue = pKey->GetValueAsBool();
+                    bool boolValue = pKey->GetValueAsBool();
 
-                    if (BoolValue == true) {
-                        Result.append("true");
+                    if (boolValue) {
+                        resultStr.append("true");
                     }
                     else {
-                        Result.append("false");
+                        resultStr.append("false");
                     }
                 }
                     break;
                 case LUAVARIANTTYPE_TABLE:
-                    Result.append(TableToString((CLuaVariant *) pKey));
+                    resultStr.append(TableToString((CLuaVariant *) pKey));
                     break;
             }
 
-            Result.append("=");
+            resultStr.append("=");
 
             switch (pValue->GetType()) {
                 case LUAVARIANTTYPE_NIL:
-                    Result.append("nil");
+                    resultStr.append("nil");
                     break;
                 case LUAVARIANTTYPE_STR: {
-                    Result.append("\"");
-                    Result.append(pValue->GetValueAsStdStr());
-                    Result.append("\"");
+                    resultStr.append("\"");
+                    resultStr.append(pValue->GetValueAsStdStr());
+                    resultStr.append("\"");
                 }
                     break;
                 case LUAVARIANTTYPE_NUM: {
                     sprintf(Buff, "%.4f", pValue->GetValueAsNum());
-                    Result.append(Buff);
+                    resultStr.append(Buff);
                 }
                     break;
                 case LUAVARIANTTYPE_BOOL: {
                     bool BoolValue = pValue->GetValueAsBool();
 
                     if (BoolValue == true) {
-                        Result.append("true");
+                        resultStr.append("true");
                     }
                     else {
-                        Result.append("false");
+                        resultStr.append("false");
                     }
                 }
                     break;
                 case LUAVARIANTTYPE_TABLE:
-                    Result.append(TableToString(pValue));
+                    resultStr.append(TableToString(pValue));
                     break;
             }
 
@@ -292,14 +292,14 @@ std::string TableToString(CLuaVariant *var)
             itTail++;
 
             if (itTail != Table.end()) {
-                Result.append(",");
+                resultStr.append(",");
             }
         }
 
-        Result.append("}");
+        resultStr.append("}");
     }
 
-    return Result;
+    return resultStr;
 }
 
 CLuaVariant StringToTable(const char *str)
@@ -420,50 +420,50 @@ CLuaVariant StringToTable(const char *str)
 
 CLuaVariant StringToVariant(const char *str)
 {
-    CLuaVariant Result;
+    CLuaVariant resultVariant;
 
-    std::string Temp = str;
+    std::string tempStr = str;
 
-    std::size_t HeadPos = std::string::npos;
-    std::size_t TailPos = std::string::npos;
+    std::size_t headPos = std::string::npos;
+    std::size_t tailPos = std::string::npos;
 
-    if (strcmp(Temp.c_str(), "nil") == 0) {
+    if (strcmp(tempStr.c_str(), "nil") == 0) {
         //nil
-        Result.Clear();
+        resultVariant.Clear();
     }
-    else if (strcmp(Temp.c_str(), "true") == 0) {
+    else if (strcmp(tempStr.c_str(), "true") == 0) {
         //boolean
-        Result.Set(true);
+        resultVariant.Set(true);
     }
-    else if (strcmp(Temp.c_str(), "false") == 0) {
+    else if (strcmp(tempStr.c_str(), "false") == 0) {
         //boolean
-        Result.Set(false);
+        resultVariant.Set(false);
     }
     else {
-        HeadPos = Temp.find_first_of("{");
-        TailPos = Temp.find_last_of("}");
+        headPos = tempStr.find_first_of("{");
+        tailPos = tempStr.find_last_of("}");
 
-        if ((HeadPos != std::string::npos) && (TailPos != std::string::npos) && (TailPos > HeadPos)) {
+        if ((headPos != std::string::npos) && (tailPos != std::string::npos) && (tailPos > headPos)) {
             //Table
-            Result = StringToTable(Temp.c_str());
+            resultVariant = StringToTable(tempStr.c_str());
         }
         else {
-            HeadPos = Temp.find_first_of("\"");
-            TailPos = Temp.find_last_of("\"");
+            headPos = tempStr.find_first_of("\"");
+            tailPos = tempStr.find_last_of("\"");
 
-            if ((HeadPos != std::string::npos) && (TailPos != std::string::npos) && (TailPos > HeadPos)) {
+            if ((headPos != std::string::npos) && (tailPos != std::string::npos) && (tailPos > headPos)) {
                 //string
-                Temp = Temp.substr(HeadPos + 1, (TailPos - HeadPos - 1));
-                Result.Set(Temp);
+                tempStr = tempStr.substr(headPos + 1, (tailPos - headPos - 1));
+                resultVariant.Set(tempStr);
             }
             else {
                 //Number
-                Result.Set(atof(Temp.c_str()));
+                resultVariant.Set(atof(tempStr.c_str()));
             }
         }
     }
 
-    return Result;
+    return resultVariant;
 }
 
 #endif  //__LUA_VARIANG_H__
