@@ -76,7 +76,11 @@ public:
 public:
     bool LoadFile(SCRIPT_ID scriptId, const std::string &filePath)
     {
-        bool ret = luaL_dofile(m_pluaVM, filePath.c_str()) == 0;
+        int ret = luaL_dofile(m_pluaVM, filePath.c_str());
+        if (ret != 0)
+        {
+            throw std::runtime_error("Lua loadfile failed,error:"+ ret);
+        }
         std::map<SCRIPT_ID, ScriptRecord>::iterator it = scriptMap.find(scriptId);
         if (it == scriptMap.end()) {
             scriptMap.insert(std::make_pair(scriptId, ScriptRecord(scriptId,filePath.c_str(), false)));
@@ -88,7 +92,11 @@ public:
 
     bool LoadFile(SCRIPT_ID scriptId, const char *filePath)
     {
-        bool ret = luaL_dofile(m_pluaVM, filePath) == 0;
+        int ret = luaL_dofile(m_pluaVM, filePath);
+        if (ret != 0)
+        {
+            throw std::runtime_error("Lua loadfile failed,error:"+ ret);
+        }
         std::map<SCRIPT_ID, ScriptRecord>::iterator it = scriptMap.find(scriptId);
         if (it == scriptMap.end()) {
             scriptMap.insert(std::make_pair(scriptId, ScriptRecord(scriptId,filePath, false)));
