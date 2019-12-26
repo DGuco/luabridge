@@ -6,6 +6,9 @@
 * E-Mail: 1139140929@qq.com
 *
 * Copyright (C) 2019 DGuco(杜国超).  All rights reserved.
+* Copyright (C) 2004 Yong Lin.  All rights reserved.
+*
+* License: The MIT License (http://www.opensource.org/licenses/mit-license.php)
 *
 * Permission is hereby granted, free of charge, to any person obtaining
 * a copy of this software and associated documentation files (the
