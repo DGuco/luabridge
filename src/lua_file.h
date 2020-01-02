@@ -32,16 +32,6 @@
 
 #pragma once
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
-#include "lua.h"
-#include "lauxlib.h"
-#include "lualib.h"
-
-#ifdef __cplusplus
-};
-
-#endif
+#include "../lua-5.1.5/src/lua.h"
+#include "../lua-5.1.5/src/lauxlib.h"
+#include "../lua-5.1.5/src/lualib.h"

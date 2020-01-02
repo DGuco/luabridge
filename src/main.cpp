@@ -3,7 +3,7 @@
 //
 
 #include <stdio.h>
-#include "../src/lua_bridge.h"
+#include "lua_bridge.h"
 
 int Add(int a, int b)
 {
@@ -27,8 +27,9 @@ int main(void)
 //    lua_register(L, "LuaFnAdd",LuaFnAdd);
 
     lua_State *L = luaL_newstate();
+
     CLuaBridge luaBridge(L);
-    luaBridge.LoadFile("../test/111111.lua");
+    luaBridge.LoadFile("../script/111111.lua");
     printf("luaState top = %d\n", lua_gettop(luaBridge));
     LuaRegisterCFunc(luaBridge, "Add", int(int, int), Add);
     LuaRegisterLuaFunc(luaBridge, "LuaFnAdd", LuaFnAdd);
