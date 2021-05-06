@@ -36,6 +36,7 @@
 #include <cstring>
 #include "lua_file.h"
 #include "lua_variant.h"
+#include "lua_library.h"
 
 #define int64 long long
 

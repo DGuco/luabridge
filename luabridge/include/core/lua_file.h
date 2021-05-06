@@ -32,6 +32,16 @@
 
 #pragma once
 
-#include "../lua-5.1.5/src/lua.h"
-#include "../lua-5.1.5/src/lauxlib.h"
-#include "../lua-5.1.5/src/lualib.h"
+#include "lua_helpers.h"
+#include "type_traits.h"
+#include "type_list.h"
+#include "func_traits.h"
+#include "constructor.h"
+#include "classinfo.h"
+#include "lua_exception.h"
+#include "lua_ref.h"
+#include "user_data.h"
+#include "cfunctions.h"
+#include "security.h"
+#include "stack.h"
+#include "namespace.h"

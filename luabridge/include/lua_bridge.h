@@ -35,8 +35,9 @@
 #include <map>
 #include <string>
 #include <utility>
-#include "lua_file.h"
 #include "lua_stack.h"
+#include "lua_library.h"
+
 
 class CLuaBridge: public CLuaStack
 {
@@ -452,7 +453,7 @@ const char *CLuaBridge::Call(const char *func, const char *sig, ...)
  */
 
 #if __cplusplus >= 201103L
-#include "lua_function.h"
+#include "core/lua_function.h"
 #define LuaRegisterCFunc(luaBridge, funcname, type, func)                           \
     luaBridge.Register(funcname, ( LuaCFunctionWrap<type>(func) ) )
 #endif // __cplusplus >= 201103L
@@ -460,4 +461,4 @@ const char *CLuaBridge::Call(const char *func, const char *sig, ...)
 #define LuaRegisterLuaFunc(luaBridge, funcname, func)                           \
     luaBridge.Register(funcname, func)
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
-#endif __LUA_BRIDGE_H__
+#endif //__LUA_BRIDGE_H__

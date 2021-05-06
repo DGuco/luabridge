@@ -3,6 +3,7 @@
 //
 
 #include <stdio.h>
+#include "include/core/lua_library.h"
 #include "lua_bridge.h"
 
 int Add(int a, int b)
