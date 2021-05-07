@@ -1,11 +1,7 @@
 /******************************************************************************
-* Name: LuaBridge for C++
+* https://github.com/DGuco/luabridge
 *
-* Author: DGuco(杜国超)
-* Date: 2019-12-07 17:15
-* E-Mail: 1139140929@qq.com
-*
-* Copyright (C) 2019 DGuco(杜国超).  All rights reserved.
+* Copyright (C) 2021 DGuco(杜国超)<1139140929@qq.com>.  All rights reserved.
 * Copyright (C) 2004 Yong Lin.  All rights reserved.
 *
 * License: The MIT License (http://www.opensource.org/licenses/mit-license.php)
@@ -49,18 +45,18 @@ enum LuaVariantType
     LUAVARIANTTYPE_TABLE = 100
 };
 
-class CLuaVariant;
-std::string TableToString(CLuaVariant *var);
+class LuaVariant;
+std::string TableToString(LuaVariant *var);
 
-CLuaVariant StringToTable(const char *str);
+LuaVariant StringToTable(const char *str);
 
-CLuaVariant StringToVariant(const char *str);
+LuaVariant StringToVariant(const char *str);
 
-class CLuaVariant;
+class LuaVariant;
 
-typedef std::map<CLuaVariant, CLuaVariant> LuaTable;
+typedef std::map<LuaVariant, LuaVariant> LuaTable;
 
-class CLuaVariant
+class LuaVariant
 {
     LuaVariantType type;
     std::string strvalue;
@@ -68,31 +64,31 @@ class CLuaVariant
     bool boolvalue;
     LuaTable tablevalue;
 public:
-    CLuaVariant()
+    LuaVariant()
     {
         Clear();
     }
-    CLuaVariant(bool value)
+    LuaVariant(bool value)
     {
         Set(value);
     }
-    CLuaVariant(int value)
+    LuaVariant(int value)
     {
         Set(value);
     }
-    CLuaVariant(double value)
+    LuaVariant(double value)
     {
         Set(value);
     }
-    CLuaVariant(const std::string &value)
+    LuaVariant(const std::string &value)
     {
         Set(value);
     }
-    CLuaVariant(const char *value)
+    LuaVariant(const char *value)
     {
         Set(value);
     }
-    CLuaVariant(const LuaTable &value)
+    LuaVariant(const LuaTable &value)
     {
         Set(value);
     }
@@ -207,12 +203,12 @@ public:
     }
 };
 
-inline bool operator<(const CLuaVariant &l, const CLuaVariant &r)
+inline bool operator<(const LuaVariant &l, const LuaVariant &r)
 {
     return l.GetValueAsCStr() < r.GetValueAsCStr();
 }
 
-std::string TableToString(CLuaVariant *var)
+std::string TableToString(LuaVariant *var)
 {
     std::string resultStr;
 
@@ -223,9 +219,9 @@ std::string TableToString(CLuaVariant *var)
 
         LuaTable &Table = var->GetValueAsRefTable();
 
-        for (std::map<CLuaVariant, CLuaVariant>::iterator it = Table.begin(); it != Table.end(); it++) {
-            const CLuaVariant *pKey = &(it->first);
-            CLuaVariant *pValue = &(it->second);
+        for (std::map<LuaVariant, LuaVariant>::iterator it = Table.begin(); it != Table.end(); it++) {
+            const LuaVariant *pKey = &(it->first);
+            LuaVariant *pValue = &(it->second);
 
             switch (pKey->GetType()) {
                 case LUAVARIANTTYPE_NIL:
@@ -254,7 +250,7 @@ std::string TableToString(CLuaVariant *var)
                 }
                     break;
                 case LUAVARIANTTYPE_TABLE:
-                    resultStr.append(TableToString((CLuaVariant *) pKey));
+                    resultStr.append(TableToString((LuaVariant *) pKey));
                     break;
             }
 
@@ -291,7 +287,7 @@ std::string TableToString(CLuaVariant *var)
                     break;
             }
 
-            std::map<CLuaVariant, CLuaVariant>::iterator itTail = it;
+            std::map<LuaVariant, LuaVariant>::iterator itTail = it;
             itTail++;
 
             if (itTail != Table.end()) {
@@ -305,9 +301,9 @@ std::string TableToString(CLuaVariant *var)
     return resultStr;
 }
 
-CLuaVariant StringToTable(const char *str)
+LuaVariant StringToTable(const char *str)
 {
-    CLuaVariant Result;
+    LuaVariant Result;
 
     std::string Content = str;
     std::size_t HeadPos = Content.find_first_of("{");
@@ -317,7 +313,7 @@ CLuaVariant StringToTable(const char *str)
         HeadPos++;
         Content = Content.substr(HeadPos, (TailPos - HeadPos));
 
-        std::map<CLuaVariant, CLuaVariant> Table;
+        std::map<LuaVariant, LuaVariant> Table;
 
         if (!Content.empty()) {
             std::string Key;
@@ -397,8 +393,8 @@ CLuaVariant StringToTable(const char *str)
                 if (Status == 2) {
                     Status = 0;
 
-                    CLuaVariant KeyVar = StringToVariant(Key.c_str());
-                    CLuaVariant ValueVar = StringToVariant(Value.c_str());
+                    LuaVariant KeyVar = StringToVariant(Key.c_str());
+                    LuaVariant ValueVar = StringToVariant(Value.c_str());
 
                     Table[KeyVar] = ValueVar;
 
@@ -408,8 +404,8 @@ CLuaVariant StringToTable(const char *str)
             }
 
             if ((Status == 1) && (!Token.empty())) {
-                CLuaVariant KeyVar = StringToVariant(Key.c_str());
-                CLuaVariant ValueVar = StringToVariant(Token.c_str());
+                LuaVariant KeyVar = StringToVariant(Key.c_str());
+                LuaVariant ValueVar = StringToVariant(Token.c_str());
 
                 Table[KeyVar] = ValueVar;
             }
@@ -421,9 +417,9 @@ CLuaVariant StringToTable(const char *str)
     return Result;
 }
 
-CLuaVariant StringToVariant(const char *str)
+LuaVariant StringToVariant(const char *str)
 {
-    CLuaVariant resultVariant;
+    LuaVariant resultVariant;
 
     std::string tempStr = str;
 

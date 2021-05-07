@@ -1,7 +1,8 @@
 //------------------------------------------------------------------------------
 /*
-  https://github.com/vinniefalco/LuaBridge
+  https://github.com/DGuco/luabridge
 
+  Copyright (C) 2021 DGuco(杜国超)<1139140929@qq.com>.  All rights reserved.
   Copyright 2019, Dmitry Tarakanov
   Copyright 2012, Vinnie Falco <vinnie.falco@gmail.com>
   Copyright 2007, Nathan Reed
@@ -29,13 +30,15 @@
 //==============================================================================
 
 #pragma once
-
+#include <functional>
 #include <stdexcept>
 #include <string>
 #include "classinfo.h"
 #include "lua_exception.h"
 #include "security.h"
 #include "type_traits.h"
+
+using namespace std;
 
 namespace luabridge
 {

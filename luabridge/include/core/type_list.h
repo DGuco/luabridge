@@ -1,7 +1,8 @@
 //------------------------------------------------------------------------------
 /*
-  https://github.com/vinniefalco/LuaBridge
-  
+  https://github.com/DGuco/luabridge
+
+  Copyright (C) 2021 DGuco(杜国超)<1139140929@qq.com>.  All rights reserved.
   Copyright 2012, Vinnie Falco <vinnie.falco@gmail.com>
   Copyright 2007, Nathan Reed
 
@@ -48,7 +49,7 @@
 #include <string>
 #include <typeinfo>
 #include "lua_library.h"
-#include "stack.h"
+#include "lua_stack.h"
 
 namespace luabridge
 {

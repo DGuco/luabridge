@@ -1,7 +1,8 @@
 //------------------------------------------------------------------------------
 /*
-  https://github.com/vinniefalco/LuaBridge
-  
+  https://github.com/DGuco/luabridge
+
+  Copyright (C) 2021 DGuco(杜国超)<1139140929@qq.com>.  All rights reserved.
   Copyright 2012, Vinnie Falco <vinnie.falco@gmail.com>
   Copyright 2008, Nigel Atkinson <suprapilot+LuaCode@gmail.com>
 

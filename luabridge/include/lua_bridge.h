@@ -39,11 +39,11 @@
 #include "lua_library.h"
 
 
-class CLuaBridge: public CLuaStack
+class LuaBridge: public LuaStack
 {
 public:
-    CLuaBridge(lua_State *VM)
-        : CLuaStack(VM)
+    LuaBridge(lua_State *VM)
+        : LuaStack(VM)
     {
         // initialize lua standard library functions
         luaopen_base(m_pluaVM);
@@ -52,7 +52,7 @@ public:
         luaopen_math(m_pluaVM);
     }
 
-    ~CLuaBridge()
+    ~LuaBridge()
     {
         if (NULL != m_pluaVM) {
             lua_close(m_pluaVM);
@@ -191,14 +191,14 @@ private:
 };
 
 template<typename R>
-R CLuaBridge::Call(const char *func)
+R LuaBridge::Call(const char *func)
 {
     SafeBeginCall(func);
     return SafeEndCall<R, 0>(func, 0);
 }
 
 template<typename R, typename P1>
-R CLuaBridge::Call(const char *func, P1 p1)
+R LuaBridge::Call(const char *func, P1 p1)
 {
     SafeBeginCall(func);
     Push(p1);
@@ -206,7 +206,7 @@ R CLuaBridge::Call(const char *func, P1 p1)
 }
 
 template<typename R, typename P1, typename P2>
-R CLuaBridge::Call(const char *func, P1 p1, P2 p2)
+R LuaBridge::Call(const char *func, P1 p1, P2 p2)
 {
     SafeBeginCall(func);
     Push(p1);
@@ -215,7 +215,7 @@ R CLuaBridge::Call(const char *func, P1 p1, P2 p2)
 }
 
 template<typename R, typename P1, typename P2, typename P3>
-R CLuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3)
+R LuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3)
 {
     SafeBeginCall(func);
     Push(p1);
@@ -225,7 +225,7 @@ R CLuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3)
 }
 
 template<typename R, typename P1, typename P2, typename P3, typename P4>
-R CLuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4)
+R LuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4)
 {
     SafeBeginCall(func);
     Push(p1);
@@ -236,7 +236,7 @@ R CLuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4)
 }
 
 template<typename R, typename P1, typename P2, typename P3, typename P4, typename P5>
-R CLuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5)
+R LuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5)
 {
     SafeBeginCall(func);
     Push(p1);
@@ -248,7 +248,7 @@ R CLuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5)
 }
 
 template<typename R, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6>
-R CLuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6)
+R LuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6)
 {
     SafeBeginCall(func);
     Push(p1);
@@ -261,7 +261,7 @@ R CLuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6)
 }
 
 template<typename R, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7>
-R CLuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7)
+R LuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7)
 {
     SafeBeginCall(func);
     Push(p1);
@@ -275,7 +275,7 @@ R CLuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P
 }
 
 template<typename R, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8>
-R CLuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8)
+R LuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8)
 {
     SafeBeginCall(func);
     Push(p1);
@@ -290,7 +290,7 @@ R CLuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P
 }
 
 template<typename R, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8, typename P9>
-R CLuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8, P9 p9)
+R LuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8, P9 p9)
 {
     SafeBeginCall(func);
     Push(p1);
@@ -306,7 +306,7 @@ R CLuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P
 }
 
 template<typename R, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8, typename P9, typename P10>
-R CLuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8, P9 p9, P10 p10)
+R LuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8, P9 p9, P10 p10)
 {
     SafeBeginCall(func);
     Push(p1);
@@ -322,7 +322,7 @@ R CLuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P
     return SafeEndCall<R, 0>(func, 10);
 }
 
-const char *CLuaBridge::Call(const char *func, const char *sig, ...)
+const char *LuaBridge::Call(const char *func, const char *sig, ...)
 {
     va_list vl;
     va_start(vl, sig);
@@ -403,8 +403,8 @@ const char *CLuaBridge::Call(const char *func, const char *sig, ...)
                 break;
 
             case 'S':    /* string */
-                *va_arg(vl, int *) = static_cast<int>(lua_strlen(m_pluaVM, index));
-                *va_arg(vl, const char **) = lua_tostring(m_pluaVM, index);
+//                *va_arg(vl, int *) = static_cast<int>(lua_strlen(m_pluaVM, index));
+//                *va_arg(vl, const char **) = lua_tostring(m_pluaVM, index);
                 break;
 
             default:

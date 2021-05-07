@@ -29,7 +29,7 @@ int main(void)
 
     lua_State *L = luaL_newstate();
 
-    CLuaBridge luaBridge(L);
+    LuaBridge luaBridge(L);
     luaBridge.LoadFile("../script/111111.lua");
     printf("luaState top = %d\n", lua_gettop(luaBridge));
     LuaRegisterCFunc(luaBridge, "Add", int(int, int), Add);

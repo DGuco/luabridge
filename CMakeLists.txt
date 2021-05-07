@@ -5,5 +5,5 @@ set(CMAKE_CXX_COMPILER g++)
 
 project(lbridge)
 
-add_subdirectory(lua-5.1.5)
+add_subdirectory(lua-5.3.6)
 add_subdirectory(luabridge)

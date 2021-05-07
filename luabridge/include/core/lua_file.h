@@ -1,11 +1,7 @@
 /******************************************************************************
-* Name: LuaBridge for C++
+* https://github.com/DGuco/luabridge
 *
-* Author: DGuco(杜国超)
-* Date: 2019-12-07 17:15
-* E-Mail: 1139140929@qq.com
-*
-* Copyright (C) 2019 DGuco(杜国超).  All rights reserved.
+* Copyright (C) 2021 DGuco(杜国超)<1139140929@qq.com>.  All rights reserved.
 * Copyright (C) 2004 Yong Lin.  All rights reserved.
 *
 * License: The MIT License (http://www.opensource.org/licenses/mit-license.php)
@@ -43,5 +39,5 @@
 #include "user_data.h"
 #include "cfunctions.h"
 #include "security.h"
-#include "stack.h"
+#include "lua_stack.h"
 #include "namespace.h"

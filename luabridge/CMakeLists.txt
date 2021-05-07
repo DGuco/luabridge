@@ -3,7 +3,9 @@ project(luabridge)
 
 set(CMAKE_C_COMPILER g++)
 set(CMAKE_CXX_COMPILER g++)
-add_compile_options(-O2 -Wall -g -pipe -Wextra -std=c++11)
+add_compile_options(-O2 -Wall -g -pipe -Wextra -D_LUABRIDGE_CXX11 -std=c++11)
+add_definitions(-DLUABRIDGE_CXX11)
+
 
 set(LUA_BRIDGE_HEADER_FILES
         include/core/cfunctions.h
@@ -16,7 +18,6 @@ set(LUA_BRIDGE_HEADER_FILES
         include/core/lua_ref.h
         include/core/namespace.h
         include/core/security.h
-        include/core/stack.h
         include/core/type_list.h
         include/core/type_traits.h
         include/core/user_data.h
@@ -34,7 +35,7 @@ set(SOURCE_FILES
 include_directories(
         /usr/include/
         /usr/local/include/
-        ${CMAKE_SOURCE_DIR}/lua-5.1.5/
+        ${CMAKE_SOURCE_DIR}/lua-5.3.6/
         ${CMAKE_SOURCE_DIR}/luabridge/include/
         ${CMAKE_SOURCE_DIR}/luabridge/include/core/
 )

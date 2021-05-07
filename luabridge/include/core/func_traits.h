@@ -1,7 +1,8 @@
 //------------------------------------------------------------------------------
 /*
-  https://github.com/vinniefalco/LuaBridge
+  https://github.com/DGuco/luabridge
 
+  Copyright (C) 2021 DGuco(杜国超)<1139140929@qq.com>.  All rights reserved.
   Copyright 2019, Dmitry Tarakanov
   Copyright 2012, Vinnie Falco <vinnie.falco@gmail.com>
 
@@ -29,6 +30,7 @@
 
 #pragma once
 
+#include <functional>
 #include "type_list.h"
 
 namespace luabridge
@@ -50,7 +52,6 @@ namespace luabridge
 //
 # define LUABRIDGE_THROWSPEC throw ()
 #endif
-
 
 //==============================================================================
 /**

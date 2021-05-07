@@ -1,7 +1,8 @@
 //------------------------------------------------------------------------------
 /*
-  https://github.com/vinniefalco/LuaBridge
+  https://github.com/DGuco/luabridge
 
+  Copyright (C) 2021 DGuco(杜国超)<1139140929@qq.com>.  All rights reserved.
   Copyright 2018, Dmitry Tarakanov
   Copyright 2012, Vinnie Falco <vinnie.falco@gmail.com>
   Copyright 2008, Nigel Atkinson <suprapilot+LuaCode@gmail.com>
@@ -31,7 +32,7 @@
 #pragma once
 
 #include "lua_exception.h"
-#include "stack.h"
+#include "lua_stack.h"
 
 #include <iostream>
 #include <string>
