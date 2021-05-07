@@ -22,9 +22,8 @@ int LuaFnAdd(lua_State *L)
         return 1;
     }catch (std::exception e)
     {
-        std::cout << e.what() << std::endl;
-        lua_pushinteger(L,0);
-        return 1;
+        std::cout << "LuaFnAdd catch exception: " << e.what() << std::endl;
+        return 0;
     }
 }
 
