@@ -274,7 +274,7 @@ struct lua_function
 
     static int Call(lua_State *L)
     {
-        Stack<STD_FUNCTION>::push(L,CLuaCFunctionWrapN<function_traits<FT>::arity, FT, STD_FUNCTION>()(L, fn));
+        Stack<typename std::function<FT>::result_type>::push(L,CLuaCFunctionWrapN<function_traits<FT>::arity, FT, STD_FUNCTION>()(L, fn));
         return 1;
     }
 

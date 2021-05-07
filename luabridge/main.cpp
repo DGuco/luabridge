@@ -34,7 +34,7 @@ int main(void)
     LuaBridge luaBridge(L);
     luaBridge.LoadFile("../script/111111.lua");
     printf("luaState top = %d\n", lua_gettop(L));
-   // LuaRegisterCFunc(luaBridge, "Add", int(int, int), Add);
+    LuaRegisterCFunc(luaBridge, "Add", int(int, int), Add);
     LuaRegisterLuaFunc(luaBridge, "LuaFnAdd", LuaFnAdd);
     int ret = luaBridge.Call<int>("x11111_test", 1, 2);
     printf("ret = %d\n", ret);
