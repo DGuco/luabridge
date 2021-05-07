@@ -34,13 +34,11 @@
 #define  __LUA_STACK_H__
 
 #include <cstring>
-#include "lua_file.h"
-#include "lua_variant.h"
-#include "lua_library.h"
 #include "lua_library.h"
 #include "lua_helpers.h"
 #include "user_data.h"
 #include <string>
+
 namespace luabridge
 {
 

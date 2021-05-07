@@ -32,6 +32,7 @@
 
 #include "lua_library.h"
 #include "classinfo.h"
+#include "type_traits.h"
 #include <cassert>
 #include <stdexcept>
 

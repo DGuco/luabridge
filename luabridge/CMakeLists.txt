@@ -25,7 +25,7 @@ set(LUA_BRIDGE_HEADER_FILES
         include/core/lua_stack.h
         include/core/lua_function.h
         include/core/lua_variant.h
-        include/core/lua_file.h
+        include/lua_file.h
         include/lua_bridge.h
         )
 
@@ -37,7 +37,6 @@ include_directories(
         /usr/local/include/
         ${CMAKE_SOURCE_DIR}/lua-5.3.6/
         ${CMAKE_SOURCE_DIR}/luabridge/include/
-        ${CMAKE_SOURCE_DIR}/luabridge/include/core/
 )
 
 link_directories(
