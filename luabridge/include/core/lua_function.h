@@ -96,7 +96,7 @@ struct CLuaCFunctionWrapN
 {
     inline typename STD_FUNCTION::result_type operator()(lua_State *l, STD_FUNCTION f)
     {
-        LuaStack::LuaAssert(l,false, "Parameters number too many.");
+        LuaHelper::LuaAssert(l,false, "Parameters number too many.");
         return 0;
     }
 };
@@ -115,7 +115,7 @@ struct CLuaCFunctionWrapN<1, FT, STD_FUNCTION>
 {
     inline typename STD_FUNCTION::result_type operator()(lua_State *l, STD_FUNCTION f)
     {
-        LuaStack::LuaAssert(l,LuaStack::GetParamCount(l) == 1, "Request 1 param");
+        LuaHelper::LuaAssert(l,LuaHelper::GetParamCount(l) == 1, "Request 1 param");
         return f(Stack<LUA_PARAM_TYPE(0)>::get(l,0));
     }
 };
@@ -126,7 +126,7 @@ struct CLuaCFunctionWrapN<2, FT, STD_FUNCTION>
     inline typename STD_FUNCTION::result_type operator()(lua_State *l, STD_FUNCTION f)
     {
 
-        LuaStack::LuaAssert(l,LuaStack::GetParamCount(l) == 2, "Request 2 param");
+        LuaHelper::LuaAssert(l,LuaHelper::GetParamCount(l) == 2, "Request 2 param");
         return f(Stack<LUA_PARAM_TYPE(0)>::get(l,1),
                  Stack<LUA_PARAM_TYPE(1)>::get(l,2));
     }
@@ -137,7 +137,7 @@ struct CLuaCFunctionWrapN<3, FT, STD_FUNCTION>
 {
     inline typename STD_FUNCTION::result_type operator()(lua_State *l, STD_FUNCTION f)
     {
-        LuaStack::LuaAssert(l,LuaStack::GetParamCount(l) == 3, "Request 3 param");
+        LuaHelper::LuaAssert(l,LuaHelper::GetParamCount(l) == 3, "Request 3 param");
         return f(Stack<LUA_PARAM_TYPE(0)>::get(l,1),
                  Stack<LUA_PARAM_TYPE(1)>::get(l,2),
                  Stack<LUA_PARAM_TYPE(2)>::get(l,3));
@@ -149,7 +149,7 @@ struct CLuaCFunctionWrapN<4, FT, STD_FUNCTION>
 {
     inline typename STD_FUNCTION::result_type operator()(lua_State *l, STD_FUNCTION f)
     {
-        LuaStack::LuaAssert(l,LuaStack::GetParamCount(l) == 4, "Request 4 param");
+        LuaHelper::LuaAssert(l,LuaHelper::GetParamCount(l) == 4, "Request 4 param");
 
         return f(Stack<LUA_PARAM_TYPE(0)>::get(l,1),
                  Stack<LUA_PARAM_TYPE(1)>::get(l,2),
@@ -163,7 +163,7 @@ struct CLuaCFunctionWrapN<5, FT, STD_FUNCTION>
 {
     inline typename STD_FUNCTION::result_type operator()(lua_State *l, STD_FUNCTION f)
     {
-        LuaStack::LuaAssert(l,LuaStack::GetParamCount(l) == 5, "Request 5 param");
+        LuaHelper::LuaAssert(l,LuaHelper::GetParamCount(l) == 5, "Request 5 param");
 
         return f(Stack<LUA_PARAM_TYPE(0)>::get(l,1),
                  Stack<LUA_PARAM_TYPE(1)>::get(l,2),
@@ -178,7 +178,7 @@ struct CLuaCFunctionWrapN<6, FT, STD_FUNCTION>
 {
     inline typename STD_FUNCTION::result_type operator()(lua_State *l, STD_FUNCTION f)
     {
-        LuaStack::LuaAssert(l,LuaStack::GetParamCount(l) == 6, "Request 6 param");
+        LuaHelper::LuaAssert(l,LuaHelper::GetParamCount(l) == 6, "Request 6 param");
 
         return f(Stack<LUA_PARAM_TYPE(0)>::get(l,1),
                  Stack<LUA_PARAM_TYPE(1)>::get(l,2),
@@ -194,7 +194,7 @@ struct CLuaCFunctionWrapN<7, FT, STD_FUNCTION>
 {
     inline typename STD_FUNCTION::result_type operator()(lua_State *l, STD_FUNCTION f)
     {
-        LuaStack::LuaAssert(l,LuaStack::GetParamCount(l) == 7, "Request 7 param");
+        LuaHelper::LuaAssert(l,LuaHelper::GetParamCount(l) == 7, "Request 7 param");
 
         return f(Stack<LUA_PARAM_TYPE(0)>::get(l,1),
                  Stack<LUA_PARAM_TYPE(1)>::get(l,2),
@@ -211,7 +211,7 @@ struct CLuaCFunctionWrapN<8, FT, STD_FUNCTION>
 {
     inline typename STD_FUNCTION::result_type operator()(lua_State *l, STD_FUNCTION f)
     {
-        LuaStack::LuaAssert(l,LuaStack::GetParamCount(l) == 8, "Request 8 param");
+        LuaHelper::LuaAssert(l,LuaHelper::GetParamCount(l) == 8, "Request 8 param");
 
         return f(Stack<LUA_PARAM_TYPE(0)>::get(l,1),
                  Stack<LUA_PARAM_TYPE(1)>::get(l,2),
@@ -229,7 +229,7 @@ struct CLuaCFunctionWrapN<9, FT, STD_FUNCTION>
 {
     inline typename STD_FUNCTION::result_type operator()(lua_State *l, STD_FUNCTION f)
     {
-        LuaStack::LuaAssert(l,LuaStack::GetParamCount(l) == 9, "Request 9 param");
+        LuaHelper::LuaAssert(l,LuaHelper::GetParamCount(l) == 9, "Request 9 param");
 
         return f(Stack<LUA_PARAM_TYPE(0)>::get(l,1),
                  Stack<LUA_PARAM_TYPE(1)>::get(l,2),
@@ -248,7 +248,7 @@ struct CLuaCFunctionWrapN<10, FT, STD_FUNCTION>
 {
     inline typename STD_FUNCTION::result_type operator()(lua_State *l, STD_FUNCTION f)
     {
-        LuaStack::LuaAssert(l,LuaStack::GetParamCount(l) == 10, "Request 10 param");
+        LuaHelper::LuaAssert(l,LuaHelper::GetParamCount(l) == 10, "Request 10 param");
 
         return f(Stack<LUA_PARAM_TYPE(0)>::get(l,1),
                  Stack<LUA_PARAM_TYPE(1)>::get(l,2),
@@ -268,7 +268,7 @@ struct CLuaCFunctionWrapN<11, FT, STD_FUNCTION>
 {
     inline typename STD_FUNCTION::result_type operator()(lua_State *l, STD_FUNCTION f)
     {
-        LuaStack::LuaAssert(l,LuaStack::GetParamCount(l) == 11, "Request 11 param");
+        LuaHelper::LuaAssert(l,LuaHelper::GetParamCount(l) == 11, "Request 11 param");
 
         return f(Stack<LUA_PARAM_TYPE(0)>::get(l,1),
                  Stack<LUA_PARAM_TYPE(1)>::get(l,2),
@@ -289,7 +289,7 @@ struct CLuaCFunctionWrapN<12, FT, STD_FUNCTION>
 {
     inline typename STD_FUNCTION::result_type operator()(lua_State *l, STD_FUNCTION f)
     {
-        LuaStack::LuaAssert(l,LuaStack::GetParamCount(l) == 12, "Request 12 param");
+        LuaHelper::LuaAssert(l,LuaHelper::GetParamCount(l) == 12, "Request 12 param");
 
         return f(Stack<LUA_PARAM_TYPE(0)>::get(l,1),
                  Stack<LUA_PARAM_TYPE(1)>::get(l,2),
@@ -311,7 +311,7 @@ struct CLuaCFunctionWrapN<13, FT, STD_FUNCTION>
 {
     inline typename STD_FUNCTION::result_type operator()(lua_State *l, STD_FUNCTION f)
     {
-        LuaStack::LuaAssert(l,LuaStack::GetParamCount(l) == 13, "Request 13 param");
+        LuaHelper::LuaAssert(l,LuaHelper::GetParamCount(l) == 13, "Request 13 param");
 
         return f(Stack<LUA_PARAM_TYPE(0)>::get(l,1),
                  Stack<LUA_PARAM_TYPE(1)>::get(l,2),
@@ -334,7 +334,7 @@ struct CLuaCFunctionWrapN<14, FT, STD_FUNCTION>
 {
     inline typename STD_FUNCTION::result_type operator()(lua_State *l, STD_FUNCTION f)
     {
-        LuaStack::LuaAssert(l,LuaStack::GetParamCount(l) == 14, "Request 14 param");
+        LuaHelper::LuaAssert(l,LuaHelper::GetParamCount(l) == 14, "Request 14 param");
 
         return f(Stack<LUA_PARAM_TYPE(0)>::get(l,1),
                  Stack<LUA_PARAM_TYPE(1)>::get(l,2),
@@ -358,7 +358,7 @@ struct CLuaCFunctionWrapN<15, FT, STD_FUNCTION>
 {
     inline typename STD_FUNCTION::result_type operator()(lua_State *l, STD_FUNCTION f)
     {
-        LuaStack::LuaAssert(l,LuaStack::GetParamCount(l) == 15, "Request 15 param");
+        LuaHelper::LuaAssert(l,LuaHelper::GetParamCount(l) == 15, "Request 15 param");
 
         return f(Stack<LUA_PARAM_TYPE(0)>::get(l,1),
                  Stack<LUA_PARAM_TYPE(1)>::get(l,2),

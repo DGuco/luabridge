@@ -41,210 +41,6 @@
 
 namespace luabridge
 {
-
-class LuaStack
-{
-public:
-    /**
-     * 检测lua 堆栈中的参数类型
-     * @param Index
-     * @param isLuaError 如果类型错误是否抛出lua异常
-     * @return
-     */
-    static bool CheckLuaArg_Num(lua_State *L, int Index, bool isLuaError = true);
-    static bool CheckLuaArg_Integer(lua_State *L, int Index, bool isLuaError = true);
-    static bool CheckLuaArg_Str(lua_State *L, int Index, bool isLuaError = true);
-    /**
-     * print lua stack info 打印lua 堆栈信息
-     * @param L
-     */
-    static void LuaStackInfo(lua_State *L);
-    /**
-     * Lua Asset,if asset failed  throw a lua lua error
-     * @param condition
-     * @param argindex
-     * @param err_msg
-     */
-    static void LuaAssert(lua_State *L, bool condition, int argindex, const char *err_msg);
-    static void LuaAssert(lua_State *L, bool condition, const char *err_msg);
-
-    /**
-     * param count
-     * @return
-     */
-    static int GetParamCount(lua_State *L);
-    /**
-     * dbug lua error info 打印lua 错误日志message
-     * @param FunName
-     * @param Msg
-     */
-    static void DefaultDebugLuaErrorInfo(const char *FunName, const char *Msg);
-};
-
-void LuaStack::LuaStackInfo(lua_State *L)
-{
-    printf("==========================Lua stack info start=====================================\n");
-    char szMsg[1024];
-    lua_Debug trouble_info;
-    memset(&trouble_info, 0, sizeof(lua_Debug));
-    //int debug_StackNum = lua_gettop(L);
-
-    for (int i = 0;; i++) {
-        if (lua_getstack(L, i, &trouble_info) == 0)
-            break;
-        lua_getinfo(L, "Snl", &trouble_info);
-
-        sprintf(szMsg, "name:(%s) what:(%s) short:(%s) linedefined:(%d) currentline:(%d)",
-                trouble_info.name,
-                trouble_info.what,
-                trouble_info.short_src,
-                trouble_info.linedefined,
-                trouble_info.currentline);
-        printf("%s\n", szMsg);
-        sprintf(szMsg, "%s(%d): /t%s",
-                trouble_info.short_src,
-                trouble_info.currentline,
-                trouble_info.name);
-
-        printf("%s\n", szMsg);
-    }
-    printf("==========================Lua stack info start=====================================\n");
-
-}
-
-bool LuaStack::CheckLuaArg_Num(lua_State *L, int Index, bool isLuaError)
-{
-    if (lua_isnumber(L, Index))
-        return true;
-
-    lua_Debug trouble_info;
-    memset(&trouble_info, 0, sizeof(lua_Debug));
-    //int debug_StackNum = lua_gettop(L);
-    if (lua_getstack(L, 0, &trouble_info) || lua_getstack(L, 1, &trouble_info))
-        lua_getinfo(L, "Snl", &trouble_info);
-
-    char szMsg[1024];
-    if (lua_isnil(L, Index)) {
-        sprintf(szMsg, "Lua function(%s), %d arg is null", trouble_info.name, Index);
-    }
-    else if (lua_isstring(L, Index)) {
-        sprintf(szMsg,
-                "Lua function(%s) %d arg type error('%s') it's not number",
-                trouble_info.name,
-                Index,
-                lua_tostring(L, Index));
-    }
-    else {
-        sprintf(szMsg, "Lua function(%s), %d arg type error", trouble_info.name, Index);
-    }
-
-    LuaStackInfo(L);
-    if (isLuaError) {
-        LuaAssert(L, false, szMsg);
-    }
-    return false;
-}
-
-bool LuaStack::CheckLuaArg_Integer(lua_State *L, int Index, bool isLuaError)
-{
-    if (lua_isinteger(L, Index))
-        return true;
-
-    lua_Debug trouble_info;
-    memset(&trouble_info, 0, sizeof(lua_Debug));
-    //int debug_StackNum = lua_gettop(L);
-    if (lua_getstack(L, 0, &trouble_info) || lua_getstack(L, 1, &trouble_info))
-        lua_getinfo(L, "Snl", &trouble_info);
-
-    char szMsg[1024];
-    if (lua_isnil(L, Index)) {
-        sprintf(szMsg, "Lua function(%s), %d arg is null", trouble_info.name, Index);
-    }
-    else if (lua_isstring(L, Index)) {
-        sprintf(szMsg,
-                "Lua function(%s) %d arg type error('%s') it's not number",
-                trouble_info.name,
-                Index,
-                lua_tostring(L, Index));
-    }
-    else {
-        sprintf(szMsg, "Lua function(%s), %d arg type error", trouble_info.name, Index);
-    }
-
-    LuaStackInfo(L);
-    if (isLuaError) {
-        LuaAssert(L, false, szMsg);
-    }
-    return false;
-}
-
-bool LuaStack::CheckLuaArg_Str(lua_State *L, int Index, bool isLuaError)
-{
-    if (lua_isstring(L, Index))
-        return true;
-
-    char szMsg[1024];
-
-    lua_Debug trouble_info;
-    memset(&trouble_info, 0, sizeof(lua_Debug));
-    //int debug_StackNum = lua_gettop(L);
-    if (lua_getstack(L, 1, &trouble_info) || lua_getstack(L, 0, &trouble_info))
-        lua_getinfo(L, "Snl", &trouble_info);
-
-    if (lua_isnil(L, Index)) {
-        sprintf(szMsg, "Lua func(%s) arg-[%d] arg is null", trouble_info.name, Index);
-    }
-    else {
-        sprintf(szMsg, "Lua func(%s) arg-[%d] arg type error", trouble_info.name, Index);
-    }
-
-    sprintf(szMsg, "name:(%s) namewhat:(%s) what:(%s) source:(%s) short:(%s) linedefined:(%d) currentline:(%d)\n",
-            trouble_info.name,
-            trouble_info.namewhat,
-            trouble_info.what,
-            trouble_info.source,
-            trouble_info.short_src,
-            trouble_info.linedefined,
-            trouble_info.currentline
-    );
-    LuaStackInfo(L);
-    if (isLuaError) {
-        LuaAssert(L, false, szMsg);
-    }
-    return false;
-}
-
-void LuaStack::LuaAssert(lua_State *L, bool condition, int argindex, const char *err_msg)
-{
-    luaL_argcheck(L, condition, argindex, err_msg);
-}
-
-void LuaStack::LuaAssert(lua_State *L, bool condition, const char *err_msg)
-{
-    if (!condition) {
-        lua_Debug ar;
-        lua_getstack(L, 0, &ar);
-        lua_getinfo(L, "n", &ar);
-        if (NULL == ar.name) {
-            ar.name = "?";
-        }
-        if (NULL == ar.namewhat) {
-            ar.namewhat = "?";
-        }
-        luaL_error(L, "assert fail: %s `%s' (%s)", ar.namewhat, ar.name, err_msg);
-    }
-}
-
-int LuaStack::GetParamCount(lua_State *L)
-{
-    return lua_gettop(L);
-}
-
-void LuaStack::DefaultDebugLuaErrorInfo(const char *FunName, const char *Msg)
-{
-    printf("Call fun:[%s] failed,msg:[%s]\n", FunName, Msg);
-}
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 template<class T>
@@ -321,7 +117,7 @@ struct Stack<int>
         }
         else {
             //抛出c++异常
-            if (!LuaStack::CheckLuaArg_Integer(L, index, false)) {
+            if (!LuaHelper::CheckLuaArg_Integer(L, index, false)) {
                 throw std::runtime_error("Stack<int> CheckLuaArg_Integer failed");
             }
             else {
@@ -353,7 +149,7 @@ struct Stack<unsigned int>
         }
         else {
             //抛出c++异常
-            if (!LuaStack::CheckLuaArg_Integer(L, index, false)) {
+            if (!LuaHelper::CheckLuaArg_Integer(L, index, false)) {
                 throw std::runtime_error("Stack<unsigned int> CheckLuaArg_Integer failed");
             }
             else {
@@ -385,7 +181,7 @@ struct Stack<unsigned char>
         }
         else {
             //抛出c++异常
-            if (!LuaStack::CheckLuaArg_Integer(L, index, false)) {
+            if (!LuaHelper::CheckLuaArg_Integer(L, index, false)) {
                 throw std::runtime_error("Stack<unsigned char> CheckLuaArg_Integer failed");
             }
             else {
@@ -417,7 +213,7 @@ struct Stack<short>
         }
         else {
             //抛出c++异常
-            if (!LuaStack::CheckLuaArg_Integer(L, index, false)) {
+            if (!LuaHelper::CheckLuaArg_Integer(L, index, false)) {
                 throw std::runtime_error("Stack<short> CheckLuaArg_Integer failed");
             }
             else {
@@ -449,7 +245,7 @@ struct Stack<unsigned short>
         }
         else {
             //抛出c++异常
-            if (!LuaStack::CheckLuaArg_Integer(L, index, false)) {
+            if (!LuaHelper::CheckLuaArg_Integer(L, index, false)) {
                 throw std::runtime_error("Stack<unsigned short> CheckLuaArg_Integer failed");
             }
             else {
@@ -481,7 +277,7 @@ struct Stack<long>
         }
         else {
             //抛出c++异常
-            if (!LuaStack::CheckLuaArg_Integer(L, index, false)) {
+            if (!LuaHelper::CheckLuaArg_Integer(L, index, false)) {
                 throw std::runtime_error("Stack<long> CheckLuaArg_Integer failed");
             }
             else {
@@ -513,7 +309,7 @@ struct Stack<unsigned long>
         }
         else {
             //抛出c++异常
-            if (!LuaStack::CheckLuaArg_Integer(L, index, false)) {
+            if (!LuaHelper::CheckLuaArg_Integer(L, index, false)) {
                 throw std::runtime_error("Stack<unsigned long> CheckLuaArg_Integer failed");
             }
             else {
@@ -545,7 +341,7 @@ struct Stack<long long>
         }
         else {
             //抛出c++异常
-            if (!LuaStack::CheckLuaArg_Integer(L, index, false)) {
+            if (!LuaHelper::CheckLuaArg_Integer(L, index, false)) {
                 throw std::runtime_error("Stack<long long> CheckLuaArg_Integer failed");
             }
             else {
@@ -573,7 +369,7 @@ struct Stack<unsigned long long>
         }
         else {
             //抛出c++异常
-            if (!LuaStack::CheckLuaArg_Integer(L, index, false)) {
+            if (!LuaHelper::CheckLuaArg_Integer(L, index, false)) {
                 throw std::runtime_error("Stack<unsigned long long> CheckLuaArg_Integer failed");
             }
             else {
@@ -602,7 +398,7 @@ struct Stack<float>
         }
         else {
             //抛出c++异常
-            if (!LuaStack::CheckLuaArg_Num(L, index, false)) {
+            if (!LuaHelper::CheckLuaArg_Num(L, index, false)) {
                 throw std::runtime_error("Stack<float> CheckLuaArg_Num failed");
             }
             else {
@@ -631,7 +427,7 @@ struct Stack<double>
         }
         else {
             //抛出c++异常
-            if (!LuaStack::CheckLuaArg_Num(L, index, false)) {
+            if (!LuaHelper::CheckLuaArg_Num(L, index, false)) {
                 throw std::runtime_error("Stack<double> CheckLuaArg_Num failed");
             }
             else {
@@ -678,12 +474,11 @@ struct Stack<char>
         }
         else {
             //抛出c++异常
-            if (!LuaStack::CheckLuaArg_Str(L, index, false)) {
+            if (!LuaHelper::CheckLuaArg_Str(L, index, false)) {
                 throw std::runtime_error("Stack<char> CheckLuaArg_Str failed");
             }
             else {
-                if (lua_isnil(L,index))
-                {
+                if (lua_isnil(L, index)) {
                     return ' ';
                 }
                 return lua_tostring(L, index)[0];
@@ -707,19 +502,18 @@ struct Stack<const char *>
             lua_pushnil(L);
     }
 
-    static const char* get(lua_State *L, int index, bool luaerror = false)
+    static const char *get(lua_State *L, int index, bool luaerror = false)
     {
         if (luaerror) {
             return luaL_checkstring(L, index);
         }
         else {
             //抛出c++异常
-            if (!LuaStack::CheckLuaArg_Str(L, index, false)) {
+            if (!LuaHelper::CheckLuaArg_Str(L, index, false)) {
                 throw std::runtime_error("Stack<char const *> CheckLuaArg_Str failed");
             }
             else {
-                if (lua_isnil(L,index))
-                {
+                if (lua_isnil(L, index)) {
                     return "";
                 }
                 return lua_tostring(L, index);
@@ -742,25 +536,22 @@ struct Stack<std::string>
 
     static std::string get(lua_State *L, int index, bool luaerror = false)
     {
-        if (luaerror)
-        {
-            LuaStack::CheckLuaArg_Str(L, index, true);
-            if (lua_isnil(L,index))
-            {
+        if (luaerror) {
+            LuaHelper::CheckLuaArg_Str(L, index, true);
+            if (lua_isnil(L, index)) {
                 return "";
             }
             size_t len;
             const char *str = lua_tolstring(L, index, &len);
             return std::string(str, len);
-        }else
-        {
+        }
+        else {
             //抛出c++异常
-            if (!LuaStack::CheckLuaArg_Str(L, index, false)) {
+            if (!LuaHelper::CheckLuaArg_Str(L, index, false)) {
                 throw std::runtime_error("Stack<std::string> CheckLuaArg_Str failed");
             }
             else {
-                if (lua_isnil(L,index))
-                {
+                if (lua_isnil(L, index)) {
                     return "";
                 }
                 size_t len;
