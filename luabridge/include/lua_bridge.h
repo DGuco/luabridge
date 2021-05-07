@@ -38,69 +38,26 @@
 #include "lua_stack.h"
 #include "lua_library.h"
 
-
-class LuaBridge: public LuaStack
+namespace luabridge
+{
+class LuaBridge
 {
 public:
-    LuaBridge(lua_State *VM)
-        : LuaStack(VM)
-    {
-        // initialize lua standard library functions
-        luaopen_base(m_pluaVM);
-        luaopen_table(m_pluaVM);
-        luaopen_string(m_pluaVM);
-        luaopen_math(m_pluaVM);
-    }
+    //construct
+    LuaBridge(lua_State *VM);
 
-    ~LuaBridge()
-    {
-        if (NULL != m_pluaVM) {
-            lua_close(m_pluaVM);
-        }
-    }
+    //destruct
+    ~LuaBridge();
 
-public:
-    bool LoadFile(const std::string &filePath)
-    {
-        int ret = luaL_dofile(m_pluaVM, filePath.c_str());
-        if (ret != 0)
-        {
-            throw std::runtime_error("Lua loadfile failed,error:"+ ret);
-        }
-    }
+    //load lua file
+    bool LoadFile(const std::string &filePath);
+    bool LoadFile(const char *filePath);
 
-    bool LoadFile(const char *filePath)
-    {
-        int ret = luaL_dofile(m_pluaVM, filePath);
-        if (ret != 0)
-        {
-            throw std::runtime_error("Lua loadfile failed,error:"+ ret);
-        }
-    }
-
-
-    void Register(const char *func, lua_CFunction f)
-    {
-        char Buf[256];
-        strcpy(Buf, func);
-        lua_register(m_pluaVM, Buf, f);
-    }
-
-    template<class LUATYPE>
-    void Register()
-    {
-        LUATYPE::LuaOpenLibMember(m_pluaVM);
-        LUATYPE::LuaOpenLib(m_pluaVM);
-    }
-
-    operator lua_State *()
-    {
-        return m_pluaVM;
-    }
-
+    //register cfunction
+    void Register(const char *func, lua_CFunction f);
     // Call Lua function
-    //   func:	Lua function name
-    //   R:		Return type. (void, float, double, int, long, bool, const char*, std::string)
+    // func:	Lua function name
+    // R:		Return type. (void, float, double, int, long, bool, const char*, std::string)
     // Sample:	double f = lua.Call<double>("test0", 1.0, 3, "param");
     template<typename R>
     R Call(const char *func);
@@ -156,39 +113,90 @@ public:
     // 例2︰ const char* s; int len; const char* error_msg = lua.Call(const char* scriptName, "test01", "S:S", 11, "Hello\0World", &len, &s);
     const char *Call(const char *func, const char *sig, ...);
 private:
-    inline void SafeBeginCall(const char *func)
-    {
-        //记录调用前的堆栈索引
-        m_iTopIndex = lua_gettop(m_pluaVM);
-        lua_getglobal(m_pluaVM, func);
-    }
+    inline void SafeBeginCall(const char *func);
 
     template<typename R, int __>
-    inline R SafeEndCall(const char *func, int nArg)
-    {
-        if (lua_pcall(m_pluaVM, nArg, 1, 0) != 0) {
-            DefaultDebugLuaErrorInfo(func, lua_tostring(m_pluaVM, -1));
-            //恢复调用前的堆栈索引
-            lua_settop(m_pluaVM, m_iTopIndex);
-            return 0;
-        }
-        else {
-            R r =  Pop<R>();
-            //恢复调用前的堆栈索引
-            lua_settop(m_pluaVM, m_iTopIndex);
-            return r;
-        }
-    }
+    inline R SafeEndCall(const char *func, int nArg);
 
     template<int __>
-    inline void SafeEndCall(const char *scriptName, const char *func, int nArg)
-    {
-        if (lua_pcall(m_pluaVM, nArg, 0, 0) != 0) {
-            DefaultDebugLuaErrorInfo(func, lua_tostring(m_pluaVM, -1));
-        }
-        lua_settop(m_pluaVM, m_iTopIndex);
-    }
+    inline void SafeEndCall(const char *scriptName, const char *func, int nArg);
+private:
+    int m_iTopIndex;
+    lua_State *m_pLuaVM;
 };
+
+LuaBridge::LuaBridge(lua_State *VM)
+    : m_pLuaVM(VM)
+{
+    // initialize lua standard library functions
+    luaopen_base(m_pLuaVM);
+    luaopen_table(m_pLuaVM);
+    luaopen_string(m_pLuaVM);
+    luaopen_math(m_pLuaVM);
+}
+
+LuaBridge::~LuaBridge()
+{
+    if (NULL != m_pLuaVM) {
+        lua_close(m_pLuaVM);
+    }
+}
+
+bool LuaBridge::LoadFile(const std::string &filePath)
+{
+    int ret = luaL_dofile(m_pLuaVM, filePath.c_str());
+    if (ret != 0) {
+        throw std::runtime_error("Lua loadfile failed,error:" + ret);
+    }
+}
+
+bool LuaBridge::LoadFile(const char *filePath)
+{
+    int ret = luaL_dofile(m_pLuaVM, filePath);
+    if (ret != 0) {
+        throw std::runtime_error("Lua loadfile failed,error:" + ret);
+    }
+}
+
+void LuaBridge::Register(const char *func, lua_CFunction f)
+{
+    char Buf[256];
+    strcpy(Buf, func);
+    lua_register(m_pLuaVM, Buf, f);
+}
+
+void LuaBridge::SafeBeginCall(const char *func)
+{
+    //记录调用前的堆栈索引
+    m_iTopIndex = lua_gettop(m_pLuaVM);
+    lua_getglobal(m_pLuaVM, func);
+}
+
+template<typename R, int __>
+R LuaBridge::SafeEndCall(const char *func, int nArg)
+{
+    if (lua_pcall(m_pLuaVM, nArg, 1, 0) != 0) {
+        LuaStack::DefaultDebugLuaErrorInfo(func, lua_tostring(m_pLuaVM, -1));
+        //恢复调用前的堆栈索引
+        lua_settop(m_pLuaVM, m_iTopIndex);
+        return 0;
+    }
+    else {
+        R r = Stack<R>::get(m_pLuaVM,-1);
+        //恢复调用前的堆栈索引
+        lua_settop(m_pLuaVM, m_iTopIndex);
+        return r;
+    }
+}
+
+template<int __>
+void LuaBridge::SafeEndCall(const char *scriptName, const char *func, int nArg)
+{
+    if (lua_pcall(m_pLuaVM, nArg, 0, 0) != 0) {
+        LuaStack::DefaultDebugLuaErrorInfo(func, lua_tostring(m_pLuaVM, -1));
+    }
+    lua_settop(m_pLuaVM, m_iTopIndex);
+}
 
 template<typename R>
 R LuaBridge::Call(const char *func)
@@ -201,7 +209,7 @@ template<typename R, typename P1>
 R LuaBridge::Call(const char *func, P1 p1)
 {
     SafeBeginCall(func);
-    Push(p1);
+    Stack<P1>::push(m_pLuaVM,p1);
     return SafeEndCall<R, 0>(func, 1);
 }
 
@@ -209,8 +217,8 @@ template<typename R, typename P1, typename P2>
 R LuaBridge::Call(const char *func, P1 p1, P2 p2)
 {
     SafeBeginCall(func);
-    Push(p1);
-    Push(p2);
+    Stack<P1>::push(m_pLuaVM,p1);
+    Stack<P2>::push(m_pLuaVM,p2);
     return SafeEndCall<R, 0>(func, 2);
 }
 
@@ -218,9 +226,9 @@ template<typename R, typename P1, typename P2, typename P3>
 R LuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3)
 {
     SafeBeginCall(func);
-    Push(p1);
-    Push(p2);
-    Push(p3);
+    Stack<P1>::push(m_pLuaVM,p1);
+    Stack<P2>::push(m_pLuaVM,p2);
+    Stack<P3>::push(m_pLuaVM,p3);
     return SafeEndCall<R, 0>(func, 3);
 }
 
@@ -228,10 +236,10 @@ template<typename R, typename P1, typename P2, typename P3, typename P4>
 R LuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4)
 {
     SafeBeginCall(func);
-    Push(p1);
-    Push(p2);
-    Push(p3);
-    Push(p4);
+    Stack<P1>::push(m_pLuaVM,p1);
+    Stack<P2>::push(m_pLuaVM,p2);
+    Stack<P3>::push(m_pLuaVM,p3);
+    Stack<P4>::push(m_pLuaVM,p4);
     return SafeEndCall<R>(func, 4);
 }
 
@@ -239,11 +247,11 @@ template<typename R, typename P1, typename P2, typename P3, typename P4, typenam
 R LuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5)
 {
     SafeBeginCall(func);
-    Push(p1);
-    Push(p2);
-    Push(p3);
-    Push(p4);
-    Push(p5);
+    Stack<P1>::push(m_pLuaVM,p1);
+    Stack<P2>::push(m_pLuaVM,p2);
+    Stack<P3>::push(m_pLuaVM,p3);
+    Stack<P4>::push(m_pLuaVM,p4);
+    Stack<P5>::push(m_pLuaVM,p5);
     return SafeEndCall<R, 0>(func, 5);
 }
 
@@ -251,12 +259,12 @@ template<typename R, typename P1, typename P2, typename P3, typename P4, typenam
 R LuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6)
 {
     SafeBeginCall(func);
-    Push(p1);
-    Push(p2);
-    Push(p3);
-    Push(p4);
-    Push(p5);
-    Push(p6);
+    Stack<P1>::push(m_pLuaVM,p1);
+    Stack<P2>::push(m_pLuaVM,p2);
+    Stack<P3>::push(m_pLuaVM,p3);
+    Stack<P4>::push(m_pLuaVM,p4);
+    Stack<P5>::push(m_pLuaVM,p5);
+    Stack<P6>::push(m_pLuaVM,p6);
     return SafeEndCall<R>(func, 6);
 }
 
@@ -264,13 +272,13 @@ template<typename R, typename P1, typename P2, typename P3, typename P4, typenam
 R LuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7)
 {
     SafeBeginCall(func);
-    Push(p1);
-    Push(p2);
-    Push(p3);
-    Push(p4);
-    Push(p5);
-    Push(p6);
-    Push(p7);
+    Stack<P1>::push(m_pLuaVM,p1);
+    Stack<P2>::push(m_pLuaVM,p2);
+    Stack<P3>::push(m_pLuaVM,p3);
+    Stack<P4>::push(m_pLuaVM,p4);
+    Stack<P5>::push(m_pLuaVM,p5);
+    Stack<P6>::push(m_pLuaVM,p6);
+    Stack<P7>::push(m_pLuaVM,p7);
     return SafeEndCall<R, 0>(func, 7);
 }
 
@@ -278,14 +286,14 @@ template<typename R, typename P1, typename P2, typename P3, typename P4, typenam
 R LuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8)
 {
     SafeBeginCall(func);
-    Push(p1);
-    Push(p2);
-    Push(p3);
-    Push(p4);
-    Push(p5);
-    Push(p6);
-    Push(p7);
-    Push(p8);
+    Stack<P1>::push(m_pLuaVM,p1);
+    Stack<P2>::push(m_pLuaVM,p2);
+    Stack<P3>::push(m_pLuaVM,p3);
+    Stack<P4>::push(m_pLuaVM,p4);
+    Stack<P5>::push(m_pLuaVM,p5);
+    Stack<P6>::push(m_pLuaVM,p6);
+    Stack<P7>::push(m_pLuaVM,p7);
+    Stack<P8>::push(m_pLuaVM,p8);
     return SafeEndCall<R, 0>(func, 8);
 }
 
@@ -293,15 +301,15 @@ template<typename R, typename P1, typename P2, typename P3, typename P4, typenam
 R LuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8, P9 p9)
 {
     SafeBeginCall(func);
-    Push(p1);
-    Push(p2);
-    Push(p3);
-    Push(p4);
-    Push(p5);
-    Push(p6);
-    Push(p7);
-    Push(p8);
-    Push(p9);
+    Stack<P1>::push(m_pLuaVM,p1);
+    Stack<P2>::push(m_pLuaVM,p2);
+    Stack<P3>::push(m_pLuaVM,p3);
+    Stack<P4>::push(m_pLuaVM,p4);
+    Stack<P5>::push(m_pLuaVM,p5);
+    Stack<P6>::push(m_pLuaVM,p6);
+    Stack<P7>::push(m_pLuaVM,p7);
+    Stack<P8>::push(m_pLuaVM,p8);
+    Stack<P9>::push(m_pLuaVM,p9);
     return SafeEndCall<R, 0>(func, 9);
 }
 
@@ -309,25 +317,25 @@ template<typename R, typename P1, typename P2, typename P3, typename P4, typenam
 R LuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8, P9 p9, P10 p10)
 {
     SafeBeginCall(func);
-    Push(p1);
-    Push(p2);
-    Push(p3);
-    Push(p4);
-    Push(p5);
-    Push(p6);
-    Push(p7);
-    Push(p8);
-    Push(p9);
-    Push(p10);
+    Stack<P1>::push(m_pLuaVM,p1);
+    Stack<P2>::push(m_pLuaVM,p2);
+    Stack<P3>::push(m_pLuaVM,p3);
+    Stack<P4>::push(m_pLuaVM,p4);
+    Stack<P5>::push(m_pLuaVM,p5);
+    Stack<P6>::push(m_pLuaVM,p6);
+    Stack<P7>::push(m_pLuaVM,p7);
+    Stack<P8>::push(m_pLuaVM,p8);
+    Stack<P9>::push(m_pLuaVM,p9);
+    Stack<P10>::push(m_pLuaVM,p10);
     return SafeEndCall<R, 0>(func, 10);
 }
 
-const char *LuaBridge::Call(const char *func, const char *sig, ...)
+const char* LuaBridge::Call(const char *func, const char *sig, ...)
 {
     va_list vl;
     va_start(vl, sig);
 
-    lua_getglobal(m_pluaVM, func);
+    lua_getglobal(m_pLuaVM, func);
 
     /* 壓入調用參數 */
     int narg = 0;
@@ -335,27 +343,27 @@ const char *LuaBridge::Call(const char *func, const char *sig, ...)
         switch (*sig++) {
         case 'f':    /* 浮點數 */
         case 'e':    /* 浮點數 */
-            lua_pushnumber(m_pluaVM, va_arg(vl, double));
+            lua_pushnumber(m_pLuaVM, va_arg(vl, double));
             break;
 
         case 'i':    /* 整數 */
         case 'n':    /* 整數 */
         case 'd':    /* 整數 */
-            lua_pushnumber(m_pluaVM, va_arg(vl, int));
+            lua_pushnumber(m_pLuaVM, va_arg(vl, int));
             break;
 
         case 'b':    /* 布爾值 */
-            lua_pushboolean(m_pluaVM, va_arg(vl, int));
+            lua_pushboolean(m_pLuaVM, va_arg(vl, int));
             break;
 
         case 's':    /* 字元串 */
-            lua_pushstring(m_pluaVM, va_arg(vl, char *));
+            lua_pushstring(m_pLuaVM, va_arg(vl, char *));
             break;
 
         case 'S':    /* 字元串 */
         {
             int len = va_arg(vl, int);
-            lua_pushlstring(m_pluaVM, va_arg(vl, char *), len);
+            lua_pushlstring(m_pLuaVM, va_arg(vl, char *), len);
         }
             break;
 
@@ -364,18 +372,18 @@ const char *LuaBridge::Call(const char *func, const char *sig, ...)
 
         default:
             //assert(("Lua call option is invalid!", false));
-            //error(m_pluaVM, "invalid option (%c)", *(sig - 1));
-            lua_pushnumber(m_pluaVM, 0);
+            //error(m_pLuaVM, "invalid option (%c)", *(sig - 1));
+            lua_pushnumber(m_pLuaVM, 0);
         }
         narg++;
-        luaL_checkstack(m_pluaVM, 1, "too many arguments");
+        luaL_checkstack(m_pLuaVM, 1, "too many arguments");
     }
 
     L_LuaCall:
     int nres = static_cast<int>(strlen(sig));
     const char *sresult = NULL;
-    if (lua_pcall(m_pluaVM, narg, nres, 0) != 0) {
-        sresult = lua_tostring(m_pluaVM, -1);
+    if (lua_pcall(m_pLuaVM, narg, nres, 0) != 0) {
+        sresult = lua_tostring(m_pLuaVM, -1);
         nres = 1;
     }
     else {
@@ -385,31 +393,35 @@ const char *LuaBridge::Call(const char *func, const char *sig, ...)
             switch (*sig++) {
             case 'f':    /* 浮点数 float*/
             case 'e':    /* 浮点数 float*/
-                *va_arg(vl, double *) = lua_tonumber(m_pluaVM, index);
+                *va_arg(vl, double *) = lua_tonumber(m_pLuaVM, index);
                 break;
 
             case 'i':    /* 整数 */
             case 'n':    /* 整数 */
             case 'd':    /* 整数 */
-                *va_arg(vl, int *) = static_cast<int>(lua_tonumber(m_pluaVM, index));
+                *va_arg(vl, int *) = static_cast<int>(lua_tonumber(m_pLuaVM, index));
                 break;
 
             case 'b':    /* bool */
-                *va_arg(vl, int *) = static_cast<int>(lua_toboolean(m_pluaVM, index));
+                *va_arg(vl, int *) = static_cast<int>(lua_toboolean(m_pLuaVM, index));
                 break;
 
             case 's':    /* string */
-                *va_arg(vl, const char **) = lua_tostring(m_pluaVM, index);
+                *va_arg(vl, const char **) = lua_tostring(m_pLuaVM, index);
                 break;
 
             case 'S':    /* string */
-//                *va_arg(vl, int *) = static_cast<int>(lua_strlen(m_pluaVM, index));
-//                *va_arg(vl, const char **) = lua_tostring(m_pluaVM, index);
+                {
+                    size_t len;
+                    const char *str = lua_tolstring(m_pLuaVM, index, &len);
+                    *va_arg(vl, int *) = static_cast<int>(len);
+                    *va_arg(vl, const char **) = str;
+                }
                 break;
 
             default:
                 //assert(("Lua call invalid option!", false));
-                //error(m_pluaVM, "invalid option (%c)", *(sig - 1));
+                //error(m_pLuaVM, "invalid option (%c)", *(sig - 1));
                 ;
             }
             index++;
@@ -417,7 +429,7 @@ const char *LuaBridge::Call(const char *func, const char *sig, ...)
     }
     va_end(vl);
 
-    lua_pop(m_pluaVM, nres);
+    lua_pop(m_pLuaVM, nres);
     return sresult;
 }
 
@@ -455,10 +467,12 @@ const char *LuaBridge::Call(const char *func, const char *sig, ...)
 #if __cplusplus >= 201103L
 #include "core/lua_function.h"
 #define LuaRegisterCFunc(luaBridge, funcname, type, func)                           \
-    luaBridge.Register(funcname, ( LuaCFunctionWrap<type>(func) ) )
+    luaBridge.Register(funcname, (luabridge::LuaCFunctionWrap<type>(func) ) )
 #endif // __cplusplus >= 201103L
 
 #define LuaRegisterLuaFunc(luaBridge, funcname, func)                           \
     luaBridge.Register(funcname, func)
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
+}
+
 #endif //__LUA_BRIDGE_H__

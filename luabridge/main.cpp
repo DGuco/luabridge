@@ -6,6 +6,8 @@
 #include "include/core/lua_library.h"
 #include "lua_bridge.h"
 
+using  namespace luabridge;
+
 int Add(int a, int b)
 {
     return a + b;
@@ -16,7 +18,7 @@ int LuaFnAdd(lua_State *L)
     int a = lua_tonumber(L, 1);
     int b = lua_tonumber(L, 2);
     printf("a = %d,b = %d\n", a, b);
-    lua_pushnumber(L, a + b);
+    lua_pushinteger(L, a + b);
     return 1;
 }
 
@@ -31,8 +33,8 @@ int main(void)
 
     LuaBridge luaBridge(L);
     luaBridge.LoadFile("../script/111111.lua");
-    printf("luaState top = %d\n", lua_gettop(luaBridge));
-    LuaRegisterCFunc(luaBridge, "Add", int(int, int), Add);
+    printf("luaState top = %d\n", lua_gettop(L));
+   // LuaRegisterCFunc(luaBridge, "Add", int(int, int), Add);
     LuaRegisterLuaFunc(luaBridge, "LuaFnAdd", LuaFnAdd);
     int ret = luaBridge.Call<int>("x11111_test", 1, 2);
     printf("ret = %d\n", ret);
@@ -46,6 +48,6 @@ int main(void)
     ret = luaBridge.Call<int>("x11111_test",1000,2000);
     printf("ret = %d\n",ret);
     printf("-------------------\n");
-    printf("luaState top = %d\n", lua_gettop(luaBridge));
+    printf("luaState top = %d\n", lua_gettop(L));
     return 0;
 }

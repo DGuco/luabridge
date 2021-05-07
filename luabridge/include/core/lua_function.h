@@ -26,13 +26,15 @@
 * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ******************************************************************************/
 
-#ifndef __LUA_STD_FUNCTION_H__
-#define __LUA_STD_FUNCTION_H__
+#ifndef __LUA_STD_FUNCTION_H_
+#define __LUA_STD_FUNCTION_H_
 
 #include "lua_stack.h"
 #include <functional>
 #include <type_traits>
 
+namespace luabridge
+{
 template<typename T>
 struct function_traits;
 
@@ -95,9 +97,9 @@ struct function_traits: function_traits<decltype(&Callable::operator())>
 template<int N, typename FT, typename STD_FUNCTION>
 struct CLuaCFunctionWrapN
 {
-    inline typename STD_FUNCTION::result_type operator()(LuaStack &l, STD_FUNCTION f)
+    inline typename STD_FUNCTION::result_type operator()(lua_State *l, STD_FUNCTION f)
     {
-        l.LuaAssert(l.GetLuaVm(),false, "Parameters number too many.");
+        LuaStack::LuaAssert(l,false, "Parameters number too many.");
         return 0;
     }
 };
@@ -105,7 +107,7 @@ struct CLuaCFunctionWrapN
 template<typename FT, typename STD_FUNCTION>
 struct CLuaCFunctionWrapN<0, FT, STD_FUNCTION>
 {
-    inline typename STD_FUNCTION::result_type operator()(LuaStack &l, STD_FUNCTION f)
+    inline typename STD_FUNCTION::result_type operator()(lua_State *l, STD_FUNCTION f)
     {
         return f();
     }
@@ -114,155 +116,154 @@ struct CLuaCFunctionWrapN<0, FT, STD_FUNCTION>
 template<typename FT, typename STD_FUNCTION>
 struct CLuaCFunctionWrapN<1, FT, STD_FUNCTION>
 {
-    inline typename STD_FUNCTION::result_type operator()(LuaStack &l, STD_FUNCTION f)
+    inline typename STD_FUNCTION::result_type operator()(lua_State *l, STD_FUNCTION f)
     {
-        l.LuaAssert(l.GetLuaVm(),l.GetParamCount() == 1, "Request 1 param");
-        typedef typename function_traits<FT>::template args<0>::type par_type;
-        return f(l.GetParam<LUA_PARAM_TYPE(0)>(1));
+        LuaStack::LuaAssert(l,LuaStack::GetParamCount(l) == 1, "Request 1 param");
+        return f(Stack<LUA_PARAM_TYPE(0)>::get(l,0));
     }
 };
 
 template<typename FT, typename STD_FUNCTION>
 struct CLuaCFunctionWrapN<2, FT, STD_FUNCTION>
 {
-    inline typename STD_FUNCTION::result_type operator()(LuaStack &l, STD_FUNCTION f)
+    inline typename STD_FUNCTION::result_type operator()(lua_State *l, STD_FUNCTION f)
     {
 
-        l.LuaAssert(l.GetLuaVm(),l.GetParamCount() == 2, "Request 2 param");
+        LuaStack::LuaAssert(l,LuaStack::GetParamCount(l) == 2, "Request 2 param");
 
-        return f(l.GetParam<LUA_PARAM_TYPE(0)>(1),
-                 l.GetParam<LUA_PARAM_TYPE(1)>(2));
+        return f(Stack<LUA_PARAM_TYPE(0)>::get(l,1),
+                 Stack<LUA_PARAM_TYPE(1)>::get(l,2));
     }
 };
 
 template<typename FT, typename STD_FUNCTION>
 struct CLuaCFunctionWrapN<3, FT, STD_FUNCTION>
 {
-    inline typename STD_FUNCTION::result_type operator()(LuaStack &l, STD_FUNCTION f)
+    inline typename STD_FUNCTION::result_type operator()(lua_State *l, STD_FUNCTION f)
     {
-        l.LuaAssert(l.GetLuaVm(),l.GetParamCount() == 3, "Request 3 param");
-        return f(l.GetParam<LUA_PARAM_TYPE(0)>(1),
-                 l.GetParam<LUA_PARAM_TYPE(1)>(2),
-                 l.GetParam<LUA_PARAM_TYPE(2)>(3));
+        LuaStack::LuaAssert(l,LuaStack::GetParamCount(l) == 3, "Request 3 param");
+        return f(Stack<LUA_PARAM_TYPE(0)>::get(l,1),
+                 Stack<LUA_PARAM_TYPE(1)>::get(l,2),
+                 Stack<LUA_PARAM_TYPE(2)>::get(l,3));
     }
 };
 
 template<typename FT, typename STD_FUNCTION>
 struct CLuaCFunctionWrapN<4, FT, STD_FUNCTION>
 {
-    inline typename STD_FUNCTION::result_type operator()(LuaStack &l, STD_FUNCTION f)
+    inline typename STD_FUNCTION::result_type operator()(lua_State *l, STD_FUNCTION f)
     {
-        l.LuaAssert(l.GetLuaVm(),l.GetParamCount() == 4, "Request 4 param");
+        LuaStack::LuaAssert(l,LuaStack::GetParamCount(l) == 4, "Request 4 param");
 
-        return f(l.GetParam<LUA_PARAM_TYPE(0)>(1),
-                 l.GetParam<LUA_PARAM_TYPE(1)>(2),
-                 l.GetParam<LUA_PARAM_TYPE(2)>(3),
-                 l.GetParam<LUA_PARAM_TYPE(3)>(4));
+        return f(Stack<LUA_PARAM_TYPE(0)>::get(l,1),
+                 Stack<LUA_PARAM_TYPE(1)>::get(l,2),
+                 Stack<LUA_PARAM_TYPE(2)>::get(l,3),
+                 Stack<LUA_PARAM_TYPE(3)>::get(l,4));
     }
 };
 
 template<typename FT, typename STD_FUNCTION>
 struct CLuaCFunctionWrapN<5, FT, STD_FUNCTION>
 {
-    inline typename STD_FUNCTION::result_type operator()(LuaStack &l, STD_FUNCTION f)
+    inline typename STD_FUNCTION::result_type operator()(lua_State *l, STD_FUNCTION f)
     {
-        l.LuaAssert(l.GetLuaVm(),l.GetParamCount() == 5, "Request 5 param");
+        LuaStack::LuaAssert(l,LuaStack::GetParamCount(l) == 5, "Request 5 param");
 
-        return f(l.GetParam<LUA_PARAM_TYPE(0)>(1),
-                 l.GetParam<LUA_PARAM_TYPE(1)>(2),
-                 l.GetParam<LUA_PARAM_TYPE(2)>(3),
-                 l.GetParam<LUA_PARAM_TYPE(3)>(4),
-                 l.GetParam<LUA_PARAM_TYPE(4)>(5));
+        return f(Stack<LUA_PARAM_TYPE(0)>::get(l,1),
+                 Stack<LUA_PARAM_TYPE(1)>::get(l,2),
+                 Stack<LUA_PARAM_TYPE(2)>::get(l,3),
+                 Stack<LUA_PARAM_TYPE(3)>::get(l,4),
+                 Stack<LUA_PARAM_TYPE(4)>::get(l,5));
     }
 };
 
 template<typename FT, typename STD_FUNCTION>
 struct CLuaCFunctionWrapN<6, FT, STD_FUNCTION>
 {
-    inline typename STD_FUNCTION::result_type operator()(LuaStack &l, STD_FUNCTION f)
+    inline typename STD_FUNCTION::result_type operator()(lua_State *l, STD_FUNCTION f)
     {
-        l.LuaAssert(l.GetLuaVm(),l.GetParamCount() == 6, "Request 6 param");
+        LuaStack::LuaAssert(l,LuaStack::GetParamCount(l) == 6, "Request 6 param");
 
-        return f(l.GetParam<LUA_PARAM_TYPE(0)>(1),
-                 l.GetParam<LUA_PARAM_TYPE(1)>(2),
-                 l.GetParam<LUA_PARAM_TYPE(2)>(3),
-                 l.GetParam<LUA_PARAM_TYPE(3)>(4),
-                 l.GetParam<LUA_PARAM_TYPE(4)>(5),
-                 l.GetParam<LUA_PARAM_TYPE(5)>(6));
+        return f(Stack<LUA_PARAM_TYPE(0)>::get(l,1),
+                 Stack<LUA_PARAM_TYPE(1)>::get(l,2),
+                 Stack<LUA_PARAM_TYPE(2)>::get(l,3),
+                 Stack<LUA_PARAM_TYPE(3)>::get(l,4),
+                 Stack<LUA_PARAM_TYPE(4)>::get(l,5),
+                 Stack<LUA_PARAM_TYPE(5)>::get(l,6));
     }
 };
 
 template<typename FT, typename STD_FUNCTION>
 struct CLuaCFunctionWrapN<7, FT, STD_FUNCTION>
 {
-    inline typename STD_FUNCTION::result_type operator()(LuaStack &l, STD_FUNCTION f)
+    inline typename STD_FUNCTION::result_type operator()(lua_State *l, STD_FUNCTION f)
     {
-        l.LuaAssert(l.GetLuaVm(),l.GetParamCount() == 7, "Request 7 param");
+        LuaStack::LuaAssert(l,LuaStack::GetParamCount(l) == 7, "Request 7 param");
 
-        return f(l.GetParam<LUA_PARAM_TYPE(0)>(1),
-                 l.GetParam<LUA_PARAM_TYPE(1)>(2),
-                 l.GetParam<LUA_PARAM_TYPE(2)>(3),
-                 l.GetParam<LUA_PARAM_TYPE(3)>(4),
-                 l.GetParam<LUA_PARAM_TYPE(4)>(5),
-                 l.GetParam<LUA_PARAM_TYPE(5)>(6),
-                 l.GetParam<LUA_PARAM_TYPE(6)>(7));
+        return f(Stack<LUA_PARAM_TYPE(0)>::get(l,1),
+                 Stack<LUA_PARAM_TYPE(1)>::get(l,2),
+                 Stack<LUA_PARAM_TYPE(2)>::get(l,3),
+                 Stack<LUA_PARAM_TYPE(3)>::get(l,4),
+                 Stack<LUA_PARAM_TYPE(4)>::get(l,5),
+                 Stack<LUA_PARAM_TYPE(5)>::get(l,6),
+                 Stack<LUA_PARAM_TYPE(6)>::get(l,7));
     }
 };
 
 template<typename FT, typename STD_FUNCTION>
 struct CLuaCFunctionWrapN<8, FT, STD_FUNCTION>
 {
-    inline typename STD_FUNCTION::result_type operator()(LuaStack &l, STD_FUNCTION f)
+    inline typename STD_FUNCTION::result_type operator()(lua_State *l, STD_FUNCTION f)
     {
-        l.LuaAssert(l.GetLuaVm(),l.GetParamCount() == 8, "Request 8 param");
+        LuaStack::LuaAssert(l,LuaStack::GetParamCount(l) == 8, "Request 8 param");
 
-        return f(l.GetParam<LUA_PARAM_TYPE(0)>(1),
-                 l.GetParam<LUA_PARAM_TYPE(1)>(2),
-                 l.GetParam<LUA_PARAM_TYPE(2)>(3),
-                 l.GetParam<LUA_PARAM_TYPE(3)>(4),
-                 l.GetParam<LUA_PARAM_TYPE(4)>(5),
-                 l.GetParam<LUA_PARAM_TYPE(5)>(6),
-                 l.GetParam<LUA_PARAM_TYPE(6)>(7),
-                 l.GetParam<LUA_PARAM_TYPE(7)>(8));
+        return f(Stack<LUA_PARAM_TYPE(0)>::get(l,1),
+                 Stack<LUA_PARAM_TYPE(1)>::get(l,2),
+                 Stack<LUA_PARAM_TYPE(2)>::get(l,3),
+                 Stack<LUA_PARAM_TYPE(3)>::get(l,4),
+                 Stack<LUA_PARAM_TYPE(4)>::get(l,5),
+                 Stack<LUA_PARAM_TYPE(5)>::get(l,6),
+                 Stack<LUA_PARAM_TYPE(6)>::get(l,7),
+                 Stack<LUA_PARAM_TYPE(7)>::get(l,8));
     }
 };
 
 template<typename FT, typename STD_FUNCTION>
 struct CLuaCFunctionWrapN<9, FT, STD_FUNCTION>
 {
-    inline typename STD_FUNCTION::result_type operator()(LuaStack &l, STD_FUNCTION f)
+    inline typename STD_FUNCTION::result_type operator()(lua_State *l, STD_FUNCTION f)
     {
-        l.LuaAssert(l.GetLuaVm(),l.GetParamCount() == 9, "Request 9 param");
+        LuaStack::LuaAssert(l,LuaStack::GetParamCount(l) == 9, "Request 9 param");
 
-        return f(l.GetParam<LUA_PARAM_TYPE(0)>(1),
-                 l.GetParam<LUA_PARAM_TYPE(1)>(2),
-                 l.GetParam<LUA_PARAM_TYPE(2)>(3),
-                 l.GetParam<LUA_PARAM_TYPE(3)>(4),
-                 l.GetParam<LUA_PARAM_TYPE(4)>(5),
-                 l.GetParam<LUA_PARAM_TYPE(5)>(6),
-                 l.GetParam<LUA_PARAM_TYPE(6)>(7),
-                 l.GetParam<LUA_PARAM_TYPE(7)>(8),
-                 l.GetParam<LUA_PARAM_TYPE(8)>(9));
+        return f(Stack<LUA_PARAM_TYPE(0)>::get(l,1),
+                 Stack<LUA_PARAM_TYPE(1)>::get(l,2),
+                 Stack<LUA_PARAM_TYPE(2)>::get(l,3),
+                 Stack<LUA_PARAM_TYPE(3)>::get(l,4),
+                 Stack<LUA_PARAM_TYPE(4)>::get(l,5),
+                 Stack<LUA_PARAM_TYPE(5)>::get(l,6),
+                 Stack<LUA_PARAM_TYPE(6)>::get(l,7),
+                 Stack<LUA_PARAM_TYPE(7)>::get(l,8),
+                 Stack<LUA_PARAM_TYPE(8)>::get(l,9));
     }
 };
 
 template<typename FT, typename STD_FUNCTION>
 struct CLuaCFunctionWrapN<10, FT, STD_FUNCTION>
 {
-    inline typename STD_FUNCTION::result_type operator()(LuaStack &l, STD_FUNCTION f)
+    inline typename STD_FUNCTION::result_type operator()(lua_State *l, STD_FUNCTION f)
     {
-        l.LuaAssert(l.GetLuaVm(),l.GetParamCount() == 10, "Request 10 param");
+        LuaStack::LuaAssert(l,LuaStack::GetParamCount(l) == 10, "Request 10 param");
 
-        return f(l.GetParam<LUA_PARAM_TYPE(0)>(1),
-                 l.GetParam<LUA_PARAM_TYPE(1)>(2),
-                 l.GetParam<LUA_PARAM_TYPE(2)>(3),
-                 l.GetParam<LUA_PARAM_TYPE(3)>(4),
-                 l.GetParam<LUA_PARAM_TYPE(4)>(5),
-                 l.GetParam<LUA_PARAM_TYPE(5)>(6),
-                 l.GetParam<LUA_PARAM_TYPE(6)>(7),
-                 l.GetParam<LUA_PARAM_TYPE(7)>(8),
-                 l.GetParam<LUA_PARAM_TYPE(8)>(9),
-                 l.GetParam<LUA_PARAM_TYPE(9)>(10));
+        return f(Stack<LUA_PARAM_TYPE(0)>::get(l,1),
+                 Stack<LUA_PARAM_TYPE(1)>::get(l,2),
+                 Stack<LUA_PARAM_TYPE(2)>::get(l,3),
+                 Stack<LUA_PARAM_TYPE(3)>::get(l,4),
+                 Stack<LUA_PARAM_TYPE(4)>::get(l,5),
+                 Stack<LUA_PARAM_TYPE(5)>::get(l,6),
+                 Stack<LUA_PARAM_TYPE(6)>::get(l,7),
+                 Stack<LUA_PARAM_TYPE(7)>::get(l,8),
+                 Stack<LUA_PARAM_TYPE(8)>::get(l,9),
+                 Stack<LUA_PARAM_TYPE(9)>::get(l,10));
     }
 };
 
@@ -273,15 +274,13 @@ struct lua_function
 
     static int Call(lua_State *L)
     {
-        LuaStack lua_stack(L);
-        lua_stack.Push(CLuaCFunctionWrapN<function_traits<FT>::arity, FT, STD_FUNCTION>()(lua_stack, fn));
+        Stack<STD_FUNCTION>::push(L,CLuaCFunctionWrapN<function_traits<FT>::arity, FT, STD_FUNCTION>()(L, fn));
         return 1;
     }
 
     static int Call0(lua_State *L)
     {
-        LuaStack lua_stack(L);
-        CLuaCFunctionWrapN<function_traits<FT>::arity, FT, STD_FUNCTION>()(lua_stack, fn);
+        CLuaCFunctionWrapN<function_traits<FT>::arity, FT, STD_FUNCTION>()(L, fn);
         return 0;
     }
 };
@@ -316,4 +315,6 @@ inline lua_CFunction LuaCFunctionWrap(F f)
     return LuaCFunctionWrapI<FT, std::function<FT>, typename std::function<FT>::result_type>()(std::function<FT>(f));
 }
 
-#endif //__LUA_STD_FUNCTION_H__
+}
+
+#endif //__LUA_STD_FUNCTION_H_
