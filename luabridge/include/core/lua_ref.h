@@ -979,7 +979,7 @@ struct Stack <LuaRef>
     v.push (L);
   }
 
-  static LuaRef get (lua_State* L, int index)
+  static LuaRef get (lua_State* L, int index, bool luaerror = false)
   {
     return LuaRef::fromStack (L, index);
   }

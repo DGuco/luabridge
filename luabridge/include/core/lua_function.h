@@ -38,7 +38,13 @@ namespace luabridge
 template<typename T>
 struct function_traits;
 
-//普通函数
+/*
+ * 比如 function_traits<int(int,int)>
+ * @function_type
+ * typedef int func_int_ii(int,int),func_int_ii表示有两个int参数返回int的一个函数类型
+ * @return_type
+ * int
+ * */
 template<typename Ret, typename... Args>
 struct function_traits<Ret(Args...)>
 {
@@ -47,11 +53,15 @@ public:
     {
         arity = sizeof...(Args)
     };
+    //std::function type
     typedef Ret function_type(Args...);
     typedef Ret return_type;
+
     using stl_function_type = std::function<function_type>;
+    //function pointer
     typedef Ret(*pointer)(Args...);
 
+    //每个参数的类型
     template<size_t I>
     struct args
     {
@@ -60,39 +70,26 @@ public:
     };
 };
 
-//函数指针
+//get参数的类型
+#define  LUA_PARAM_TYPE(n) typename function_traits<FT>::template args<n>::type
+
+//cstyle 函数指针
 template<typename Ret, typename... Args>
-struct function_traits<Ret(*)(Args...)>: function_traits<Ret(Args...)>
+struct function_traits<Ret(*)(Args...)> : function_traits<Ret(Args...)>
 {
 };
 
 //std::function
 template<typename Ret, typename... Args>
-struct function_traits<std::function<Ret(Args...)>>: function_traits<Ret(Args...)>
+struct function_traits<std::function<Ret(Args...)>> : function_traits<Ret(Args...)>
 {
 };
-
-//member function
-#define FUNCTION_TRAITS(...) \
-    template <typename ReturnType, typename ClassType, typename... Args>\
-    struct function_traits<ReturnType(ClassType::*)(Args...) __VA_ARGS__> : function_traits<ReturnType(Args...)>{}; \
-
-FUNCTION_TRAITS()
-FUNCTION_TRAITS(const)
-FUNCTION_TRAITS(volatile)
-FUNCTION_TRAITS(const volatile)
 
 //函数对象
 template<typename Callable>
 struct function_traits: function_traits<decltype(&Callable::operator())>
 {
 };
-
-// ------------------------
-// Functin Marshal
-// ------------------------
-
-#define  LUA_PARAM_TYPE(n) typename function_traits<FT>::template args<0>::type
 
 template<int N, typename FT, typename STD_FUNCTION>
 struct CLuaCFunctionWrapN
@@ -130,7 +127,6 @@ struct CLuaCFunctionWrapN<2, FT, STD_FUNCTION>
     {
 
         LuaStack::LuaAssert(l,LuaStack::GetParamCount(l) == 2, "Request 2 param");
-
         return f(Stack<LUA_PARAM_TYPE(0)>::get(l,1),
                  Stack<LUA_PARAM_TYPE(1)>::get(l,2));
     }
@@ -268,6 +264,122 @@ struct CLuaCFunctionWrapN<10, FT, STD_FUNCTION>
 };
 
 template<typename FT, typename STD_FUNCTION>
+struct CLuaCFunctionWrapN<11, FT, STD_FUNCTION>
+{
+    inline typename STD_FUNCTION::result_type operator()(lua_State *l, STD_FUNCTION f)
+    {
+        LuaStack::LuaAssert(l,LuaStack::GetParamCount(l) == 11, "Request 11 param");
+
+        return f(Stack<LUA_PARAM_TYPE(0)>::get(l,1),
+                 Stack<LUA_PARAM_TYPE(1)>::get(l,2),
+                 Stack<LUA_PARAM_TYPE(2)>::get(l,3),
+                 Stack<LUA_PARAM_TYPE(3)>::get(l,4),
+                 Stack<LUA_PARAM_TYPE(4)>::get(l,5),
+                 Stack<LUA_PARAM_TYPE(5)>::get(l,6),
+                 Stack<LUA_PARAM_TYPE(6)>::get(l,7),
+                 Stack<LUA_PARAM_TYPE(7)>::get(l,8),
+                 Stack<LUA_PARAM_TYPE(8)>::get(l,9),
+                 Stack<LUA_PARAM_TYPE(9)>::get(l,10),
+                 Stack<LUA_PARAM_TYPE(10)>::get(l,11));
+    }
+};
+
+template<typename FT, typename STD_FUNCTION>
+struct CLuaCFunctionWrapN<12, FT, STD_FUNCTION>
+{
+    inline typename STD_FUNCTION::result_type operator()(lua_State *l, STD_FUNCTION f)
+    {
+        LuaStack::LuaAssert(l,LuaStack::GetParamCount(l) == 12, "Request 12 param");
+
+        return f(Stack<LUA_PARAM_TYPE(0)>::get(l,1),
+                 Stack<LUA_PARAM_TYPE(1)>::get(l,2),
+                 Stack<LUA_PARAM_TYPE(2)>::get(l,3),
+                 Stack<LUA_PARAM_TYPE(3)>::get(l,4),
+                 Stack<LUA_PARAM_TYPE(4)>::get(l,5),
+                 Stack<LUA_PARAM_TYPE(5)>::get(l,6),
+                 Stack<LUA_PARAM_TYPE(6)>::get(l,7),
+                 Stack<LUA_PARAM_TYPE(7)>::get(l,8),
+                 Stack<LUA_PARAM_TYPE(8)>::get(l,9),
+                 Stack<LUA_PARAM_TYPE(9)>::get(l,10),
+                 Stack<LUA_PARAM_TYPE(10)>::get(l,11),
+                 Stack<LUA_PARAM_TYPE(11)>::get(l,12));
+    }
+};
+
+template<typename FT, typename STD_FUNCTION>
+struct CLuaCFunctionWrapN<13, FT, STD_FUNCTION>
+{
+    inline typename STD_FUNCTION::result_type operator()(lua_State *l, STD_FUNCTION f)
+    {
+        LuaStack::LuaAssert(l,LuaStack::GetParamCount(l) == 13, "Request 13 param");
+
+        return f(Stack<LUA_PARAM_TYPE(0)>::get(l,1),
+                 Stack<LUA_PARAM_TYPE(1)>::get(l,2),
+                 Stack<LUA_PARAM_TYPE(2)>::get(l,3),
+                 Stack<LUA_PARAM_TYPE(3)>::get(l,4),
+                 Stack<LUA_PARAM_TYPE(4)>::get(l,5),
+                 Stack<LUA_PARAM_TYPE(5)>::get(l,6),
+                 Stack<LUA_PARAM_TYPE(6)>::get(l,7),
+                 Stack<LUA_PARAM_TYPE(7)>::get(l,8),
+                 Stack<LUA_PARAM_TYPE(8)>::get(l,9),
+                 Stack<LUA_PARAM_TYPE(9)>::get(l,10),
+                 Stack<LUA_PARAM_TYPE(10)>::get(l,11),
+                 Stack<LUA_PARAM_TYPE(11)>::get(l,12),
+                 Stack<LUA_PARAM_TYPE(12)>::get(l,13));
+    }
+};
+
+template<typename FT, typename STD_FUNCTION>
+struct CLuaCFunctionWrapN<14, FT, STD_FUNCTION>
+{
+    inline typename STD_FUNCTION::result_type operator()(lua_State *l, STD_FUNCTION f)
+    {
+        LuaStack::LuaAssert(l,LuaStack::GetParamCount(l) == 14, "Request 14 param");
+
+        return f(Stack<LUA_PARAM_TYPE(0)>::get(l,1),
+                 Stack<LUA_PARAM_TYPE(1)>::get(l,2),
+                 Stack<LUA_PARAM_TYPE(2)>::get(l,3),
+                 Stack<LUA_PARAM_TYPE(3)>::get(l,4),
+                 Stack<LUA_PARAM_TYPE(4)>::get(l,5),
+                 Stack<LUA_PARAM_TYPE(5)>::get(l,6),
+                 Stack<LUA_PARAM_TYPE(6)>::get(l,7),
+                 Stack<LUA_PARAM_TYPE(7)>::get(l,8),
+                 Stack<LUA_PARAM_TYPE(8)>::get(l,9),
+                 Stack<LUA_PARAM_TYPE(9)>::get(l,10),
+                 Stack<LUA_PARAM_TYPE(10)>::get(l,11),
+                 Stack<LUA_PARAM_TYPE(11)>::get(l,12),
+                 Stack<LUA_PARAM_TYPE(12)>::get(l,13),
+                 Stack<LUA_PARAM_TYPE(13)>::get(l,14));
+    }
+};
+
+template<typename FT, typename STD_FUNCTION>
+struct CLuaCFunctionWrapN<15, FT, STD_FUNCTION>
+{
+    inline typename STD_FUNCTION::result_type operator()(lua_State *l, STD_FUNCTION f)
+    {
+        LuaStack::LuaAssert(l,LuaStack::GetParamCount(l) == 15, "Request 15 param");
+
+        return f(Stack<LUA_PARAM_TYPE(0)>::get(l,1),
+                 Stack<LUA_PARAM_TYPE(1)>::get(l,2),
+                 Stack<LUA_PARAM_TYPE(2)>::get(l,3),
+                 Stack<LUA_PARAM_TYPE(3)>::get(l,4),
+                 Stack<LUA_PARAM_TYPE(4)>::get(l,5),
+                 Stack<LUA_PARAM_TYPE(5)>::get(l,6),
+                 Stack<LUA_PARAM_TYPE(6)>::get(l,7),
+                 Stack<LUA_PARAM_TYPE(7)>::get(l,8),
+                 Stack<LUA_PARAM_TYPE(8)>::get(l,9),
+                 Stack<LUA_PARAM_TYPE(9)>::get(l,10),
+                 Stack<LUA_PARAM_TYPE(10)>::get(l,11),
+                 Stack<LUA_PARAM_TYPE(11)>::get(l,12),
+                 Stack<LUA_PARAM_TYPE(12)>::get(l,13),
+                 Stack<LUA_PARAM_TYPE(13)>::get(l,14),
+                 Stack<LUA_PARAM_TYPE(14)>::get(l,15));
+    }
+};
+
+
+template<typename FT, typename STD_FUNCTION>
 struct lua_function
 {
     static STD_FUNCTION fn;
@@ -295,7 +407,6 @@ struct LuaCFunctionWrapI
     {
         lua_function<FT, STD_FUNCTION>::fn = f;
         return &lua_function<FT, STD_FUNCTION>::Call;
-        //	return 0;
     }
 };
 

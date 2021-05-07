@@ -285,7 +285,7 @@ struct Stack<lua_CFunction>
         lua_pushcfunction(L, f);
     }
 
-    static lua_CFunction get(lua_State *L, int index)
+    static lua_CFunction get(lua_State *L, int index, bool luaerror = false)
     {
         return lua_tocfunction(L, index);
     }
@@ -699,7 +699,7 @@ struct Stack<char>
     Stack specialization for `const char*`.
 */
 template<>
-struct Stack<char const *>
+struct Stack<const char *>
 {
     static void push(lua_State *L, char const *str)
     {
@@ -709,7 +709,7 @@ struct Stack<char const *>
             lua_pushnil(L);
     }
 
-    static char const *get(lua_State *L, int index, bool luaerror = false)
+    static const char* get(lua_State *L, int index, bool luaerror = false)
     {
         if (luaerror) {
             return luaL_checkstring(L, index);
