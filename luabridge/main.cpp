@@ -7,9 +7,16 @@
 
 using namespace luabridge;
 
-int Add(int a, const char* b)
+int Add(int a, int b)
 {
-    return a;
+    printf("lua call Add\n");
+    return a + b;
+}
+
+int Sub(int a, int b)
+{
+    printf("lua call Sub\n");
+    return a - b;
 }
 
 int LuaFnAdd(lua_State *L)
@@ -31,19 +38,20 @@ int main(void)
 {
     LuaBridge luaBridge(luaL_newstate());
     luaBridge.LoadFile("../script/111111.lua");
-    LuaRegisterCFunc(luaBridge, "Add", int(int, const char*), Add);
+    LuaRegisterCFunc(luaBridge, "Sub", int(int,int), Sub);
+    LuaRegisterCFunc(luaBridge, "Add", int(int,int), Add);
     LuaRegisterLuaFunc(luaBridge, "LuaFnAdd", LuaFnAdd);
     int ret = luaBridge.Call<int>("x11111_test", 1, 2);
     printf("ret = %d\n", ret);
     printf("-------------------\n");
-//    ret = luaBridge.Call<int>("x11111_test",10,20);
-//    printf("ret = %d\n",ret);
-//    printf("-------------------\n");
-//    ret = luaBridge.Call<int>("x11111_test",100,200);
-//    printf("ret = %d\n",ret);
-//    printf("-------------------\n");
-//    ret = luaBridge.Call<int>("x11111_test",1000,2000);
-//    printf("ret = %d\n",ret);
-//    printf("-------------------\n");
+    ret = luaBridge.Call<int>("x11111_test",10,20);
+    printf("ret = %d\n",ret);
+    printf("-------------------\n");
+    ret = luaBridge.Call<int>("x11111_test",100,200);
+    printf("ret = %d\n",ret);
+    printf("-------------------\n");
+    ret = luaBridge.Call<int>("x11111_test",1000,2000);
+    printf("ret = %d\n",ret);
+    printf("-------------------\n");
     return 0;
 }

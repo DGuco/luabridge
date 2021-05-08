@@ -379,14 +379,14 @@ struct CLuaCFunctionWrapN<15, FT, STD_FUNCTION>
 };
 
 
-template<typename FT, typename STD_FUNCTION>
+template<typename FT, typename STD_FUNCTION,int FUNCID>
 struct lua_function
 {
     static STD_FUNCTION fn;
-
     static int Call(lua_State *L)
     {
-        Stack<typename std::function<FT>::result_type>::push(L,CLuaCFunctionWrapN<function_traits<FT>::arity, FT, STD_FUNCTION>()(L, fn));
+        typedef typename std::function<FT>::result_type RTYPE;
+        Stack<RTYPE>::push(L,CLuaCFunctionWrapN<function_traits<FT>::arity, FT, STD_FUNCTION>()(L, fn));
         return 1;
     }
 
@@ -397,33 +397,33 @@ struct lua_function
     }
 };
 
-template<typename FT, typename STD_FUNCTION>
-STD_FUNCTION lua_function<FT, STD_FUNCTION>::fn;
+template<typename FT, typename STD_FUNCTION,int FUNCID>
+STD_FUNCTION lua_function<FT, STD_FUNCTION,FUNCID>::fn;
 
-template<typename FT, typename STD_FUNCTION, typename R>
+template<typename FT, typename STD_FUNCTION,int FUNCID,typename R>
 struct LuaCFunctionWrapI
 {
     inline lua_CFunction operator()(STD_FUNCTION f)
     {
-        lua_function<FT, STD_FUNCTION>::fn = f;
-        return &lua_function<FT, STD_FUNCTION>::Call;
+        lua_function<FT, STD_FUNCTION,FUNCID>::fn = f;
+        return &lua_function<FT, STD_FUNCTION,FUNCID>::Call;
     }
 };
 
-template<typename FT, typename STD_FUNCTION>
-struct LuaCFunctionWrapI<FT, STD_FUNCTION, void>
+template<typename FT, typename STD_FUNCTION,int FUNCID>
+struct LuaCFunctionWrapI<FT, STD_FUNCTION,FUNCID, void>
 {
     inline lua_CFunction operator()(STD_FUNCTION f)
     {
-        lua_function<FT, STD_FUNCTION>::fn = f;
-        return &lua_function<FT, STD_FUNCTION>::Call0;
+        lua_function<FT, STD_FUNCTION,FUNCID>::fn = f;
+        return &lua_function<FT, STD_FUNCTION,FUNCID>::Call0;
     }
 };
 
-template<typename FT, typename F>
+template<int FUNCID,typename FT, typename F>
 inline lua_CFunction LuaCFunctionWrap(F f)
 {
-    return LuaCFunctionWrapI<FT, std::function<FT>, typename std::function<FT>::result_type>()(std::function<FT>(f));
+    return LuaCFunctionWrapI<FT, std::function<FT>,FUNCID,typename std::function<FT>::result_type>()(std::function<FT>(f));
 }
 
 }
