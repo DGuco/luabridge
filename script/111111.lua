@@ -5,6 +5,6 @@ function x11111_test(x,y)
     print("addNum = "..addNum)
     print("subNum = "..subNum)
     Say("Hello world");
-    return 1
+    return 0.1
 end
 

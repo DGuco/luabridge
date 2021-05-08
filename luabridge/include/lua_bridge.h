@@ -119,7 +119,7 @@ private:
     inline R SafeEndCall(const char *func, int nArg);
 
     template<int __>
-    inline void SafeEndCall(const char *scriptName, const char *func, int nArg);
+    inline void SafeEndCall(const char *func, int nArg);
 private:
     int m_iTopIndex;
     lua_State *m_pLuaVM;
@@ -184,15 +184,24 @@ R LuaBridge::SafeEndCall(const char *func, int nArg)
         return 0;
     }
     else {
-        R r = Stack<R>::get(m_pLuaVM,-1);
-        //恢复调用前的堆栈索引
-        lua_settop(m_pLuaVM, m_iTopIndex);
-        return r;
+        try
+        {
+            R r = Stack<R>::get(m_pLuaVM,-1);
+            //恢复调用前的堆栈索引
+            lua_settop(m_pLuaVM, m_iTopIndex);
+            return r;
+        }catch (std::exception& e)
+        {
+            //恢复调用前的堆栈索引
+            lua_settop(m_pLuaVM, m_iTopIndex);
+            LuaHelper::DefaultDebugLuaErrorInfo(func,e.what());
+            return 0;
+        }
     }
 }
 
 template<int __>
-void LuaBridge::SafeEndCall(const char *scriptName, const char *func, int nArg)
+void LuaBridge::SafeEndCall(const char *func, int nArg)
 {
     if (lua_pcall(m_pLuaVM, nArg, 0, 0) != 0) {
         LuaHelper::DefaultDebugLuaErrorInfo(func, lua_tostring(m_pLuaVM, -1));

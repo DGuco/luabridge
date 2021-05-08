@@ -19,7 +19,7 @@ int Sub(int a, int b)
     return a - b;
 }
 
-void Say(char *contex)
+void Say(const char *contex)
 {
     printf("Say = %s\n",contex);
 }
@@ -45,7 +45,7 @@ int main(void)
     luaBridge.LoadFile("../script/111111.lua");
     LuaRegisterCFunc(luaBridge, "Add", int(int,int), Add);
     LuaRegisterCFunc(luaBridge, "Sub", int(int,int), Sub);
-    LuaRegisterCFunc(luaBridge, "Say", void(char*), Say);
+    LuaRegisterCFunc(luaBridge, "Say", void(const char*), Say);
     LuaRegisterLuaFunc(luaBridge, "LuaFnAdd", LuaFnAdd);
     int ret = luaBridge.Call<int>("x11111_test", 1, 2);
     printf("ret = %d\n", ret);
