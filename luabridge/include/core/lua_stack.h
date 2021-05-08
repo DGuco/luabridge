@@ -514,7 +514,7 @@ struct Stack<const char *>
             }
             else {
                 if (lua_isnil(L, index)) {
-                    return "";
+                    "";
                 }
                 return lua_tostring(L, index);
             }
@@ -522,6 +522,40 @@ struct Stack<const char *>
     }
 };
 
+//------------------------------------------------------------------------------
+/**
+    Stack specialization for `const char*`.
+*/
+template<>
+struct Stack<char *>
+{
+    static void push(lua_State *L, char const *str)
+    {
+        if (str != 0)
+            lua_pushstring(L, str);
+        else
+            lua_pushnil(L);
+    }
+
+    static char *get(lua_State *L, int index, bool luaerror = false)
+    {
+        if (luaerror) {
+            return const_cast<char*>(luaL_checkstring(L, index));
+        }
+        else {
+            //抛出c++异常
+            if (!LuaHelper::CheckLuaArg_Str(L, index, false)) {
+                throw std::runtime_error("Stack<char const *> CheckLuaArg_Str failed");
+            }
+            else {
+                if (lua_isnil(L, index)) {
+                    return const_cast<char *>("");
+                }
+                return const_cast<char*>(lua_tostring(L, index));
+            }
+        }
+    }
+};
 //------------------------------------------------------------------------------
 /**
     Stack specialization for `std::string`.

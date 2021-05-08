@@ -116,7 +116,7 @@ struct CLuaCFunctionWrapN<1, FT, STD_FUNCTION>
     inline typename STD_FUNCTION::result_type operator()(lua_State *l, STD_FUNCTION f)
     {
         LuaHelper::LuaAssert(l,LuaHelper::GetParamCount(l) == 1, "Request 1 param");
-        return f(Stack<LUA_PARAM_TYPE(0)>::get(l,0));
+        return f(Stack<LUA_PARAM_TYPE(0)>::get(l,1));
     }
 };
 

@@ -55,8 +55,6 @@ public:
     //register cfunction
     void Register(const char *func, lua_CFunction f);
 
-    // get register fuunc index
-    int GetRegFuncIndex();
     // Call Lua function
     // func:	Lua function name
     // R:		Return type. (void, float, double, int, long, bool, const char*, std::string)
@@ -124,18 +122,19 @@ private:
     inline void SafeEndCall(const char *scriptName, const char *func, int nArg);
 private:
     int m_iTopIndex;
-    int m_iRegFuncIndex;
     lua_State *m_pLuaVM;
 };
 
 LuaBridge::LuaBridge(lua_State *VM)
-    : m_pLuaVM(VM),m_iTopIndex(0),m_iRegFuncIndex(0)
+    : m_pLuaVM(VM),m_iTopIndex(0)
 {
     // initialize lua standard library functions
     luaopen_base(m_pLuaVM);
     luaopen_table(m_pLuaVM);
     luaopen_string(m_pLuaVM);
     luaopen_math(m_pLuaVM);
+    luaopen_debug(m_pLuaVM);
+    luaopen_utf8(m_pLuaVM);
 }
 
 LuaBridge::~LuaBridge()
@@ -166,11 +165,6 @@ void LuaBridge::Register(const char *func, lua_CFunction f)
     char Buf[256];
     strcpy(Buf, func);
     lua_register(m_pLuaVM, Buf, f);
-}
-
-int LuaBridge::GetRegFuncIndex()
-{
-    return m_iRegFuncIndex++;
 }
 
 void LuaBridge::SafeBeginCall(const char *func)
@@ -471,6 +465,7 @@ const char* LuaBridge::Call(const char *func, const char *sig, ...)
  *    return n;
  * }
  */
+
 
 #if __cplusplus >= 201103L
 #define LuaRegisterCFunc(luaBridge, funcname, type, func)                           \
