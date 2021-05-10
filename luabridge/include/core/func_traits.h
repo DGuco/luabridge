@@ -247,6 +247,10 @@ struct FuncTraits
 template<class R, class... ParamList>
 struct FuncTraits<R (*)(ParamList...)>
 {
+    enum
+    {
+        arity = sizeof...(ParamList)
+    };
     static bool const isMemberFunction = false;
     using DeclType = R (*)(ParamList...);
     using ReturnType = R;
@@ -265,6 +269,10 @@ struct FuncTraits<R (*)(ParamList...)>
 template <class R, class... ParamList>
 struct FuncTraits <R (__stdcall *) (ParamList...)>
 {
+  enum
+  {
+    arity = sizeof...(ParamList)
+  };
   static bool const isMemberFunction = false;
   using DeclType = R (__stdcall *) (ParamList...);
   using ReturnType = R;
@@ -283,6 +291,10 @@ struct FuncTraits <R (__stdcall *) (ParamList...)>
 template<class T, class R, class... ParamList>
 struct FuncTraits<R (T::*)(ParamList...)>
 {
+    enum
+    {
+        arity = sizeof...(ParamList)
+    };
     static bool const isMemberFunction = true;
     static bool const isConstMemberFunction = false;
     using DeclType = R (T::*)(ParamList...);
@@ -301,6 +313,10 @@ struct FuncTraits<R (T::*)(ParamList...)>
 template<class T, class R, class... ParamList>
 struct FuncTraits<R (T::*)(ParamList...) const>
 {
+    enum
+    {
+        arity = sizeof...(ParamList)
+    };
     static bool const isMemberFunction = true;
     static bool const isConstMemberFunction = true;
     using DeclType = R (T::*)(ParamList...) const;
@@ -319,6 +335,10 @@ struct FuncTraits<R (T::*)(ParamList...) const>
 template<class R, class... ParamList>
 struct FuncTraits<std::function<R(ParamList...)>>
 {
+    enum
+    {
+        arity = sizeof...(ParamList)
+    };
     static bool const isMemberFunction = false;
     static bool const isConstMemberFunction = false;
     using DeclType = std::function<R(ParamList...)>;
@@ -337,26 +357,44 @@ struct Invoke
     template<class Fn>
     static int run(lua_State *L, Fn &fn)
     {
+        if (!LuaHelper::GetParamCount(L) == FuncTraits<Fn>::arity) {
+            char Msg[128] = {0};
+            snprintf(Msg,
+                     128,
+                     "Param count error need = %d,in fact num = %d",
+                     FuncTraits<Fn>::arity,
+                     LuaHelper::GetParamCount(L));
+            LuaHelper::LuaAssert(L, false, Msg);
+        }
+        ArgList<Params, startParam> args(L);
         try {
-            ArgList<Params, startParam> args(L);
             Stack<ReturnType>::push(L, FuncTraits<Fn>::call(fn, args));
             return 1;
         }
         catch (const std::exception &e) {
-            return luaL_error(L, e.what());
+            return LuaHelper::LuaAssert(L, false, e.what());
         }
     }
 
     template<class T, class MemFn>
     static int run(lua_State *L, T *object, const MemFn &fn)
     {
+        if (!LuaHelper::GetParamCount(L) == FuncTraits<MemFn>::arity) {
+            char Msg[128] = {0};
+            snprintf(Msg,
+                     128,
+                     "Param count error need = %d,in fact num = %d",
+                     FuncTraits<MemFn>::arity,
+                     LuaHelper::GetParamCount(L));
+            LuaHelper::LuaAssert(L, false, Msg);
+        }
+        ArgList<Params, startParam> args(L);
         try {
-            ArgList<Params, startParam> args(L);
             Stack<ReturnType>::push(L, FuncTraits<MemFn>::call(object, fn, args));
             return 1;
         }
         catch (const std::exception &e) {
-            return luaL_error(L, e.what());
+            return LuaHelper::LuaAssert(L, false, e.what());
         }
     }
 };
@@ -367,26 +405,44 @@ struct Invoke<void, Params, startParam>
     template<class Fn>
     static int run(lua_State *L, Fn &fn)
     {
+        if (!LuaHelper::GetParamCount(L) == FuncTraits<Fn>::arity) {
+            char Msg[128] = {0};
+            snprintf(Msg,
+                     128,
+                     "Param count error need = %d,in fact num = %d",
+                     FuncTraits<Fn>::arity,
+                     LuaHelper::GetParamCount(L));
+            LuaHelper::LuaAssert(L, false, Msg);
+        }
+        ArgList<Params, startParam> args(L);
         try {
-            ArgList<Params, startParam> args(L);
             FuncTraits<Fn>::call(fn, args);
             return 0;
         }
         catch (const std::exception &e) {
-            return luaL_error(L, e.what());
+            return LuaHelper::LuaAssert(L, false, e.what());
         }
     }
 
     template<class T, class MemFn>
     static int run(lua_State *L, T *object, const MemFn &fn)
     {
+        if (!LuaHelper::GetParamCount(L) == FuncTraits<MemFn>::arity) {
+            char Msg[128] = {0};
+            snprintf(Msg,
+                     128,
+                     "Param count error need = %d,in fact num = %d",
+                     FuncTraits<MemFn>::arity,
+                     LuaHelper::GetParamCount(L));
+            LuaHelper::LuaAssert(L, false, Msg);
+        }
+        ArgList<Params, startParam> args(L);
         try {
-            ArgList<Params, startParam> args(L);
             FuncTraits<MemFn>::call(object, fn, args);
             return 0;
         }
         catch (const std::exception &e) {
-            return luaL_error(L, e.what());
+            return LuaHelper::LuaAssert(L, false, e.what());
         }
     }
 };

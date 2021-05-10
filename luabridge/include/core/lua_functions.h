@@ -5,6 +5,7 @@
   Copyright (C) 2021 DGuco(杜国超)<1139140929@qq.com>.  All rights reserved.
   Copyright 2019, Dmitry Tarakanov
   Copyright 2012, Vinnie Falco <vinnie.falco@gmail.com>
+  Copyright (C) 2004 Yong Lin.  All rights reserved.
 
   License: The MIT License (http://www.opensource.org/licenses/mit-license.php)
 

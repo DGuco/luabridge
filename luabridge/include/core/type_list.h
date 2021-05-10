@@ -189,7 +189,8 @@ struct TypeListValues<TypeList<Head const &, Tail> >
 
 //==============================================================================
 /**
-  Subclass of a TypeListValues constructable from the Lua stack.
+  *Subclass of a TypeListValues constructable from the Lua stack.
+  *cfunction 从lua stack获取参数列表
 */
 
 template<typename List, int Start = 1>
@@ -215,5 +216,4 @@ struct ArgList<TypeList<Head, Tail>, Start>
     {
     }
 };
-
 } // namespace luabridge

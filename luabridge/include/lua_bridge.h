@@ -6,7 +6,6 @@
 * E-Mail: 1139140929@qq.com
 *
 * Copyright (C) 2019 DGuco(杜国超).  All rights reserved.
-* Copyright (C) 2004 Yong Lin.  All rights reserved.
 *
 * License: The MIT License (http://www.opensource.org/licenses/mit-license.php)
 *
@@ -42,64 +41,46 @@ namespace luabridge
 class LuaBridge
 {
 public:
-    //construct
+    /**
+     * Construce
+     * @param VM
+     */
     LuaBridge(lua_State *VM);
-
-    //destruct
+    /**
+     * destruct
+     */
     ~LuaBridge();
-
-    //load lua file
+    /**
+     * load lua file
+     * @param filePath
+     * @return
+     */
     bool LoadFile(const std::string &filePath);
     bool LoadFile(const char *filePath);
 
-    //register cfunction
+    /**
+     * register cfunction
+     * @param func func name 函数名
+     * @param f
+     */
     void Register(const char *func, lua_CFunction f);
-
-    // Call Lua function
-    // func:	Lua function name
-    // R:		Return type. (void, float, double, int, long, bool, const char*, std::string)
-    // Sample:	double f = lua.Call<double>("test0", 1.0, 3, "param");
-    template<typename R>
-    R Call(const char *func);
-
-    template<typename R, typename P1>
-    R Call(const char *func, P1 p1);
-
-    template<typename R, typename P1, typename P2>
-    R Call(const char *func, P1 p1, P2 p2);
-
-    template<typename R, typename P1, typename P2, typename P3>
-    R Call(const char *func, P1 p1, P2 p2, P3 p3);
-
-    template<typename R, typename P1, typename P2, typename P3, typename P4>
-    R Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4);
-
-    template<typename R, typename P1, typename P2, typename P3, typename P4, typename P5>
-    R Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5);
-
-    template<typename R, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6>
-    R Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6);
-
-    template<typename R, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7>
-    R Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7);
-
-    template<typename R, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8>
-    R Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8);
-
-    template<typename R, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8, typename P9>
-    R Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8, P9 p9);
-
-    template<typename R, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8, typename P9, typename P10>
-    R Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8, P9 p9, P10 p10);
-    /************************************************************************
-    * Here:
-    * This function "const char* Call(const char* scriptName, const char*, const char*, ...)" is come from "Programming in Lua"
-    *
-    * BOOK:	Programming in Lua
-    *		by Roberto Ierusalimschy
-    *		Lua.org, December 2003
-    *		ISBN 85-903798-1-7
-    ************************************************************************/
+    /**
+     * Call Lua function
+     * @param func 函数名
+     * func:	Lua function name
+     * R:		Return type. (void, float, double, int, long, bool, const char*, std::string)
+     * Sample:	double f = lua.Call<double>("test0", 1.0, 3, "param");
+     */
+    /**
+     * Call Lua function
+     * @tparam R    返回类型
+     * @tparam Args 函数参数列表
+     * @param func  函数名
+     * @param args  函数参数列表
+     * @return R
+     */
+    template<typename R, typename ...Args>
+    R Call(const char *func, const Args... args);
     /**
      *
      * @param func 函数名
@@ -113,8 +94,14 @@ public:
     // 例2︰ const char* s; int len; const char* error_msg = lua.Call(const char* scriptName, "test01", "S:S", 11, "Hello\0World", &len, &s);
     const char *Call(const char *func, const char *sig, ...);
 private:
-    inline void SafeBeginCall(const char *func);
+    //把参数压栈
+    int PushToLua();
+    template<typename T>
+    int PushToLua(const T &t);
+    template<typename First, typename... Rest>
+    int PushToLua(const First &first, const Rest &...rest);
 
+    inline void SafeBeginCall(const char *func);
     template<typename R, int __>
     inline R SafeEndCall(const char *func, int nArg);
 
@@ -126,7 +113,7 @@ private:
 };
 
 LuaBridge::LuaBridge(lua_State *VM)
-    : m_pLuaVM(VM),m_iTopIndex(0)
+    : m_pLuaVM(VM), m_iTopIndex(0)
 {
     // initialize lua standard library functions
     luaopen_base(m_pLuaVM);
@@ -167,6 +154,25 @@ void LuaBridge::Register(const char *func, lua_CFunction f)
     lua_register(m_pLuaVM, Buf, f);
 }
 
+int LuaBridge::PushToLua()
+{
+    return 0;
+}
+
+template<typename T>
+int LuaBridge::PushToLua(const T &t)
+{
+    Stack<T>::push(m_pLuaVM, t);
+    return 1;
+}
+
+template<typename First, typename... Rest>
+int LuaBridge::PushToLua(const First &first, const Rest &...rest)
+{
+    Stack<First>::push(m_pLuaVM, first);
+    return PushToLua(rest...);
+}
+
 void LuaBridge::SafeBeginCall(const char *func)
 {
     //记录调用前的堆栈索引
@@ -184,19 +190,19 @@ R LuaBridge::SafeEndCall(const char *func, int nArg)
         return 0;
     }
     else {
-//        try
-//        {
-            R r = Stack<R>::get(m_pLuaVM,-1);
+        try
+        {
+            R r = Stack<R>::get(m_pLuaVM, -1);
             //恢复调用前的堆栈索引
             lua_settop(m_pLuaVM, m_iTopIndex);
             return r;
-//        }catch (std::exception& e)
-//        {
-//            //恢复调用前的堆栈索引
-//            lua_settop(m_pLuaVM, m_iTopIndex);
-//            LuaHelper::DefaultDebugLuaErrorInfo(func,e.what());
-//            return 0;
-//        }
+        }
+        catch (std::exception &e) {
+            //恢复调用前的堆栈索引
+            lua_settop(m_pLuaVM, m_iTopIndex);
+            LuaHelper::DefaultDebugLuaErrorInfo(func, e.what());
+            return 0;
+        }
     }
 }
 
@@ -209,139 +215,15 @@ void LuaBridge::SafeEndCall(const char *func, int nArg)
     lua_settop(m_pLuaVM, m_iTopIndex);
 }
 
-template<typename R>
-R LuaBridge::Call(const char *func)
+template<typename R, typename ...Args>
+R LuaBridge::Call(const char *func, const Args... args)
 {
     SafeBeginCall(func);
-    return SafeEndCall<R, 0>(func, 0);
+    PushToLua(args...);
+    return SafeEndCall<R, 0>(func, sizeof...(args));
 }
 
-template<typename R, typename P1>
-R LuaBridge::Call(const char *func, P1 p1)
-{
-    SafeBeginCall(func);
-    Stack<P1>::push(m_pLuaVM,p1);
-    return SafeEndCall<R, 0>(func, 1);
-}
-
-template<typename R, typename P1, typename P2>
-R LuaBridge::Call(const char *func, P1 p1, P2 p2)
-{
-    SafeBeginCall(func);
-    Stack<P1>::push(m_pLuaVM,p1);
-    Stack<P2>::push(m_pLuaVM,p2);
-    return SafeEndCall<R, 0>(func, 2);
-}
-
-template<typename R, typename P1, typename P2, typename P3>
-R LuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3)
-{
-    SafeBeginCall(func);
-    Stack<P1>::push(m_pLuaVM,p1);
-    Stack<P2>::push(m_pLuaVM,p2);
-    Stack<P3>::push(m_pLuaVM,p3);
-    return SafeEndCall<R, 0>(func, 3);
-}
-
-template<typename R, typename P1, typename P2, typename P3, typename P4>
-R LuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4)
-{
-    SafeBeginCall(func);
-    Stack<P1>::push(m_pLuaVM,p1);
-    Stack<P2>::push(m_pLuaVM,p2);
-    Stack<P3>::push(m_pLuaVM,p3);
-    Stack<P4>::push(m_pLuaVM,p4);
-    return SafeEndCall<R>(func, 4);
-}
-
-template<typename R, typename P1, typename P2, typename P3, typename P4, typename P5>
-R LuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5)
-{
-    SafeBeginCall(func);
-    Stack<P1>::push(m_pLuaVM,p1);
-    Stack<P2>::push(m_pLuaVM,p2);
-    Stack<P3>::push(m_pLuaVM,p3);
-    Stack<P4>::push(m_pLuaVM,p4);
-    Stack<P5>::push(m_pLuaVM,p5);
-    return SafeEndCall<R, 0>(func, 5);
-}
-
-template<typename R, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6>
-R LuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6)
-{
-    SafeBeginCall(func);
-    Stack<P1>::push(m_pLuaVM,p1);
-    Stack<P2>::push(m_pLuaVM,p2);
-    Stack<P3>::push(m_pLuaVM,p3);
-    Stack<P4>::push(m_pLuaVM,p4);
-    Stack<P5>::push(m_pLuaVM,p5);
-    Stack<P6>::push(m_pLuaVM,p6);
-    return SafeEndCall<R>(func, 6);
-}
-
-template<typename R, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7>
-R LuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7)
-{
-    SafeBeginCall(func);
-    Stack<P1>::push(m_pLuaVM,p1);
-    Stack<P2>::push(m_pLuaVM,p2);
-    Stack<P3>::push(m_pLuaVM,p3);
-    Stack<P4>::push(m_pLuaVM,p4);
-    Stack<P5>::push(m_pLuaVM,p5);
-    Stack<P6>::push(m_pLuaVM,p6);
-    Stack<P7>::push(m_pLuaVM,p7);
-    return SafeEndCall<R, 0>(func, 7);
-}
-
-template<typename R, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8>
-R LuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8)
-{
-    SafeBeginCall(func);
-    Stack<P1>::push(m_pLuaVM,p1);
-    Stack<P2>::push(m_pLuaVM,p2);
-    Stack<P3>::push(m_pLuaVM,p3);
-    Stack<P4>::push(m_pLuaVM,p4);
-    Stack<P5>::push(m_pLuaVM,p5);
-    Stack<P6>::push(m_pLuaVM,p6);
-    Stack<P7>::push(m_pLuaVM,p7);
-    Stack<P8>::push(m_pLuaVM,p8);
-    return SafeEndCall<R, 0>(func, 8);
-}
-
-template<typename R, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8, typename P9>
-R LuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8, P9 p9)
-{
-    SafeBeginCall(func);
-    Stack<P1>::push(m_pLuaVM,p1);
-    Stack<P2>::push(m_pLuaVM,p2);
-    Stack<P3>::push(m_pLuaVM,p3);
-    Stack<P4>::push(m_pLuaVM,p4);
-    Stack<P5>::push(m_pLuaVM,p5);
-    Stack<P6>::push(m_pLuaVM,p6);
-    Stack<P7>::push(m_pLuaVM,p7);
-    Stack<P8>::push(m_pLuaVM,p8);
-    Stack<P9>::push(m_pLuaVM,p9);
-    return SafeEndCall<R, 0>(func, 9);
-}
-
-template<typename R, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8, typename P9, typename P10>
-R LuaBridge::Call(const char *func, P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6, P7 p7, P8 p8, P9 p9, P10 p10)
-{
-    SafeBeginCall(func);
-    Stack<P1>::push(m_pLuaVM,p1);
-    Stack<P2>::push(m_pLuaVM,p2);
-    Stack<P3>::push(m_pLuaVM,p3);
-    Stack<P4>::push(m_pLuaVM,p4);
-    Stack<P5>::push(m_pLuaVM,p5);
-    Stack<P6>::push(m_pLuaVM,p6);
-    Stack<P7>::push(m_pLuaVM,p7);
-    Stack<P8>::push(m_pLuaVM,p8);
-    Stack<P9>::push(m_pLuaVM,p9);
-    Stack<P10>::push(m_pLuaVM,p10);
-    return SafeEndCall<R, 0>(func, 10);
-}
-
-const char* LuaBridge::Call(const char *func, const char *sig, ...)
+const char *LuaBridge::Call(const char *func, const char *sig, ...)
 {
     va_list vl;
     va_start(vl, sig);
@@ -422,12 +304,12 @@ const char* LuaBridge::Call(const char *func, const char *sig, ...)
                 break;
 
             case 'S':    /* string */
-                {
-                    size_t len;
-                    const char *str = lua_tolstring(m_pLuaVM, index, &len);
-                    *va_arg(vl, int *) = static_cast<int>(len);
-                    *va_arg(vl, const char **) = str;
-                }
+            {
+                size_t len;
+                const char *str = lua_tolstring(m_pLuaVM, index, &len);
+                *va_arg(vl, int *) = static_cast<int>(len);
+                *va_arg(vl, const char **) = str;
+            }
                 break;
 
             default:

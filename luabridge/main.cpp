@@ -9,13 +9,13 @@ using namespace luabridge;
 
 int Add(int a, int b)
 {
-    printf("lua call Add\n");
+    printf("lua call Add,a= %d,b = %d\n",a,b);
     return a + b;
 }
 
 int Sub(int a, int b)
 {
-    printf("lua call Sub\n");
+    printf("lua call Sub,a= %d,b = %d\n",a,b);
     return a - b;
 }
 

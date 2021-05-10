@@ -170,8 +170,9 @@ public:
      * @param condition
      * @param argindex
      * @param err_msg
+     * @return never return when assert failed
      */
-    static void LuaAssert(lua_State *L, bool condition, const char *err_msg);
+    static int LuaAssert(lua_State *L, bool condition, const char *err_msg);
 
     /**
      * param count
@@ -273,7 +274,7 @@ bool LuaHelper::CheckLuaArg_Str(lua_State *L, int Index)
     return false;
 }
 
-void LuaHelper::LuaAssert(lua_State *L, bool condition, const char *err_msg)
+int LuaHelper::LuaAssert(lua_State *L, bool condition, const char *err_msg)
 {
     if (!condition) {
         lua_Debug ar;
@@ -300,13 +301,17 @@ void LuaHelper::LuaAssert(lua_State *L, bool condition, const char *err_msg)
      * 如果用g++重新编译lua源码不会有问题
      **/
 #ifdef COMPILE_LUA_WITH_CXX
-        luaL_error(L, "assert fail: %s `%s' (%s)", ar.namewhat, ar.name, err_msg);
+        return luaL_error(L, "assert fail: %s `%s' (%s)", ar.namewhat, ar.name, err_msg);
 #else
-        char Msg[512] = {0};
-        sprintf(Msg,"assert fail: %s `%s' (%s)",ar.namewhat, ar.name, err_msg);
+        char Msg[256] = {0};
+        snprintf(Msg,256,"assert fail: %s `%s' (%s)",ar.namewhat, ar.name, err_msg);
         throw std::runtime_error("Msg");
+        return 0;
 #endif
 
+    }else
+    {
+        return  1;
     }
 }
 
