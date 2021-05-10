@@ -33,8 +33,19 @@
 #ifndef _LUA_LIBRARY_H_
 #define _LUA_LIBRARY_H_
 
-#include "lua.h"
-#include "lualib.h"
-#include "lauxlib.h"
+//lua lib源码库是否用g++编译
+#ifdef  COMPILE_LUA_WITH_CXX
+    #include "lua.h"
+    #include "lualib.h"
+    #include "lauxlib.h"
+#else
+    //lua lib源码库用gcc编译
+    extern "C"
+    {
+        #include "lua.h"
+        #include "lualib.h"
+        #include "lauxlib.h"
+    }
+#endif
 
 #endif //_LUA_LIBRARY_H_

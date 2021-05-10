@@ -28,10 +28,12 @@
 */
 //==============================================================================
 
-#pragma once
+#ifndef __LUA_HELPERS_H__
+#define __LUA_HELPERS_H__
 
 #include "lua_library.h"
 #include <cassert>
+#include <cstring>
 
 namespace luabridge
 {
@@ -89,12 +91,12 @@ inline int get_length(lua_State *L, int idx)
 }
 
 #else
-inline int get_length (lua_State* L, int idx)
+inline int get_length(lua_State *L, int idx)
 {
-  lua_len (L, idx);
-  int len = int (luaL_checknumber (L, -1));
-  lua_pop (L, 1);
-  return len;
+    lua_len(L, idx);
+    int len = int(luaL_checknumber(L, -1));
+    lua_pop (L, 1);
+    return len;
 }
 
 #endif
@@ -146,7 +148,6 @@ inline bool equalstates(lua_State *L1, lua_State *L2)
         lua_topointer(L2, LUA_REGISTRYINDEX);
 }
 
-
 class LuaHelper
 {
 public:
@@ -156,9 +157,9 @@ public:
      * @param isLuaError 如果类型错误是否抛出lua异常
      * @return
      */
-    static bool CheckLuaArg_Num(lua_State *L, int Index, bool isLuaError = true);
-    static bool CheckLuaArg_Integer(lua_State *L, int Index, bool isLuaError = true);
-    static bool CheckLuaArg_Str(lua_State *L, int Index, bool isLuaError = true);
+    static bool CheckLuaArg_Num(lua_State *L, int Index);
+    static bool CheckLuaArg_Integer(lua_State *L, int Index);
+    static bool CheckLuaArg_Str(lua_State *L, int Index);
     /**
      * print lua stack info 打印lua 堆栈信息
      * @param L
@@ -170,7 +171,6 @@ public:
      * @param argindex
      * @param err_msg
      */
-    static void LuaAssert(lua_State *L, bool condition, int argindex, const char *err_msg);
     static void LuaAssert(lua_State *L, bool condition, const char *err_msg);
 
     /**
@@ -207,7 +207,7 @@ void LuaHelper::LuaStackInfo(lua_State *L)
 
 }
 
-bool LuaHelper::CheckLuaArg_Num(lua_State *L, int Index, bool isLuaError)
+bool LuaHelper::CheckLuaArg_Num(lua_State *L, int Index)
 {
     if (lua_isnumber(L, Index))
         return true;
@@ -226,13 +226,10 @@ bool LuaHelper::CheckLuaArg_Num(lua_State *L, int Index, bool isLuaError)
     }
 
     LuaStackInfo(L);
-    if (isLuaError) {
-        LuaAssert(L, false, "CheckLuaArg_Num failed");
-    }
     return false;
 }
 
-bool LuaHelper::CheckLuaArg_Integer(lua_State *L, int Index, bool isLuaError)
+bool LuaHelper::CheckLuaArg_Integer(lua_State *L, int Index)
 {
     if (lua_isinteger(L, Index))
         return true;
@@ -251,13 +248,10 @@ bool LuaHelper::CheckLuaArg_Integer(lua_State *L, int Index, bool isLuaError)
     }
 
     LuaStackInfo(L);
-    if (isLuaError) {
-        LuaAssert(L, false, "CheckLuaArg_Integer failed");
-    }
     return false;
 }
 
-bool LuaHelper::CheckLuaArg_Str(lua_State *L, int Index, bool isLuaError)
+bool LuaHelper::CheckLuaArg_Str(lua_State *L, int Index)
 {
     if (lua_isstring(L, Index))
         return true;
@@ -276,16 +270,7 @@ bool LuaHelper::CheckLuaArg_Str(lua_State *L, int Index, bool isLuaError)
     }
 
     LuaStackInfo(L);
-    if (isLuaError) {
-        LuaAssert(L, false, "CheckLuaArg_Str failed");
-    }
-
     return false;
-}
-
-void LuaHelper::LuaAssert(lua_State *L, bool condition, int argindex, const char *err_msg)
-{
-    luaL_argcheck(L, condition, argindex, err_msg);
 }
 
 void LuaHelper::LuaAssert(lua_State *L, bool condition, const char *err_msg)
@@ -300,7 +285,28 @@ void LuaHelper::LuaAssert(lua_State *L, bool condition, const char *err_msg)
         if (NULL == ar.namewhat) {
             ar.namewhat = "?";
         }
+        /*
+ *@param check:
+ * lua_toxxx和luaL_checkxxx的区别，这两个函数都是从lua栈上获取一个值，但是在检查到类型不符时候，lua_toxxx只是返回null或者默认值；
+ * 而luaL_check则是会抛出一个异常，下面的代码不会再继续执行；这里就需要注意了，lua里面使用的异常并不是c++的异常，只是使用了c的setjump和longjump来实现到恢复点的跳转，
+ * 所以并不会有C++所期望的栈的展开操作，所以在C++里面看来是异常安全的代码，此时也是“不安全”的，也不能保证异常安全，比如
+ * Function1(lua_state state)
+ * {
+     TestClass tmp();
+     luaL_checkstring(state,1);
+ * }
+ * 当上面的luaL_checkstring出现异常时候，TestClass的析构函数并不会被调用，假如你需要在析构函数里面释放一些资源，可能会导致资源泄露、锁忘记释放等问题。
+ * 所以在使用luaL_checkxxx时候，需要很小心，在luaL_checkxxx之前尽量不要申请一些需要之后释放的资源，尤其是加锁函数,智能指针和auto锁也不能正常工作。
+ * 如果用g++重新编译lua源码不会有问题
+ **/
+#ifdef COMPILE_LUA_WITH_CXX
         luaL_error(L, "assert fail: %s `%s' (%s)", ar.namewhat, ar.name, err_msg);
+#else
+        char Msg[512];
+        sprintf(Msg,"assert fail: %s `%s' (%s)",ar.namewhat, ar.name, err_msg);
+        throw std::runtime_error("Msg");
+#endif
+
     }
 }
 
@@ -315,3 +321,5 @@ void LuaHelper::DefaultDebugLuaErrorInfo(const char *FunName, const char *Msg)
 }
 
 } // namespace luabridge
+
+#endif

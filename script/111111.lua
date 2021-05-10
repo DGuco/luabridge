@@ -1,10 +1,10 @@
 
 function x11111_test(x,y)
-    local addNum = LuaFnAdd(x,y);
+    local addNum = LuaFnAdd("","");
     local subNum = Sub(x,y);
     print("addNum = "..addNum)
     print("subNum = "..subNum)
     Say("Hello world");
-    return 0.1
+    return 1
 end
 

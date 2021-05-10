@@ -79,7 +79,7 @@ struct Stack<lua_CFunction>
         lua_pushcfunction(L, f);
     }
 
-    static lua_CFunction get(lua_State *L, int index, bool luaerror = false)
+    static lua_CFunction get(lua_State *L, int index)
     {
         return lua_tocfunction(L, index);
     }
@@ -97,33 +97,10 @@ struct Stack<int>
         lua_pushinteger(L, static_cast <lua_Integer> (value));
     }
 
-    /*
-     *@param check:
-     * lua_toxxx和luaL_checkxxx的区别，这两个函数都是从lua栈上获取一个值，但是在检查到类型不符时候，lua_toxxx只是返回null或者默认值；
-     * 而luaL_check则是会抛出一个异常，下面的代码不会再继续执行；这里就需要注意了，lua里面使用的异常并不是c++的异常，只是使用了c的setjump和longjump来实现到恢复点的跳转，
-     * 所以并不会有C++所期望的栈的展开操作，所以在C++里面看来是异常安全的代码，此时也是“不安全”的，也不能保证异常安全，比如
-     * Function1(lua_state state)
-     * {
-         TestClass tmp();
-         luaL_checkstring(state,1);
-     * }
-     * 当上面的luaL_checkstring出现异常时候，TestClass的析构函数并不会被调用，假如你需要在析构函数里面释放一些资源，可能会导致资源泄露、锁忘记释放等问题。
-     * 所以在使用luaL_checkxxx时候，需要很小心，在luaL_checkxxx之前尽量不要申请一些需要之后释放的资源，尤其是加锁函数,智能指针和auto锁也不能正常工作。
-     **/
-    static int get(lua_State *L, int index, bool luaerror = false)
+    static int get(lua_State *L, int index)
     {
-        if (luaerror) {
-            return static_cast <int> (luaL_checkinteger(L, index));
-        }
-        else {
-            //抛出c++异常
-            if (!LuaHelper::CheckLuaArg_Integer(L, index, false)) {
-                throw std::runtime_error("Stack<int> CheckLuaArg_Integer failed");
-            }
-            else {
-                return static_cast<int>(lua_tointeger(L, index));
-            }
-        }
+        LuaHelper::LuaAssert(L, LuaHelper::CheckLuaArg_Integer(L, index), "CheckLuaArg_Integer failed");
+        return static_cast<int>(lua_tointeger(L, index));
     }
 };
 
@@ -142,20 +119,10 @@ struct Stack<unsigned int>
     /*
      * @param check
      */
-    static unsigned int get(lua_State *L, int index, bool luaerror = false)
+    static unsigned int get(lua_State *L, int index)
     {
-        if (luaerror) {
-            return static_cast <unsigned int> (luaL_checkinteger(L, index));
-        }
-        else {
-            //抛出c++异常
-            if (!LuaHelper::CheckLuaArg_Integer(L, index, false)) {
-                throw std::runtime_error("Stack<unsigned int> CheckLuaArg_Integer failed");
-            }
-            else {
-                return static_cast<unsigned int>(lua_tointeger(L, index));
-            }
-        }
+        LuaHelper::LuaAssert(L, LuaHelper::CheckLuaArg_Integer(L, index), "CheckLuaArg_Integer failed");
+        return static_cast<unsigned int>(lua_tointeger(L, index));
     }
 };
 
@@ -174,20 +141,10 @@ struct Stack<unsigned char>
     /*
      * @param check
      */
-    static unsigned char get(lua_State *L, int index, bool luaerror = false)
+    static unsigned char get(lua_State *L, int index)
     {
-        if (luaerror) {
-            return static_cast <unsigned char> (luaL_checkinteger(L, index));
-        }
-        else {
-            //抛出c++异常
-            if (!LuaHelper::CheckLuaArg_Integer(L, index, false)) {
-                throw std::runtime_error("Stack<unsigned char> CheckLuaArg_Integer failed");
-            }
-            else {
-                return static_cast<unsigned char>(lua_tointeger(L, index));
-            }
-        }
+        LuaHelper::LuaAssert(L, LuaHelper::CheckLuaArg_Integer(L, index), "CheckLuaArg_Integer failed");
+        return static_cast <unsigned char> (luaL_checkinteger(L, index));
     }
 };
 
@@ -206,20 +163,10 @@ struct Stack<short>
     /*
      * @param check
      */
-    static short get(lua_State *L, int index, bool luaerror = false)
+    static short get(lua_State *L, int index)
     {
-        if (luaerror) {
-            return static_cast <short> (luaL_checkinteger(L, index));
-        }
-        else {
-            //抛出c++异常
-            if (!LuaHelper::CheckLuaArg_Integer(L, index, false)) {
-                throw std::runtime_error("Stack<short> CheckLuaArg_Integer failed");
-            }
-            else {
-                return static_cast<short>(lua_tointeger(L, index));
-            }
-        }
+        LuaHelper::LuaAssert(L, LuaHelper::CheckLuaArg_Integer(L, index), "CheckLuaArg_Integer failed");
+        return static_cast <short> (luaL_checkinteger(L, index));
     }
 };
 
@@ -238,20 +185,10 @@ struct Stack<unsigned short>
     /*
     * @param check
     */
-    static unsigned short get(lua_State *L, int index, bool luaerror = false)
+    static unsigned short get(lua_State *L, int index)
     {
-        if (luaerror) {
-            return static_cast <unsigned short> (luaL_checkinteger(L, index));
-        }
-        else {
-            //抛出c++异常
-            if (!LuaHelper::CheckLuaArg_Integer(L, index, false)) {
-                throw std::runtime_error("Stack<unsigned short> CheckLuaArg_Integer failed");
-            }
-            else {
-                return static_cast<unsigned short>(lua_tointeger(L, index));
-            }
-        }
+        LuaHelper::LuaAssert(L, LuaHelper::CheckLuaArg_Integer(L, index), "CheckLuaArg_Integer failed");
+        return static_cast <unsigned short> (luaL_checkinteger(L, index));
     }
 };
 
@@ -270,20 +207,10 @@ struct Stack<long>
     /*
     * @param check
     */
-    static long get(lua_State *L, int index, bool luaerror = false)
+    static long get(lua_State *L, int index)
     {
-        if (luaerror) {
-            return static_cast <long> (luaL_checkinteger(L, index));
-        }
-        else {
-            //抛出c++异常
-            if (!LuaHelper::CheckLuaArg_Integer(L, index, false)) {
-                throw std::runtime_error("Stack<long> CheckLuaArg_Integer failed");
-            }
-            else {
-                return static_cast<long>(lua_tointeger(L, index));
-            }
-        }
+        LuaHelper::LuaAssert(L, LuaHelper::CheckLuaArg_Integer(L, index), "CheckLuaArg_Integer failed");
+        return static_cast <long> (luaL_checkinteger(L, index));
     }
 };
 
@@ -302,20 +229,10 @@ struct Stack<unsigned long>
     /*
     * @param check
     */
-    static long get(lua_State *L, int index, bool luaerror = false)
+    static unsigned long get(lua_State *L, int index)
     {
-        if (luaerror) {
-            return static_cast <unsigned long> (luaL_checkinteger(L, index));
-        }
-        else {
-            //抛出c++异常
-            if (!LuaHelper::CheckLuaArg_Integer(L, index, false)) {
-                throw std::runtime_error("Stack<unsigned long> CheckLuaArg_Integer failed");
-            }
-            else {
-                return static_cast<unsigned long>(lua_tointeger(L, index));
-            }
-        }
+        LuaHelper::LuaAssert(L, LuaHelper::CheckLuaArg_Integer(L, index), "CheckLuaArg_Integer failed");
+        return static_cast <unsigned long> (luaL_checkinteger(L, index));
     }
 };
 
@@ -334,20 +251,10 @@ struct Stack<long long>
     /*
     * @param check
     */
-    static long long get(lua_State *L, int index, bool luaerror = false)
+    static long long get(lua_State *L, int index)
     {
-        if (luaerror) {
-            return static_cast <long long> (luaL_checkinteger(L, index));
-        }
-        else {
-            //抛出c++异常
-            if (!LuaHelper::CheckLuaArg_Integer(L, index, false)) {
-                throw std::runtime_error("Stack<long long> CheckLuaArg_Integer failed");
-            }
-            else {
-                return static_cast<long long>(lua_tointeger(L, index));
-            }
-        }
+        LuaHelper::LuaAssert(L, LuaHelper::CheckLuaArg_Integer(L, index), "CheckLuaArg_Integer failed");
+        return static_cast <long long> (luaL_checkinteger(L, index));
     }
 };
 
@@ -362,20 +269,10 @@ struct Stack<unsigned long long>
     {
         lua_pushinteger(L, static_cast <lua_Integer> (value));
     }
-    static unsigned long long get(lua_State *L, int index, bool luaerror = false)
+    static unsigned long long get(lua_State *L, int index)
     {
-        if (luaerror) {
-            return static_cast <unsigned long long> (luaL_checkinteger(L, index));
-        }
-        else {
-            //抛出c++异常
-            if (!LuaHelper::CheckLuaArg_Integer(L, index, false)) {
-                throw std::runtime_error("Stack<unsigned long long> CheckLuaArg_Integer failed");
-            }
-            else {
-                return static_cast<unsigned long long>(lua_tointeger(L, index));
-            }
-        }
+        LuaHelper::LuaAssert(L, LuaHelper::CheckLuaArg_Integer(L, index), "CheckLuaArg_Integer failed");
+        return static_cast <unsigned long long> (luaL_checkinteger(L, index));
     }
 };
 
@@ -391,20 +288,10 @@ struct Stack<float>
         lua_pushnumber(L, static_cast <lua_Number> (value));
     }
 
-    static float get(lua_State *L, int index, bool luaerror = false)
+    static float get(lua_State *L, int index)
     {
-        if (luaerror) {
-            return static_cast <float> (luaL_checknumber(L, index));
-        }
-        else {
-            //抛出c++异常
-            if (!LuaHelper::CheckLuaArg_Num(L, index, false)) {
-                throw std::runtime_error("Stack<float> CheckLuaArg_Num failed");
-            }
-            else {
-                return static_cast<float>(lua_tonumber(L, index));
-            }
-        }
+        LuaHelper::LuaAssert(L, LuaHelper::CheckLuaArg_Num(L, index), "CheckLuaArg_Num failed");
+        return static_cast<float>(lua_tonumber(L, index));
     }
 };
 
@@ -420,20 +307,10 @@ struct Stack<double>
         lua_pushnumber(L, static_cast <lua_Number> (value));
     }
 
-    static double get(lua_State *L, int index, bool luaerror = false)
+    static double get(lua_State *L, int index)
     {
-        if (luaerror) {
-            return static_cast <double> (luaL_checknumber(L, index));
-        }
-        else {
-            //抛出c++异常
-            if (!LuaHelper::CheckLuaArg_Num(L, index, false)) {
-                throw std::runtime_error("Stack<double> CheckLuaArg_Num failed");
-            }
-            else {
-                return static_cast<double>(lua_tonumber(L, index));
-            }
-        }
+        LuaHelper::LuaAssert(L, LuaHelper::CheckLuaArg_Num(L, index), "CheckLuaArg_Num failed");
+        return static_cast<double>(lua_tonumber(L, index));
     }
 };
 
@@ -449,7 +326,7 @@ struct Stack<bool>
         lua_pushboolean(L, value ? 1 : 0);
     }
 
-    static bool get(lua_State *L, int index, bool luaerror = false)
+    static bool get(lua_State *L, int index)
     {
         return lua_toboolean(L, index) ? true : false;
     }
@@ -467,23 +344,14 @@ struct Stack<char>
         lua_pushlstring(L, &value, 1);
     }
 
-    static char get(lua_State *L, int index, bool luaerror = false)
+    static char get(lua_State *L, int index)
     {
-        if (luaerror) {
-            return luaL_checkstring(L, index)[0];
+        LuaHelper::LuaAssert(L, LuaHelper::CheckLuaArg_Str(L, index), "CheckLuaArg_Str failed");
+        if (lua_isnil(L, index))
+        {
+            return ' ';
         }
-        else {
-            //抛出c++异常
-            if (!LuaHelper::CheckLuaArg_Str(L, index, false)) {
-                throw std::runtime_error("Stack<char> CheckLuaArg_Str failed");
-            }
-            else {
-                if (lua_isnil(L, index)) {
-                    return ' ';
-                }
-                return lua_tostring(L, index)[0];
-            }
-        }
+        return lua_tostring(L, index)[0];
     }
 };
 
@@ -502,23 +370,14 @@ struct Stack<const char *>
             lua_pushnil(L);
     }
 
-    static const char *get(lua_State *L, int index, bool luaerror = false)
+    static const char *get(lua_State *L, int index)
     {
-        if (luaerror) {
-            return luaL_checkstring(L, index);
+        LuaHelper::LuaAssert(L, LuaHelper::CheckLuaArg_Str(L, index), "CheckLuaArg_Str failed");
+        if (lua_isnil(L, index))
+        {
+            return "";
         }
-        else {
-            //抛出c++异常
-            if (!LuaHelper::CheckLuaArg_Str(L, index, false)) {
-                throw std::runtime_error("Stack<char const *> CheckLuaArg_Str failed");
-            }
-            else {
-                if (lua_isnil(L, index)) {
-                    "";
-                }
-                return lua_tostring(L, index);
-            }
-        }
+        return lua_tostring(L, index);
     }
 };
 
@@ -537,23 +396,14 @@ struct Stack<char *>
             lua_pushnil(L);
     }
 
-    static char *get(lua_State *L, int index, bool luaerror = false)
+    static char *get(lua_State *L, int index)
     {
-        if (luaerror) {
-            return const_cast<char*>(luaL_checkstring(L, index));
+        LuaHelper::LuaAssert(L, LuaHelper::CheckLuaArg_Str(L, index), "CheckLuaArg_Str failed");
+        if (lua_isnil(L, index))
+        {
+            return "";
         }
-        else {
-            //抛出c++异常
-            if (!LuaHelper::CheckLuaArg_Str(L, index, false)) {
-                throw std::runtime_error("Stack<char const *> CheckLuaArg_Str failed");
-            }
-            else {
-                if (lua_isnil(L, index)) {
-                    return const_cast<char *>("");
-                }
-                return const_cast<char*>(lua_tostring(L, index));
-            }
-        }
+        return const_cast<char *>(lua_tostring(L, index));
     }
 };
 //------------------------------------------------------------------------------
@@ -568,31 +418,16 @@ struct Stack<std::string>
         lua_pushlstring(L, str.data(), str.size());
     }
 
-    static std::string get(lua_State *L, int index, bool luaerror = false)
+    static std::string get(lua_State *L, int index)
     {
-        if (luaerror) {
-            LuaHelper::CheckLuaArg_Str(L, index, true);
-            if (lua_isnil(L, index)) {
-                return "";
-            }
-            size_t len;
-            const char *str = lua_tolstring(L, index, &len);
-            return std::string(str, len);
+        LuaHelper::LuaAssert(L, LuaHelper::CheckLuaArg_Str(L, index), "CheckLuaArg_Str failed");
+        if (lua_isnil(L, index)) {
+            return "";
         }
-        else {
-            //抛出c++异常
-            if (!LuaHelper::CheckLuaArg_Str(L, index, false)) {
-                throw std::runtime_error("Stack<std::string> CheckLuaArg_Str failed");
-            }
-            else {
-                if (lua_isnil(L, index)) {
-                    return "";
-                }
-                size_t len;
-                const char *str = lua_tolstring(L, index, &len);
-                return std::string(str, len);
-            }
-        }
+        size_t len;
+        const char *str = lua_tolstring(L, index, &len);
+        return std::string(str, len);
+
 //        size_t len;
 //        if (lua_type(L, index) == LUA_TSTRING) {
 //            const char *str = lua_tolstring(L, index, &len);
@@ -620,9 +455,9 @@ struct StackOpSelector<T &, false>
         Stack<T>::push(L, value);
     }
 
-    static ReturnType get(lua_State *L, int index, bool luaerror = false)
+    static ReturnType get(lua_State *L, int index)
     {
-        return Stack<T>::get(L, index, luaerror);
+        return Stack<T>::get(L, index);
     }
 };
 
@@ -636,9 +471,9 @@ struct StackOpSelector<const T &, false>
         Stack<T>::push(L, value);
     }
 
-    static ReturnType get(lua_State *L, int index, bool luaerror = false)
+    static ReturnType get(lua_State *L, int index)
     {
-        return Stack<T>::get(L, index, luaerror);
+        return Stack<T>::get(L, index);
     }
 };
 
@@ -652,9 +487,9 @@ struct StackOpSelector<T *, false>
         Stack<T>::push(L, *value);
     }
 
-    static ReturnType get(lua_State *L, int index, bool luaerror = false)
+    static ReturnType get(lua_State *L, int index)
     {
-        return Stack<T>::get(L, index, luaerror);
+        return Stack<T>::get(L, index);
     }
 };
 
@@ -668,9 +503,9 @@ struct StackOpSelector<const T *, false>
         Stack<T>::push(L, *value);
     }
 
-    static ReturnType get(lua_State *L, int index, bool luaerror = false)
+    static ReturnType get(lua_State *L, int index)
     {
-        return Stack<T>::get(L, index, luaerror);
+        return Stack<T>::get(L, index);
     }
 };
 
@@ -685,9 +520,9 @@ struct Stack<T &>
         Helper::push(L, value);
     }
 
-    static ReturnType get(lua_State *L, int index, bool luaerror = false)
+    static ReturnType get(lua_State *L, int index)
     {
-        return Helper::get(L, index, luaerror);
+        return Helper::get(L, index);
     }
 };
 
@@ -702,9 +537,9 @@ struct Stack<const T &>
         Helper::push(L, value);
     }
 
-    static ReturnType get(lua_State *L, int index, bool luaerror = false)
+    static ReturnType get(lua_State *L, int index)
     {
-        return Helper::get(L, index, luaerror);
+        return Helper::get(L, index);
     }
 };
 
@@ -719,9 +554,9 @@ struct Stack<T *>
         Helper::push(L, value);
     }
 
-    static ReturnType get(lua_State *L, int index, bool luaerror = false)
+    static ReturnType get(lua_State *L, int index)
     {
-        return Helper::get(L, index, luaerror);
+        return Helper::get(L, index);
     }
 };
 
@@ -736,9 +571,9 @@ struct Stack<const T *>
         Helper::push(L, value);
     }
 
-    static ReturnType get(lua_State *L, int index, bool luaerror = false)
+    static ReturnType get(lua_State *L, int index)
     {
-        return Helper::get(L, index, luaerror);
+        return Helper::get(L, index);
     }
 };
 

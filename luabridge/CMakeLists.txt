@@ -4,7 +4,7 @@ project(luabridge)
 set(CMAKE_C_COMPILER g++)
 set(CMAKE_CXX_COMPILER g++)
 add_compile_options(-O2 -Wall -g -pipe -Wextra -D_LUABRIDGE_CXX11 -std=c++11)
-add_definitions(-DLUABRIDGE_CXX11)
+add_definitions(-DLUABRIDGE_CXX11 -DCOMPILE_LUA_WITH_CXX)
 
 
 set(LUA_BRIDGE_HEADER_FILES

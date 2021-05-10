@@ -184,19 +184,19 @@ R LuaBridge::SafeEndCall(const char *func, int nArg)
         return 0;
     }
     else {
-        try
-        {
+//        try
+//        {
             R r = Stack<R>::get(m_pLuaVM,-1);
             //恢复调用前的堆栈索引
             lua_settop(m_pLuaVM, m_iTopIndex);
             return r;
-        }catch (std::exception& e)
-        {
-            //恢复调用前的堆栈索引
-            lua_settop(m_pLuaVM, m_iTopIndex);
-            LuaHelper::DefaultDebugLuaErrorInfo(func,e.what());
-            return 0;
-        }
+//        }catch (std::exception& e)
+//        {
+//            //恢复调用前的堆栈索引
+//            lua_settop(m_pLuaVM, m_iTopIndex);
+//            LuaHelper::DefaultDebugLuaErrorInfo(func,e.what());
+//            return 0;
+//        }
     }
 }
 
