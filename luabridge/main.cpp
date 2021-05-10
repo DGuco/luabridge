@@ -60,8 +60,10 @@ int LuaFnAdd(lua_State *L)
 
 int main(void)
 {
-    LuaBridge luaBridge(luaL_newstate());
+    lua_State* L =  luaL_newstate();
+    LuaBridge luaBridge(L);
     luaBridge.LoadFile("../script/111111.lua");
+
     LuaRegisterCFunc(luaBridge, "Add", int(int,int), Add);
     LuaRegisterCFunc(luaBridge, "Sub", int(int,int), Sub);
     LuaRegisterCFunc(luaBridge, "Say", void(const char*), Say);

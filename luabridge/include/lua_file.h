@@ -28,7 +28,7 @@
 
 #pragma once
 
-#include "core/lua_function.h"
+#include "core/lua_functions.h"
 #include "core/lua_helpers.h"
 #include "core/lua_stack.h"
 #include "core/type_traits.h"
@@ -39,6 +39,5 @@
 #include "core/lua_exception.h"
 #include "core/lua_ref.h"
 #include "core/user_data.h"
-#include "core/cfunctions.h"
 #include "core/security.h"
 #include "core/namespace.h"

@@ -28,7 +28,8 @@
 */
 //==============================================================================
 
-#pragma once
+#ifndef __LUA_FUNCTION_H__
+#define __LUA_FUNCTION_H__
 
 #include "func_traits.h"
 
@@ -278,6 +279,26 @@ struct CFunc
 
     //----------------------------------------------------------------------------
     /**
+        lua_CFunction to call a function with a return value.
+
+        This is used for global functions, global properties, class static methods,
+        and class static properties.
+
+        The function pointer (lightuserdata) in the first upvalue.
+    */
+    template<class FnPtr>
+    struct CFCall
+    {
+        typedef typename FuncTraits<FnPtr>::Params Params;
+        typedef typename FuncTraits<FnPtr>::ReturnType ReturnType;
+
+        static int f(lua_State *L,FnPtr fnptr)
+        {
+            return Invoke<ReturnType, Params, 1>::run(L, fnptr);
+        }
+    };
+    //----------------------------------------------------------------------------
+    /**
         lua_CFunction to call a class member function with a return value.
 
         The member function pointer is in the first upvalue.
@@ -487,4 +508,35 @@ struct CFunc
     }
 };
 
+template<typename FT, typename STD_FUNCTION,int FUNCID>
+struct lua_function
+{
+    static STD_FUNCTION fn;
+    static int Call(lua_State *L)
+    {
+        return CFunc::CFCall<STD_FUNCTION>::f(L, fn);
+    }
+};
+
+template<typename FT, typename STD_FUNCTION,int FUNCID>
+STD_FUNCTION lua_function<FT, STD_FUNCTION,FUNCID>::fn;
+
+template<typename FT, typename STD_FUNCTION,int FUNCID>
+struct LuaCFunctionWrapI
+{
+    inline lua_CFunction operator()(STD_FUNCTION f)
+    {
+        lua_function<FT, STD_FUNCTION,FUNCID>::fn = f;
+        return &lua_function<FT, STD_FUNCTION,FUNCID>::Call;
+    }
+};
+
+template<int FUNCID,typename FT, typename F>
+inline lua_CFunction LuaCFunctionWrap(F f)
+{
+    return LuaCFunctionWrapI<FT, std::function<FT>,FUNCID>()(std::function<FT>(f));
+}
+
 } // namespace luabridge
+
+#endif

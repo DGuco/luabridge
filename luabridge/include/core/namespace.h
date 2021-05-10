@@ -29,7 +29,8 @@
 */
 //==============================================================================
 
-#pragma once
+#ifndef __NAMESPACE_H__
+#define __NAMESPACE_H__
 
 #include <functional>
 #include <stdexcept>
@@ -106,40 +107,6 @@ protected:
 class Namespace: public detail::Registrar
 {
     //============================================================================
-    /**
-      Error reporting.
-
-      VF: This function looks handy, why aren't we using it?
-    */
-#if 0
-    static int luaError (lua_State* L, std::string message)
-    {
-      assert (lua_isstring (L, lua_upvalueindex (1)));
-      std::string s;
-
-      // Get information on the caller's caller to format the message,
-      // so the error appears to originate from the Lua source.
-      lua_Debug ar;
-      int result = lua_getstack (L, 2, &ar);
-      if (result != 0)
-      {
-        lua_getinfo (L, "Sl", &ar);
-        s = ar.short_src;
-        if (ar.currentline != -1)
-        {
-          // poor mans int to string to avoid <strstrream>.
-          lua_pushnumber (L, ar.currentline);
-          s = s + ":" + lua_tostring (L, -1) + ": ";
-          lua_pop (L, 1);
-        }
-      }
-
-      s = s + message;
-
-      return luaL_error (L, s.c_str ());
-    }
-#endif
-
     /**
       Factored base to reduce template instantiations.
     */
@@ -1146,7 +1113,6 @@ public:
         lua_pushlightuserdata(L, reinterpret_cast <void *> (fp)); // Stack: ns, function ptr
         lua_pushcclosure(L, &CFunc::Call<FP>::f, 1); // Stack: ns, function
         rawsetfield(L, -2, name); // Stack: ns
-
         return *this;
     }
 
@@ -1213,3 +1179,5 @@ inline Namespace getGlobalNamespace(lua_State *L)
 }
 
 } // namespace luabridge
+
+#endif

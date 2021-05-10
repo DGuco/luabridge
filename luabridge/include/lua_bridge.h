@@ -162,7 +162,7 @@ bool LuaBridge::LoadFile(const char *filePath)
 
 void LuaBridge::Register(const char *func, lua_CFunction f)
 {
-    char Buf[256];
+    char Buf[256] = {0};
     strcpy(Buf, func);
     lua_register(m_pLuaVM, Buf, f);
 }
@@ -475,12 +475,8 @@ const char* LuaBridge::Call(const char *func, const char *sig, ...)
  * }
  */
 
-
-#if __cplusplus >= 201103L
-#define LuaRegisterCFunc(luaBridge, funcname, type, func)                           \
+#define LuaRegisterCFunc(luaBridge, funcname, type, func)                       \
     luaBridge.Register(funcname, (LuaCFunctionWrap<__COUNTER__,type>(func)))
-#endif // __cplusplus >= 201103L
-
 #define LuaRegisterLuaFunc(luaBridge, funcname, func)                           \
     luaBridge.Register(funcname, func)
 //////////////////////////////////////////////////////////////////////////////////////////////////////////

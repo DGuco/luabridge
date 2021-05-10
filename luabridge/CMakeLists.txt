@@ -8,11 +8,11 @@ add_definitions(-DLUABRIDGE_CXX11 -DCOMPILE_LUA_WITH_CXX)
 
 
 set(LUA_BRIDGE_HEADER_FILES
-        include/core/cfunctions.h
+        include/core/func_traits.h
         include/core/classinfo.h
         include/core/constructor.h
         include/core/dump.h
-        include/core/func_traits.h
+        include/core/lua_functions.h
         include/core/lua_exception.h
         include/core/lua_helpers.h
         include/core/lua_ref.h
@@ -23,8 +23,6 @@ set(LUA_BRIDGE_HEADER_FILES
         include/core/user_data.h
         include/core/lua_library.h
         include/core/lua_stack.h
-        include/core/lua_function.h
-        include/core/lua_variant.h
         include/lua_file.h
         include/lua_bridge.h
         )
