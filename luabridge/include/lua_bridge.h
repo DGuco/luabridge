@@ -108,8 +108,8 @@ private:
     template<int __>
     inline void SafeEndCall(const char *func, int nArg);
 private:
-    int m_iTopIndex;
     lua_State *m_pLuaVM;
+    int m_iTopIndex;
 };
 
 LuaBridge::LuaBridge(lua_State *VM)
@@ -138,6 +138,7 @@ bool LuaBridge::LoadFile(const std::string &filePath)
     if (ret != 0) {
         throw std::runtime_error("Lua loadfile failed,error:" + ret);
     }
+    return 0;
 }
 
 bool LuaBridge::LoadFile(const char *filePath)
@@ -146,6 +147,7 @@ bool LuaBridge::LoadFile(const char *filePath)
     if (ret != 0) {
         throw std::runtime_error("Lua loadfile failed,error:" + ret);
     }
+    return 0;
 }
 
 void LuaBridge::Register(const char *func, lua_CFunction f)

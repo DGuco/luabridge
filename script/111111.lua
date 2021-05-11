@@ -10,8 +10,8 @@ function x11111_test(x,y)
 end
 
 function x11111_test1(x,y,i,j,world)
-    local addNum = Add(x,y);
-    local subNum = Sub(i,j);
+    local addNum = Add(x);
+    local subNum = Sub(i);
     print("addNum = "..addNum)
     print("subNum = "..subNum)
     print("world = "..world)

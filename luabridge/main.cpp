@@ -39,7 +39,6 @@ public:
 
 int LuaFnAdd(lua_State *L)
 {
-    Test* test;
     int a = Stack<int>::get(L, 1);
     int b = Stack<int>::get(L, 2);
     printf("!!!!a = %d,b = %d !!!!!\n", a, b);
