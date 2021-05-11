@@ -122,6 +122,7 @@ LuaBridge::LuaBridge(lua_State *VM)
     luaopen_math(m_pLuaVM);
     luaopen_debug(m_pLuaVM);
     luaopen_utf8(m_pLuaVM);
+    LuaException::EnableExceptions(m_pLuaVM);
 }
 
 LuaBridge::~LuaBridge()
@@ -313,9 +314,7 @@ const char *LuaBridge::Call(const char *func, const char *sig, ...)
                 break;
 
             default:
-                //assert(("Lua call invalid option!", false));
-                //error(m_pLuaVM, "invalid option (%c)", *(sig - 1));
-                ;
+                break;
             }
             index++;
         }

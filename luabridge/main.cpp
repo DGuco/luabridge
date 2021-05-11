@@ -9,13 +9,13 @@ using namespace luabridge;
 
 int Add(int a, int b)
 {
-    printf("lua call Add,a= %d,b = %d\n",a,b);
+    printf("lua call Add,a = %d,b = %d\n",a,b);
     return a + b;
 }
 
 int Sub(int a, int b)
 {
-    printf("lua call Sub,a= %d,b = %d\n",a,b);
+    printf("lua call Sub,a = %d,b = %d\n",a,b);
     return a - b;
 }
 
@@ -63,12 +63,15 @@ int main(void)
     lua_State* L =  luaL_newstate();
     LuaBridge luaBridge(L);
     luaBridge.LoadFile("../script/111111.lua");
-
+    luabridge::getGlobalNamespace (L);
     LuaRegisterCFunc(luaBridge, "Add", int(int,int), Add);
     LuaRegisterCFunc(luaBridge, "Sub", int(int,int), Sub);
     LuaRegisterCFunc(luaBridge, "Say", void(const char*), Say);
     LuaRegisterLuaFunc(luaBridge, "LuaFnAdd", LuaFnAdd);
-    int ret = luaBridge.Call<int>("x11111_test", 1, 2);
+    int ret = luaBridge.Call<int>("x11111_test1", 1, 2,200,100,"Hello lua");
+    printf("retMsg = %s\n", ret);
+    printf("-------------------\n");
+    ret = luaBridge.Call<int>("x11111_test", 1, 2);
     printf("ret = %d\n", ret);
     printf("-------------------\n");
 //    ret = luaBridge.Call<int>("x11111_test",10,20);

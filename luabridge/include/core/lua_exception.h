@@ -106,7 +106,7 @@ public:
   /**
       Initializes error handling. Subsequent Lua errors are translated to C++ exceptions.
   */
-  static void enableExceptions (lua_State* L)
+  static void EnableExceptions(lua_State *L)
   {
     lua_atpanic (L, throwAtPanic);
   }
@@ -139,7 +139,7 @@ private:
 */
 static void enableExceptions (lua_State* L)
 {
-  LuaException::enableExceptions (L);
+  LuaException::EnableExceptions(L);
 }
 
 } // namespace luabridge

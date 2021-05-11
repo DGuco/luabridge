@@ -185,26 +185,29 @@ public:
      * @param Msg
      */
     static void DefaultDebugLuaErrorInfo(const char *FunName, const char *Msg);
+    static void DefaultDebugLuaErrorInfo(const char *Msg);
 };
 
 void LuaHelper::LuaStackInfo(lua_State *L)
 {
-    printf("==========================Lua stack info start=====================================\n");
+    LuaHelper::DefaultDebugLuaErrorInfo("==========================Lua stack info start=====================================");
     lua_Debug trouble_info;
     memset(&trouble_info, 0, sizeof(lua_Debug));
+    char Msg[128] = {0};
     for (int i = 0;; i++) {
         if (lua_getstack(L, i, &trouble_info) == 0)
             break;
         lua_getinfo(L, "Snl", &trouble_info);
-
-        printf("name[%s] what[%s] short_src[%s] linedefined[%d] currentline[%d]\n",
+        memset(Msg,0,128);
+        snprintf(Msg,128,"name[%s] what[%s] short_src[%s] linedefined[%d] currentline[%d]",
                trouble_info.name,
                trouble_info.what,
                trouble_info.short_src,
                trouble_info.linedefined,
                trouble_info.currentline);
+        LuaHelper::DefaultDebugLuaErrorInfo(Msg);
     }
-    printf("==========================Lua stack info end=====================================\n");
+    LuaHelper::DefaultDebugLuaErrorInfo("==========================Lua stack info end=====================================");
 
 }
 
@@ -215,17 +218,21 @@ bool LuaHelper::CheckLuaArg_Num(lua_State *L, int Index)
 
     lua_Debug trouble_info;
     memset(&trouble_info, 0, sizeof(lua_Debug));
-    //int debug_StackNum = lua_gettop(L);
     if (lua_getstack(L, 0, &trouble_info) || lua_getstack(L, 1, &trouble_info))
         lua_getinfo(L, "Snl", &trouble_info);
 
-    if (lua_isnil(L, Index)) {
-        printf("Lua function[%s], arg[%d] is null \n", trouble_info.name, Index);
-    }
-    else {
-        printf("Lua function[%s], arg[%d] type error not number \n", trouble_info.name, Index);
+    if (NULL == trouble_info.name) {
+        trouble_info.name = "?";
     }
 
+    char Msg[128] = {0};
+    if (lua_isnil(L, Index)) {
+        snprintf(Msg,128,"Lua function[%s], arg[%d] is null", trouble_info.name, Index);
+    }
+    else {
+        snprintf(Msg,128,"Lua function[%s], arg[%d] type error not number", trouble_info.name, Index);
+    }
+    LuaHelper::DefaultDebugLuaErrorInfo(Msg);
     LuaStackInfo(L);
     return false;
 }
@@ -237,16 +244,21 @@ bool LuaHelper::CheckLuaArg_Integer(lua_State *L, int Index)
 
     lua_Debug trouble_info;
     memset(&trouble_info, 0, sizeof(lua_Debug));
-    //int debug_StackNum = lua_gettop(L);
     if (lua_getstack(L, 0, &trouble_info) || lua_getstack(L, 1, &trouble_info))
         lua_getinfo(L, "Snl", &trouble_info);
 
+    if (NULL == trouble_info.name) {
+        trouble_info.name = "?";
+    }
+
+    char Msg[128] = {0};
     if (lua_isnil(L, Index)) {
-        printf("Lua function[%s], arg[%d] is null \n", trouble_info.name, Index);
+        snprintf(Msg,128,"Lua function[%s], arg[%d] is null", trouble_info.name, Index);
     }
     else {
-        printf("Lua function[%s], arg[%d] type error not integer \n", trouble_info.name, Index);
+        snprintf(Msg,128,"Lua function[%s], arg[%d] type error not integer", trouble_info.name, Index);
     }
+    LuaHelper::DefaultDebugLuaErrorInfo(Msg);
 
     LuaStackInfo(L);
     return false;
@@ -259,17 +271,21 @@ bool LuaHelper::CheckLuaArg_Str(lua_State *L, int Index)
 
     lua_Debug trouble_info;
     memset(&trouble_info, 0, sizeof(lua_Debug));
-    //int debug_StackNum = lua_gettop(L);
     if (lua_getstack(L, 1, &trouble_info) || lua_getstack(L, 0, &trouble_info))
         lua_getinfo(L, "Snl", &trouble_info);
 
+    if (NULL == trouble_info.name) {
+        trouble_info.name = "?";
+    }
+
+    char Msg[128] = {0};
     if (lua_isnil(L, Index)) {
         printf("Lua function[%s], arg[%d] is null \n", trouble_info.name, Index);
     }
     else {
         printf("Lua function[%s], arg[%d] type error not str \n", trouble_info.name, Index);
     }
-
+    LuaHelper::DefaultDebugLuaErrorInfo(Msg);
     LuaStackInfo(L);
     return false;
 }
@@ -278,8 +294,11 @@ int LuaHelper::LuaAssert(lua_State *L, bool condition, const char *err_msg)
 {
     if (!condition) {
         lua_Debug ar;
-        lua_getstack(L, 0, &ar);
-        lua_getinfo(L, "n", &ar);
+        memset(&ar, 0, sizeof(lua_Debug));
+        if (lua_getstack(L, 0, &ar))
+        {
+            lua_getinfo(L, "n", &ar);
+        }
         if (NULL == ar.name) {
             ar.name = "?";
         }
@@ -301,10 +320,10 @@ int LuaHelper::LuaAssert(lua_State *L, bool condition, const char *err_msg)
      * 如果用g++重新编译lua源码不会有问题
      **/
 #ifdef COMPILE_LUA_WITH_CXX
-        return luaL_error(L, "assert fail: %s `%s' (%s)", ar.namewhat, ar.name, err_msg);
+        return luaL_error(L, "assert fail: %s `%s' (%s)",ar.namewhat, ar.name, err_msg);
 #else
-        char Msg[256] = {0};
-        snprintf(Msg,256,"assert fail: %s `%s' (%s)",ar.namewhat, ar.name, err_msg);
+        char Msg[128] = {0};
+        snprintf(Msg,128,"assert fail: %s `%s' (%s)",ar.namewhat, ar.name, err_msg);
         throw std::runtime_error("Msg");
         return 0;
 #endif
@@ -323,6 +342,11 @@ int LuaHelper::GetParamCount(lua_State *L)
 void LuaHelper::DefaultDebugLuaErrorInfo(const char *FunName, const char *Msg)
 {
     printf("Call fun:[%s] failed,msg:[%s]\n", FunName, Msg);
+}
+
+void LuaHelper::DefaultDebugLuaErrorInfo(const char *Msg)
+{
+    printf("%s\n", Msg);
 }
 
 } // namespace luabridge

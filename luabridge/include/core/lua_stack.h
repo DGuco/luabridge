@@ -398,12 +398,18 @@ struct Stack<char *>
 
     static char *get(lua_State *L, int index)
     {
-        LuaHelper::LuaAssert(L, LuaHelper::CheckLuaArg_Str(L, index), "CheckLuaArg_Str failed");
-        if (lua_isnil(L, index))
-        {
-            return "";
+        //lua lib源码库是否用g++编译
+#ifdef  COMPILE_LUA_WITH_CXX
+        return const_cast<char *>(luaL_checkstring(L, index));
+#else
+        //抛出c++异常
+        if (LuaHelper::CheckLuaArg_Str(L, index)) {
+            if (lua_isnil(L, index)) {
+                return const_cast<char *>("");
+            }
+            return const_cast<char *>(lua_tostring(L, index));
         }
-        return const_cast<char *>(lua_tostring(L, index));
+#endif
     }
 };
 //------------------------------------------------------------------------------
