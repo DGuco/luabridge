@@ -136,17 +136,17 @@ class Namespace: public detail::Registrar
             lua_rawsetp(L, -2, getTypeKey()); // co [typeKey] = name. Stack: ns, co
 
             lua_pushcfunction(L, &CFunc::indexMetaMethod);
-            rawsetfield(L, -2, "__index");
+            LuaHelper::RawSetField(L, -2, "__index");
 
             lua_pushcfunction(L, &CFunc::newindexObjectMetaMethod);
-            rawsetfield(L, -2, "__newindex");
+            LuaHelper::RawSetField(L, -2, "__newindex");
 
             lua_newtable(L);
             lua_rawsetp(L, -2, getPropgetKey());
 
             if (Security::hideMetatables()) {
                 lua_pushnil(L);
-                rawsetfield(L, -2, "__metatable");
+                LuaHelper::RawSetField(L, -2, "__metatable");
             }
         }
 
@@ -185,7 +185,7 @@ class Namespace: public detail::Registrar
             lua_pushvalue(L, -1); // Stack: ns, co, cl, vst, st, st
             lua_setmetatable(L, -3); // st.__metatable = mt. Stack: ns, co, cl, vst, st
             lua_insert(L, -2); // Stack: ns, co, cl, st, vst
-            rawsetfield(L, -5, name); // ns [name] = vst. Stack: ns, co, cl, st
+            LuaHelper::RawSetField(L, -5, name); // ns [name] = vst. Stack: ns, co, cl, st
 
 #if 0
             lua_pushlightuserdata (L, this);
@@ -193,10 +193,10 @@ class Namespace: public detail::Registrar
             rawsetfield (L, -2, "__tostring");
 #endif
             lua_pushcfunction(L, &CFunc::indexMetaMethod);
-            rawsetfield(L, -2, "__index");
+            LuaHelper::RawSetField(L, -2, "__index");
 
             lua_pushcfunction(L, &CFunc::newindexStaticMetaMethod);
-            rawsetfield(L, -2, "__newindex");
+            LuaHelper::RawSetField(L, -2, "__newindex");
 
             lua_newtable(L); // Stack: ns, co, cl, st, proget table (pg)
             lua_rawsetp(L, -2, getPropgetKey()); // st [propgetKey] = pg. Stack: ns, co, cl, st
@@ -209,7 +209,7 @@ class Namespace: public detail::Registrar
 
             if (Security::hideMetatables()) {
                 lua_pushnil(L);
-                rawsetfield(L, -2, "__metatable");
+                LuaHelper::RawSetField(L, -2, "__metatable");
             }
         }
 
@@ -276,7 +276,7 @@ class Namespace: public detail::Registrar
             : ClassBase(parent)
         {
             assert (lua_istable(L, -1)); // Stack: namespace table (ns)
-            rawgetfield(L, -1, name); // Stack: ns, static table (st) | nil
+            LuaHelper::RawGetField(L, -1, name); // Stack: ns, static table (st) | nil
 
             if (lua_isnil(L, -1)) // Stack: ns, nil
             {
@@ -284,12 +284,12 @@ class Namespace: public detail::Registrar
 
                 createConstTable(name); // Stack: ns, const table (co)
                 lua_pushcfunction(L, &CFunc::gcMetaMethod<T>); // Stack: ns, co, function
-                rawsetfield(L, -2, "__gc"); // Stack: ns, co
+                LuaHelper::RawSetField(L, -2, "__gc"); // Stack: ns, co
                 ++m_stackSize;
 
                 createClassTable(name); // Stack: ns, co, class table (cl)
                 lua_pushcfunction(L, &CFunc::gcMetaMethod<T>); // Stack: ns, co, cl, function
-                rawsetfield(L, -2, "__gc"); // Stack: ns, co, cl
+                LuaHelper::RawSetField(L, -2, "__gc"); // Stack: ns, co, cl
                 ++m_stackSize;
 
                 createStaticTable(name); // Stack: ns, co, cl, st
@@ -330,12 +330,12 @@ class Namespace: public detail::Registrar
 
             createConstTable(name); // Stack: ns, const table (co)
             lua_pushcfunction(L, &CFunc::gcMetaMethod<T>); // Stack: ns, co, function
-            rawsetfield(L, -2, "__gc"); // Stack: ns, co
+            LuaHelper::RawSetField(L, -2, "__gc"); // Stack: ns, co
             ++m_stackSize;
 
             createClassTable(name); // Stack: ns, co, class table (cl)
             lua_pushcfunction(L, &CFunc::gcMetaMethod<T>); // Stack: ns, co, cl, function
-            rawsetfield(L, -2, "__gc"); // Stack: ns, co, cl
+            LuaHelper::RawSetField(L, -2, "__gc"); // Stack: ns, co, cl
             ++m_stackSize;
 
             createStaticTable(name); // Stack: ns, co, cl, st
@@ -455,7 +455,7 @@ class Namespace: public detail::Registrar
 
             lua_pushlightuserdata(L, reinterpret_cast <void *> (fp)); // Stack: co, cl, st, function ptr
             lua_pushcclosure(L, &CFunc::Call<FP>::f, 1); // co, cl, st, function
-            rawsetfield(L, -2, name); // co, cl, st
+            LuaHelper::RawSetField(L, -2, name); // co, cl, st
 
             return *this;
         }
@@ -478,7 +478,7 @@ class Namespace: public detail::Registrar
             assertStackState(); // Stack: const table (co), class table (cl), static table (st)
 
             lua_pushcfunction(L, fp); // co, cl, st, function
-            rawsetfield(L, -2, name); // co, cl, st
+            LuaHelper::RawSetField(L, -2, name); // co, cl, st
 
             return *this;
         }
@@ -630,35 +630,35 @@ class Namespace: public detail::Registrar
         }
 
 #ifdef LUABRIDGE_CXX11
-        template <class TG, class TS = TG>
-        Class <T>& addProperty (char const* name,
-          std::function <TG (const T*)> get,
-          std::function <void (T*, TS)> set = nullptr)
+        template<class TG, class TS = TG>
+        Class<T> &addProperty(char const *name,
+                              std::function<TG(const T *)> get,
+                              std::function<void(T *, TS)> set = nullptr)
         {
-          using GetType = decltype (get);
-          new (lua_newuserdata (L, sizeof (get))) GetType (std::move (get)); // Stack: co, cl, st, function userdata (ud)
-          lua_newtable (L); // Stack: co, cl, st, ud, ud metatable (mt)
-          lua_pushcfunction (L, &CFunc::gcMetaMethodAny <GetType>); // Stack: co, cl, st, ud, mt, gc function
-          rawsetfield (L, -2, "__gc"); // Stack: co, cl, st, ud, mt
-          lua_setmetatable (L, -2); // Stack: co, cl, st, ud
-          lua_pushcclosure (L, &CFunc::CallProxyFunctor <GetType>::f, 1); // Stack: co, cl, st, getter
-          lua_pushvalue (L, -1); // Stack: co, cl, st, getter, getter
-          CFunc::addGetter (L, name, -4); // Stack: co, cl, st, getter
-          CFunc::addGetter (L, name, -4); // Stack: co, cl, st
-
-          if (set != nullptr)
-          {
-            using SetType = decltype (set);
-            new (lua_newuserdata (L, sizeof (set))) SetType (std::move (set)); // Stack: co, cl, st, function userdata (ud)
+            using GetType = decltype(get);
+            new(lua_newuserdata(L, sizeof(get))) GetType(std::move(get)); // Stack: co, cl, st, function userdata (ud)
             lua_newtable (L); // Stack: co, cl, st, ud, ud metatable (mt)
-            lua_pushcfunction (L, &CFunc::gcMetaMethodAny <SetType>); // Stack: co, cl, st, ud, mt, gc function
-            rawsetfield (L, -2, "__gc"); // Stack: co, cl, st, ud, mt
-            lua_setmetatable (L, -2); // Stack: co, cl, st, ud
-            lua_pushcclosure (L, &CFunc::CallProxyFunctor <SetType>::f, 1); // Stack: co, cl, st, setter
-            CFunc::addSetter (L, name, -3); // Stack: co, cl, st
-          }
+            lua_pushcfunction (L, &CFunc::gcMetaMethodAny<GetType>); // Stack: co, cl, st, ud, mt, gc function
+            LuaHelper::RawSetField(L, -2, "__gc"); // Stack: co, cl, st, ud, mt
+            lua_setmetatable(L, -2); // Stack: co, cl, st, ud
+            lua_pushcclosure(L, &CFunc::CallProxyFunctor<GetType>::f, 1); // Stack: co, cl, st, getter
+            lua_pushvalue(L, -1); // Stack: co, cl, st, getter, getter
+            CFunc::addGetter(L, name, -4); // Stack: co, cl, st, getter
+            CFunc::addGetter(L, name, -4); // Stack: co, cl, st
 
-          return *this;
+            if (set != nullptr) {
+                using SetType = decltype(set);
+                new(lua_newuserdata(L,
+                                    sizeof(set))) SetType(std::move(set)); // Stack: co, cl, st, function userdata (ud)
+                lua_newtable (L); // Stack: co, cl, st, ud, ud metatable (mt)
+                lua_pushcfunction (L, &CFunc::gcMetaMethodAny<SetType>); // Stack: co, cl, st, ud, mt, gc function
+                LuaHelper::RawSetField(L, -2, "__gc"); // Stack: co, cl, st, ud, mt
+                lua_setmetatable(L, -2); // Stack: co, cl, st, ud
+                lua_pushcclosure(L, &CFunc::CallProxyFunctor<SetType>::f, 1); // Stack: co, cl, st, setter
+                CFunc::addSetter(L, name, -3); // Stack: co, cl, st
+            }
+
+            return *this;
         }
 
 #endif // LUABRIDGE_CXX11
@@ -688,120 +688,118 @@ class Namespace: public detail::Registrar
         /**
             Add or replace a member function by std::function.
         */
-        template <class ReturnType, class... Params>
-        Class <T>& addFunction (char const* name, std::function <ReturnType (T*, Params...)> function)
+        template<class ReturnType, class... Params>
+        Class<T> &addFunction(char const *name, std::function<ReturnType(T *, Params...)> function)
         {
-          assertStackState (); // Stack: const table (co), class table (cl), static table (st)
+            assertStackState(); // Stack: const table (co), class table (cl), static table (st)
 
-          using FnType = decltype (function);
-          new (lua_newuserdata (L, sizeof (function))) FnType (std::move (function)); // Stack: co, cl, st, function userdata (ud)
-          lua_newtable (L); // Stack: co, cl, st, ud, ud metatable (mt)
-          lua_pushcfunction (L, &CFunc::gcMetaMethodAny <FnType>); // Stack: co, cl, st, ud, mt, gc function
-          rawsetfield (L, -2, "__gc"); // Stack: co, cl, st, ud, mt
-          lua_setmetatable (L, -2); // Stack: co, cl, st, ud
-          lua_pushcclosure (L, &CFunc::CallProxyFunctor <FnType>::f, 1); // Stack: co, cl, st, function
-          rawsetfield (L, -3, name); // Stack: co, cl, st
+            using FnType = decltype(function);
+            new(lua_newuserdata(L,
+                                sizeof(function))) FnType(std::move(function)); // Stack: co, cl, st, function userdata (ud)
+            lua_newtable (L); // Stack: co, cl, st, ud, ud metatable (mt)
+            lua_pushcfunction (L, &CFunc::gcMetaMethodAny<FnType>); // Stack: co, cl, st, ud, mt, gc function
+            LuaHelper::RawSetField(L, -2, "__gc"); // Stack: co, cl, st, ud, mt
+            lua_setmetatable(L, -2); // Stack: co, cl, st, ud
+            lua_pushcclosure(L, &CFunc::CallProxyFunctor<FnType>::f, 1); // Stack: co, cl, st, function
+            LuaHelper::RawSetField(L, -3, name); // Stack: co, cl, st
 
-          return *this;
+            return *this;
         }
 
         //--------------------------------------------------------------------------
         /**
             Add or replace a const member function by std::function.
         */
-        template <class ReturnType, class... Params>
-        Class <T>& addFunction (char const* name, std::function <ReturnType (const T*, Params...)> function)
+        template<class ReturnType, class... Params>
+        Class<T> &addFunction(char const *name, std::function<ReturnType(const T *, Params...)> function)
         {
-          assertStackState (); // Stack: const table (co), class table (cl), static table (st)
+            assertStackState(); // Stack: const table (co), class table (cl), static table (st)
 
-          using FnType = decltype (function);
-          new (lua_newuserdata (L, sizeof (function))) FnType (std::move (function)); // Stack: co, cl, st, function userdata (ud)
-          lua_newtable (L); // Stack: co, cl, st, ud, ud metatable (mt)
-          lua_pushcfunction (L, &CFunc::gcMetaMethodAny <FnType>); // Stack: co, cl, st, ud, mt, gc function
-          rawsetfield (L, -2, "__gc"); // Stack: co, cl, st, ud, mt
-          lua_setmetatable (L, -2); // Stack: co, cl, st, ud
-          lua_pushcclosure (L, &CFunc::CallProxyFunctor <FnType>::f, 1); // Stack: co, cl, st, function
-          lua_pushvalue (L, -1); // Stack: co, cl, st, function, function
-          rawsetfield (L, -4, name); // Stack: co, cl, st, function
-          rawsetfield (L, -4, name); // Stack: co, cl, st
+            using FnType = decltype(function);
+            new(lua_newuserdata(L,
+                                sizeof(function))) FnType(std::move(function)); // Stack: co, cl, st, function userdata (ud)
+            lua_newtable (L); // Stack: co, cl, st, ud, ud metatable (mt)
+            lua_pushcfunction (L, &CFunc::gcMetaMethodAny<FnType>); // Stack: co, cl, st, ud, mt, gc function
+            LuaHelper::RawSetField(L, -2, "__gc"); // Stack: co, cl, st, ud, mt
+            lua_setmetatable(L, -2); // Stack: co, cl, st, ud
+            lua_pushcclosure(L, &CFunc::CallProxyFunctor<FnType>::f, 1); // Stack: co, cl, st, function
+            lua_pushvalue(L, -1); // Stack: co, cl, st, function, function
+            LuaHelper::RawSetField(L, -4, name); // Stack: co, cl, st, function
+            LuaHelper::RawSetField(L, -4, name); // Stack: co, cl, st
 
-          return *this;
+            return *this;
         }
 
         //--------------------------------------------------------------------------
         /**
             Add or replace a member function.
         */
-        template <class ReturnType, class... Params>
-        Class <T>& addFunction (char const* name, ReturnType (T::* mf) (Params...))
+        template<class ReturnType, class... Params>
+        Class<T> &addFunction(char const *name, ReturnType (T::* mf)(Params...))
         {
-          using MemFn = ReturnType (T::*) (Params...);
+            using MemFn = ReturnType (T::*)(Params...);
 
-          assertStackState (); // Stack: const table (co), class table (cl), static table (st)
+            assertStackState(); // Stack: const table (co), class table (cl), static table (st)
 
-          static const std::string GC = "__gc";
-          if (name == GC)
-          {
-            throw std::logic_error (GC + " metamethod registration is forbidden");
-          }
-          CFunc::CallMemberFunctionHelper <MemFn, false>::add (L, name, mf);
-          return *this;
+            static const std::string GC = "__gc";
+            if (name == GC) {
+                throw std::logic_error(GC + " metamethod registration is forbidden");
+            }
+            CFunc::CallMemberFunctionHelper<MemFn, false>::add(L, name, mf);
+            return *this;
         }
 
-        template <class ReturnType, class... Params>
-        Class <T>& addFunction (char const* name, ReturnType (T::* mf) (Params...) const)
+        template<class ReturnType, class... Params>
+        Class<T> &addFunction(char const *name, ReturnType (T::* mf)(Params...) const)
         {
-          using MemFn = ReturnType (T::*) (Params...) const;
+            using MemFn = ReturnType (T::*)(Params...) const;
 
-          assertStackState (); // Stack: const table (co), class table (cl), static table (st)
+            assertStackState(); // Stack: const table (co), class table (cl), static table (st)
 
-          static const std::string GC = "__gc";
-          if (name == GC)
-          {
-            throw std::logic_error (GC + " metamethod registration is forbidden");
-          }
-          CFunc::CallMemberFunctionHelper <MemFn, true>::add (L, name, mf);
-          return *this;
+            static const std::string GC = "__gc";
+            if (name == GC) {
+                throw std::logic_error(GC + " metamethod registration is forbidden");
+            }
+            CFunc::CallMemberFunctionHelper<MemFn, true>::add(L, name, mf);
+            return *this;
         }
 
         //--------------------------------------------------------------------------
         /**
             Add or replace a proxy function.
         */
-        template <class ReturnType, class... Params>
-        Class <T>& addFunction (char const* name, ReturnType (*proxyFn) (T* object, Params...))
+        template<class ReturnType, class... Params>
+        Class<T> &addFunction(char const *name, ReturnType (*proxyFn)(T *object, Params...))
         {
-          assertStackState (); // Stack: const table (co), class table (cl), static table (st)
+            assertStackState(); // Stack: const table (co), class table (cl), static table (st)
 
-          static const std::string GC = "__gc";
-          if (name == GC)
-          {
-            throw std::logic_error (GC + " metamethod registration is forbidden");
-          }
-          using FnType = decltype (proxyFn);
-          lua_pushlightuserdata (L, reinterpret_cast <void*> (proxyFn)); // Stack: co, cl, st, function ptr
-          lua_pushcclosure (L, &CFunc::CallProxyFunction <FnType>::f, 1); // Stack: co, cl, st, function
-          rawsetfield (L, -3, name); // Stack: co, cl, st
-          return *this;
+            static const std::string GC = "__gc";
+            if (name == GC) {
+                throw std::logic_error(GC + " metamethod registration is forbidden");
+            }
+            using FnType = decltype(proxyFn);
+            lua_pushlightuserdata(L, reinterpret_cast <void *> (proxyFn)); // Stack: co, cl, st, function ptr
+            lua_pushcclosure(L, &CFunc::CallProxyFunction<FnType>::f, 1); // Stack: co, cl, st, function
+            LuaHelper::RawSetField(L, -3, name); // Stack: co, cl, st
+            return *this;
         }
 
-        template <class ReturnType, class... Params>
-        Class <T>& addFunction (char const* name, ReturnType (*proxyFn) (const T* object, Params...))
+        template<class ReturnType, class... Params>
+        Class<T> &addFunction(char const *name, ReturnType (*proxyFn)(const T *object, Params...))
         {
-          assertStackState (); // Stack: const table (co), class table (cl), static table (st)
+            assertStackState(); // Stack: const table (co), class table (cl), static table (st)
 
-          static const std::string GC = "__gc";
-          if (name == GC)
-          {
-            throw std::logic_error (GC + " metamethod registration is forbidden");
-          }
-          using FnType = decltype (proxyFn);
-          lua_pushlightuserdata (L, reinterpret_cast <void*> (proxyFn)); // Stack: co, cl, st, function ptr
-          lua_pushcclosure (L, &CFunc::CallProxyFunction <FnType>::f, 1); // Stack: co, cl, st, function
-          lua_pushvalue (L, -1); // Stack: co, cl, st, function, function
-          rawsetfield (L, -4, name); // Stack: co, cl, st, function
-          rawsetfield (L, -4, name); // Stack: co, cl, st
-          return *this;
+            static const std::string GC = "__gc";
+            if (name == GC) {
+                throw std::logic_error(GC + " metamethod registration is forbidden");
+            }
+            using FnType = decltype(proxyFn);
+            lua_pushlightuserdata(L, reinterpret_cast <void *> (proxyFn)); // Stack: co, cl, st, function ptr
+            lua_pushcclosure(L, &CFunc::CallProxyFunction<FnType>::f, 1); // Stack: co, cl, st, function
+            lua_pushvalue(L, -1); // Stack: co, cl, st, function, function
+            LuaHelper::RawSetField(L, -4, name); // Stack: co, cl, st, function
+            LuaHelper::RawSetField(L, -4, name); // Stack: co, cl, st
+            return *this;
         }
 
 #endif
@@ -826,7 +824,7 @@ class Namespace: public detail::Registrar
             typedef int (T::*MFP)(lua_State *);
             new(lua_newuserdata(L, sizeof(mfp))) MFP(mfp); // Stack: co, cl, st, function ptr
             lua_pushcclosure(L, &CFunc::CallMemberCFunction<T>::f, 1); // Stack: co, cl, st, function
-            rawsetfield(L, -3, name); // Stack: co, cl, st
+            LuaHelper::RawSetField(L, -3, name); // Stack: co, cl, st
 
             return *this;
         }
@@ -852,8 +850,8 @@ class Namespace: public detail::Registrar
             new(lua_newuserdata(L, sizeof(mfp))) MFP(mfp);
             lua_pushcclosure(L, &CFunc::CallConstMemberCFunction<T>::f, 1);
             lua_pushvalue(L, -1); // Stack: co, cl, st, function, function
-            rawsetfield(L, -4, name); // Stack: co, cl, st, function
-            rawsetfield(L, -4, name); // Stack: co, cl, st
+            LuaHelper::RawSetField(L, -4, name); // Stack: co, cl, st, function
+            LuaHelper::RawSetField(L, -4, name); // Stack: co, cl, st
 
             return *this;
         }
@@ -875,7 +873,7 @@ class Namespace: public detail::Registrar
             assertStackState(); // Stack: const table (co), class table (cl), static table (st)
 
             lua_pushcclosure(L, &ctorContainerProxy < typename FuncTraits<MemFn>::Params, C > , 0);
-            rawsetfield(L, -2, "__call");
+            LuaHelper::RawSetField(L, -2, "__call");
 
             return *this;
         }
@@ -886,7 +884,7 @@ class Namespace: public detail::Registrar
             assertStackState(); // Stack: const table (co), class table (cl), static table (st)
 
             lua_pushcclosure(L, &ctorPlacementProxy < typename FuncTraits<MemFn>::Params, T > , 0);
-            rawsetfield(L, -2, "__call");
+            LuaHelper::RawSetField(L, -2, "__call");
 
             return *this;
         }
@@ -916,7 +914,7 @@ private:
     {
         assert (lua_istable(L, -1)); // Stack: parent namespace (pns)
 
-        rawgetfield(L, -1, name); // Stack: pns, namespace (ns) | nil
+        LuaHelper::RawGetField(L, -1, name); // Stack: pns, namespace (ns) | nil
 
         if (lua_isnil(L, -1)) // Stack: pns, nil
         {
@@ -930,11 +928,11 @@ private:
 
             // ns.__index = indexMetaMethod
             lua_pushcfunction(L, &CFunc::indexMetaMethod);
-            rawsetfield(L, -2, "__index"); // Stack: pns, ns
+            LuaHelper::RawSetField(L, -2, "__index"); // Stack: pns, ns
 
             // ns.__newindex = newindexMetaMethod
             lua_pushcfunction(L, &CFunc::newindexStaticMetaMethod);
-            rawsetfield(L, -2, "__newindex"); // Stack: pns, ns
+            LuaHelper::RawSetField(L, -2, "__newindex"); // Stack: pns, ns
 
             lua_newtable(L); // Stack: pns, ns, propget table (pg)
             lua_rawsetp(L, -2, getPropgetKey()); // ns [propgetKey] = pg. Stack: pns, ns
@@ -944,7 +942,7 @@ private:
 
             // pns [name] = ns
             lua_pushvalue(L, -1); // Stack: pns, ns, ns
-            rawsetfield(L, -3, name); // Stack: pns, ns
+            LuaHelper::RawSetField(L, -3, name); // Stack: pns, ns
 #if 0
             lua_pushcfunction (L, &tostringMetaMethod);
             rawsetfield (L, -2, "__tostring");
@@ -1112,7 +1110,7 @@ public:
 
         lua_pushlightuserdata(L, reinterpret_cast <void *> (fp)); // Stack: ns, function ptr
         lua_pushcclosure(L, &CFunc::Call<FP>::f, 1); // Stack: ns, function
-        rawsetfield(L, -2, name); // Stack: ns
+        LuaHelper::RawSetField(L, -2, name); // Stack: ns
         return *this;
     }
 
@@ -1134,7 +1132,7 @@ public:
         assert (lua_istable(L, -1)); // Stack: namespace table (ns)
 
         lua_pushcfunction(L, fp); // Stack: ns, function
-        rawsetfield(L, -2, name); // Stack: ns
+        LuaHelper::RawSetField(L, -2, name); // Stack: ns
 
         return *this;
     }

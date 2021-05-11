@@ -16,7 +16,7 @@ function x11111_test1(x,y,i,j,world)
     print("subNum = "..subNum)
     print("world = "..world)
     print("x11111_test1 done")
-    return "OK"
+    return 23
 end
 
 

@@ -37,6 +37,7 @@
 #include <map>
 #include "lua_exception.h"
 #include "lua_stack.h"
+#include "lua_helpers.h"
 
 namespace luabridge {
 
@@ -239,7 +240,7 @@ public:
   */
   void push (lua_State* L) const
   {
-    assert (equalstates (L, m_L));
+    assert (LuaHelper::EqualStates(L, m_L));
     (void) L;
     impl ().push ();
   }
@@ -250,7 +251,7 @@ public:
   */
   void pop (lua_State* L)
   {
-    assert (equalstates (L, m_L));
+    assert (LuaHelper::EqualStates(L, m_L));
     (void) L;
     impl ().pop ();
   }
@@ -430,7 +431,7 @@ public:
   {
     StackPop p (m_L, 1);
     impl ().push ();;
-    return get_length (m_L, -1);
+    return LuaHelper::GetStackLen(m_L, -1);
   }
 
   //----------------------------------------------------------------------------
@@ -445,7 +446,7 @@ public:
   LuaRef operator() () const
   {
     impl ().push ();;
-    LuaException::pcall (m_L, 0, 1);
+    LuaHelper::Pcall (m_L, 0, 1);
     return LuaRef::fromStack (m_L);
   }
 
@@ -454,7 +455,7 @@ public:
   {
     impl ().push ();;
     Stack <P1>::push (m_L, p1);
-    LuaException::pcall (m_L, 1, 1);
+    LuaHelper::Pcall (m_L, 1, 1);
     return LuaRef::fromStack (m_L);
   }
 
@@ -464,7 +465,7 @@ public:
     impl ().push ();;
     Stack <P1>::push (m_L, p1);
     Stack <P2>::push (m_L, p2);
-    LuaException::pcall (m_L, 2, 1);
+    LuaHelper::Pcall (m_L, 2, 1);
     return LuaRef::fromStack (m_L);
   }
 
@@ -475,7 +476,7 @@ public:
     Stack <P1>::push (m_L, p1);
     Stack <P2>::push (m_L, p2);
     Stack <P3>::push (m_L, p3);
-    LuaException::pcall (m_L, 3, 1);
+    LuaHelper::Pcall (m_L, 3, 1);
     return LuaRef::fromStack (m_L);
   }
 
@@ -487,7 +488,7 @@ public:
     Stack <P2>::push (m_L, p2);
     Stack <P3>::push (m_L, p3);
     Stack <P4>::push (m_L, p4);
-    LuaException::pcall (m_L, 4, 1);
+    LuaHelper::Pcall (m_L, 4, 1);
     return LuaRef::fromStack (m_L);
   }
 
@@ -500,7 +501,7 @@ public:
     Stack <P3>::push (m_L, p3);
     Stack <P4>::push (m_L, p4);
     Stack <P5>::push (m_L, p5);
-    LuaException::pcall (m_L, 5, 1);
+    LuaHelper::Pcall (m_L, 5, 1);
     return LuaRef::fromStack (m_L);
   }
 
@@ -514,7 +515,7 @@ public:
     Stack <P4>::push (m_L, p4);
     Stack <P5>::push (m_L, p5);
     Stack <P6>::push (m_L, p6);
-    LuaException::pcall (m_L, 6, 1);
+    LuaHelper::Pcall (m_L, 6, 1);
     return LuaRef::fromStack (m_L);
   }
 
@@ -529,7 +530,7 @@ public:
     Stack <P5>::push (m_L, p5);
     Stack <P6>::push (m_L, p6);
     Stack <P7>::push (m_L, p7);
-    LuaException::pcall (m_L, 7, 1);
+    LuaHelper::Pcall (m_L, 7, 1);
     return LuaRef::fromStack (m_L);
   }
 
@@ -545,7 +546,7 @@ public:
     Stack <P6>::push (m_L, p6);
     Stack <P7>::push (m_L, p7);
     Stack <P8>::push (m_L, p8);
-    LuaException::pcall (m_L, 8, 1);
+    LuaHelper::Pcall (m_L, 8, 1);
     return LuaRef::fromStack (m_L);
   }
   /** @} */

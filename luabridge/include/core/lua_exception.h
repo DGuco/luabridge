@@ -92,18 +92,6 @@ public:
 
   //----------------------------------------------------------------------------
   /**
-      Wrapper for lua_pcall that throws.
-  */
-  static void pcall (lua_State* L, int nargs = 0, int nresults = 0, int msgh = 0)
-  {
-    int code = lua_pcall (L, nargs, nresults, msgh);
-
-    if (code != LUABRIDGE_LUA_OK)
-      Throw (LuaException (L, code));
-  }
-
-  //----------------------------------------------------------------------------
-  /**
       Initializes error handling. Subsequent Lua errors are translated to C++ exceptions.
   */
   static void EnableExceptions(lua_State *L)

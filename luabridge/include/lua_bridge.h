@@ -184,7 +184,7 @@ void LuaBridge::SafeBeginCall(const char *func)
 template<typename R, int __>
 R LuaBridge::SafeEndCall(const char *func, int nArg)
 {
-    if (lua_pcall(m_pLuaVM, nArg, 1, 0) != 0) {
+    if (lua_pcall(m_pLuaVM, nArg, 1, 0) != LUA_OK) {
         LuaHelper::DefaultDebugLuaErrorInfo(func, lua_tostring(m_pLuaVM, -1));
         //恢复调用前的堆栈索引
         lua_settop(m_pLuaVM, m_iTopIndex);

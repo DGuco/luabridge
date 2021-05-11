@@ -50,7 +50,7 @@ struct CFunc
 
         lua_rawgetp(L, tableIndex, getPropgetKey()); // Stack: getter, propget table (pg)
         lua_pushvalue(L, -2); // Stack: getter, pg, getter
-        rawsetfield(L, -2, name); // Stack: getter, pg
+        LuaHelper::RawSetField(L, -2, name); // Stack: getter, pg
         lua_pop (L, 2); // Stack: -
     }
 
@@ -61,7 +61,7 @@ struct CFunc
 
         lua_rawgetp(L, tableIndex, getPropsetKey()); // Stack: setter, propset table (ps)
         lua_pushvalue(L, -2); // Stack: setter, ps, setter
-        rawsetfield(L, -2, name); // Stack: setter, ps
+        LuaHelper::RawSetField(L, -2, name); // Stack: setter, ps
         lua_pop (L, 2); // Stack: -
     }
 
@@ -314,7 +314,7 @@ struct CFunc
 
         static int f(lua_State *L)
         {
-            assert (isfulluserdata(L, lua_upvalueindex(1)));
+            assert (LuaHelper::IsFullUserData(L, lua_upvalueindex(1)));
             T *const t = Userdata::get<T>(L, 1, false);
             MemFnPtr const &fnptr = *static_cast <MemFnPtr const *> (lua_touserdata(L, lua_upvalueindex (1)));
             assert (fnptr != 0);
@@ -331,7 +331,7 @@ struct CFunc
 
         static int f(lua_State *L)
         {
-            assert (isfulluserdata(L, lua_upvalueindex(1)));
+            assert (LuaHelper::IsFullUserData(L, lua_upvalueindex(1)));
             T const *const t = Userdata::get<T>(L, 1, true);
             MemFnPtr const &fnptr = *static_cast <MemFnPtr const *> (lua_touserdata(L, lua_upvalueindex (1)));
             assert (fnptr != 0);
@@ -351,7 +351,7 @@ struct CFunc
     {
         static int f(lua_State *L)
         {
-            assert (isfulluserdata(L, lua_upvalueindex(1)));
+            assert (LuaHelper::IsFullUserData(L, lua_upvalueindex(1)));
             typedef int (T::*MFP)(lua_State *L);
             T *const t = Userdata::get<T>(L, 1, false);
             MFP const &fnptr = *static_cast <MFP const *> (lua_touserdata(L, lua_upvalueindex (1)));
@@ -365,7 +365,7 @@ struct CFunc
     {
         static int f(lua_State *L)
         {
-            assert (isfulluserdata(L, lua_upvalueindex(1)));
+            assert (LuaHelper::IsFullUserData(L, lua_upvalueindex(1)));
             typedef int (T::*MFP)(lua_State *L);
             T const *const t = Userdata::get<T>(L, 1, true);
             MFP const &fnptr = *static_cast <MFP const *> (lua_touserdata(L, lua_upvalueindex (1)));
@@ -406,7 +406,7 @@ struct CFunc
 
     static int f (lua_State* L)
     {
-      assert (isfulluserdata (L, lua_upvalueindex (1)));
+      assert (LuaHelper::IsFullUserData(L, lua_upvalueindex(1)));
       Functor& fn = *static_cast <Functor*> (lua_touserdata (L, lua_upvalueindex (1)));
       return Invoke <ReturnType, Params, 1>::run (L, fn);
     }
@@ -426,8 +426,8 @@ struct CFunc
             new(lua_newuserdata(L, sizeof(MemFnPtr))) MemFnPtr(mf);
             lua_pushcclosure(L, &CallConstMember<MemFnPtr>::f, 1);
             lua_pushvalue(L, -1);
-            rawsetfield(L, -5, name); // const table
-            rawsetfield(L, -3, name); // class table
+            LuaHelper::RawSetField(L, -5, name); // const table
+            LuaHelper::RawSetField(L, -3, name); // class table
         }
     };
 
@@ -438,7 +438,7 @@ struct CFunc
         {
             new(lua_newuserdata(L, sizeof(MemFnPtr))) MemFnPtr(mf);
             lua_pushcclosure(L, &CallMember<MemFnPtr>::f, 1);
-            rawsetfield(L, -3, name); // class table
+            LuaHelper::RawSetField(L, -3, name); // class table
         }
     };
 
@@ -460,7 +460,7 @@ struct CFunc
     template<class T>
     static int gcMetaMethodAny(lua_State *L)
     {
-        assert (isfulluserdata(L, 1));
+        assert (LuaHelper::IsFullUserData(L, 1));
         T *t = static_cast <T *> (lua_touserdata(L, 1));
         t->~T();
         return 0;

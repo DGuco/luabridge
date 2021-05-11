@@ -77,8 +77,6 @@ struct TypeListSize<None>
     static const size_t value = 0;
 };
 
-#ifdef LUABRIDGE_CXX11
-
 template <class... Params>
 struct MakeTypeList;
 
@@ -94,7 +92,6 @@ struct MakeTypeList <>
   using Result = None;
 };
 
-#endif
 
 /**
   A TypeList with actual values.

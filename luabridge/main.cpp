@@ -69,7 +69,7 @@ int main(void)
     LuaRegisterCFunc(luaBridge, "Say", void(const char*), Say);
     LuaRegisterLuaFunc(luaBridge, "LuaFnAdd", LuaFnAdd);
     int ret = luaBridge.Call<int>("x11111_test1", 1, 2,200,100,"Hello lua");
-    printf("retMsg = %s\n", ret);
+    printf("ret = %d\n", ret);
     printf("-------------------\n");
     ret = luaBridge.Call<int>("x11111_test", 1, 2);
     printf("ret = %d\n", ret);
