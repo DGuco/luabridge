@@ -915,6 +915,8 @@ private:
         : Registrar(L)
     {
         lua_getglobal(L, "_G");
+        int top = lua_gettop(L);
+        int ret = lua_type(L,-1);
         ++m_stackSize;
     }
 

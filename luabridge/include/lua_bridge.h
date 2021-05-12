@@ -38,7 +38,7 @@
 
 namespace luabridge
 {
-class LuaBridge : public detail::Registrar
+class LuaBridge
 {
 public:
     /**
@@ -102,11 +102,12 @@ private:
     template<int __>
     inline void SafeEndCall(const char *func, int nArg);
 private:
+    lua_State *const L;
     int m_iTopIndex;
 };
 
 LuaBridge::LuaBridge(lua_State *VM)
-    :  detail::Registrar(VM), m_iTopIndex(0)
+    :  L(VM), m_iTopIndex(0)
 {
     // initialize lua standard library functions
     luaopen_base(L);
@@ -115,7 +116,7 @@ LuaBridge::LuaBridge(lua_State *VM)
     luaopen_math(L);
     luaopen_debug(L);
     luaopen_utf8(L);
-    LuaException::EnableExceptions(L);
+//    LuaException::EnableExceptions(L);
 }
 
 LuaBridge::~LuaBridge()
@@ -145,9 +146,7 @@ bool LuaBridge::LoadFile(const char *filePath)
 
 void LuaBridge::Register(const char *func, lua_CFunction f)
 {
-    char Buf[256] = {0};
-    strcpy(Buf, func);
-    lua_register(L, Buf, f);
+    lua_register(L, func, f);
 }
 
 int LuaBridge::PushToLua()

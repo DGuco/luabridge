@@ -44,30 +44,48 @@ int LuaFnAdd(lua_State *L)
     printf("!!!!a = %d,b = %d !!!!!\n", a, b);
     lua_pushinteger(L, a + b);
     return 1;
-//    try {
-//        int a = Stack<int>::get(L, 1);
-//        int b = Stack<int>::get(L, 2);
-//        printf("a = %d,b = %d\n", a, b);
-//        lua_pushinteger(L, a + b);
-//        return 1;
-//    }catch (std::exception& e)
-//    {
-//        std::cout << "LuaFnAdd catch exception: " << e.what() << std::endl;
-//        return 0;
-//    }
 }
+
+struct OuterClass
+{
+    OuterClass()
+    {
+        printf("OuterClass\n");
+    }
+
+    ~OuterClass()
+    {
+        printf("~OuterClass\n");
+    }
+
+    void Say()
+    {
+        printf("Say\n");
+    }
+};
 
 int main(void)
 {
     lua_State* L =  luaL_newstate();
     LuaBridge luaBridge(L);
+
+    luabridge::getGlobalNamespace(L)
+        .addCFunction("LuaFnAdd",LuaFnAdd)
+        .addFunction("Add",Add)
+        .beginClass <OuterClass> ("OuterClass")
+        .addConstructor<void(*)()>()
+        .addFunction("Say",&OuterClass::Say)
+        .endClass ();
+
     luaBridge.LoadFile("../script/111111.lua");
-    luabridge::getGlobalNamespace (L);
-    LuaRegisterCFunc(luaBridge, "Add", int(int,int), Add);
+    int ret = luaBridge.Call<int>("x11111_PrintG");
+    printf("ret = %d\n", ret);
+    printf("-------------------\n");
+//    LuaRegisterCFunc(luaBridge, "Add", int(int,int), Add);
     LuaRegisterCFunc(luaBridge, "Sub", int(int,int), Sub);
     LuaRegisterCFunc(luaBridge, "Say", void(const char*), Say);
     LuaRegisterLuaFunc(luaBridge, "LuaFnAdd", LuaFnAdd);
-    int ret = luaBridge.Call<int>("x11111_callfailedtest", 1, 2,200,100,"Hello lua");
+    ret = luaBridge.Call<int>("x11111_callfailedtest", 1, 2,200,100,"Hello lua");
     printf("ret = %d\n", ret);
     printf("-------------------\n");
     ret = luaBridge.Call<int>("x11111_test", 1, 2);

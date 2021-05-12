@@ -268,7 +268,6 @@ struct CFunc
     {
         typedef typename FuncTraits<FnPtr>::Params Params;
         typedef typename FuncTraits<FnPtr>::ReturnType ReturnType;
-
         static int f(lua_State *L)
         {
             assert (lua_islightuserdata(L, lua_upvalueindex(1)));

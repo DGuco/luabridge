@@ -213,4 +213,22 @@ struct ArgList<TypeList<Head, Tail>, Start>
     {
     }
 };
+
+//每个参数的类型
+template<class... ParamList>
+struct ArgTypeList
+{
+    enum
+    {
+        arity = sizeof...(ParamList)
+    };
+    using ParamTypeElement = typename std::tuple<ParamList...>;
+    //每个参数的类型
+    template<size_t I>
+    struct args
+    {
+        static_assert(I < arity, "index is out of range, index must less than sizeof Args");
+        using type = typename std::tuple_element<I, ParamTypeElement>::type;
+    };
+};
 } // namespace luabridge
