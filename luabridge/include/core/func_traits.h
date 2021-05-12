@@ -658,7 +658,7 @@ struct Caller<FT, 15>
 };
 
 template<class ReturnType, class FT>
-ReturnType doCall(lua_State* L,FT &fnl)
+static ReturnType doCall(lua_State* L,FT &fnl)
 {
     return Caller<FT,FuncTraits<FT>::arity>::f(L, fnl);
 }

@@ -1,15 +1,5 @@
 
-function x11111_test(x,y)
-    local addNum = Add(x,y);
-    local subNum = Sub(x,y);
-    print("addNum = "..addNum)
-    print("subNum = "..subNum)
-    Say("Hello world");
-    print("x11111_test done")
-    return 1
-end
-
-function x11111_test1(x,y,i,j,world)
+function x11111_callfailedtest(x,y,i,j,world)
     local addNum = Add(x);
     local subNum = Sub(i);
     print("addNum = "..addNum)
@@ -19,4 +9,14 @@ function x11111_test1(x,y,i,j,world)
     return 23
 end
 
+
+function x11111_test(x,y)
+    local addNum = Add(x,y);
+    local subNum = Sub(x,y);
+    print("addNum = "..addNum)
+    print("subNum = "..subNum)
+    Say("Hello world");
+    print("x11111_test done")
+    return 1
+end
 

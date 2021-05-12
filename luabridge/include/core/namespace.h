@@ -63,6 +63,11 @@ protected:
     lua_State *const L;
     int mutable m_stackSize;
 
+    Registrar()
+        : L(NULL)
+    {
+    }
+
     Registrar(lua_State *L)
         : L(L), m_stackSize(0)
     {
@@ -81,7 +86,7 @@ protected:
         return *this;
     }
 
-    ~Registrar()
+    virtual ~Registrar()
     {
         if (m_stackSize > 0) {
             assert (m_stackSize <= lua_gettop(L));
@@ -127,15 +132,15 @@ class Namespace: public detail::Registrar
         {
             std::string type_name = std::string(trueConst ? "const " : "") + name;
 
-            // Stack: namespace table (ns)
-            lua_newtable(L); // Stack: ns, const table (co)
-            lua_pushvalue(L, -1); // Stack: ns, co, co
-            lua_setmetatable(L, -2); // co.__metatable = co. Stack: ns, co
+            // Stack: namespace table (ns) 栈状态:ns
+            lua_newtable(L); // Stack: ns, const table (co)   栈状态:ns=>co
+            lua_pushvalue(L, -1); // Stack: ns, co, co 栈状态:ns=>co=>co
+            lua_setmetatable(L, -2); // co.__metatable = co,插入const table的__metatable(此时还是空表). Stack: ns, co, 栈状态:ns=>co
 
-            lua_pushstring(L, type_name.c_str());
-            lua_rawsetp(L, -2, getTypeKey()); // co [typeKey] = name. Stack: ns, co
+            lua_pushstring(L, type_name.c_str()); // const table name 栈状态:ns=>co=>type_name
+            lua_rawsetp(L, -2, getTypeKey()); // co [typeKey] = name. Stack: ns, co 栈状态:ns=>co
 
-            lua_pushcfunction(L, &CFunc::indexMetaMethod);
+            lua_pushcfunction(L, &CFunc::indexMetaMethod); //栈状态:ns=>co=>indexMetaMethod
             LuaHelper::RawSetField(L, -2, "__index");
 
             lua_pushcfunction(L, &CFunc::newindexObjectMetaMethod);
@@ -187,11 +192,7 @@ class Namespace: public detail::Registrar
             lua_insert(L, -2); // Stack: ns, co, cl, st, vst
             LuaHelper::RawSetField(L, -5, name); // ns [name] = vst. Stack: ns, co, cl, st
 
-#if 0
-            lua_pushlightuserdata (L, this);
-            lua_pushcclosure (L, &tostringMetaMethod, 1);
-            rawsetfield (L, -2, "__tostring");
-#endif
+
             lua_pushcfunction(L, &CFunc::indexMetaMethod);
             LuaHelper::RawSetField(L, -2, "__index");
 
@@ -275,36 +276,52 @@ class Namespace: public detail::Registrar
         Class(char const *name, Namespace &parent)
             : ClassBase(parent)
         {
-            assert (lua_istable(L, -1)); // Stack: namespace table (ns)
-            LuaHelper::RawGetField(L, -1, name); // Stack: ns, static table (st) | nil
+            //栈顶是否是表(_G)
+            assert (lua_istable(L, -1)); // Stack: namespace table (ns) 栈状态:ns
+            //尝试find类的metadata表_G[name]
+            LuaHelper::RawGetField(L, -1, name); // Stack: ns, static table (st) | nil 栈状态:ns=>st(or nil)
 
-            if (lua_isnil(L, -1)) // Stack: ns, nil
+            //表不存在create it
+            if (lua_isnil(L, -1)) // Stack: ns, nil 栈状态:ns=>st(or nil)
             {
-                lua_pop(L, 1); // Stack: ns
-
-                createConstTable(name); // Stack: ns, const table (co)
-                lua_pushcfunction(L, &CFunc::gcMetaMethod<T>); // Stack: ns, co, function
-                LuaHelper::RawSetField(L, -2, "__gc"); // Stack: ns, co
+                //弹出nil值
+                lua_pop(L, 1); // Stack: ns 栈状态:ns
+                //create类的const metadata表
+                createConstTable(name); // Stack: ns, const table (co) 栈状态:ns=>co
+                //注册gc元方法
+                lua_pushcfunction(L, &CFunc::gcMetaMethod<T>); // Stack: ns, co, gcfun 栈状态:ns=>co=>gcfun
+                LuaHelper::RawSetField(L, -2, "__gc"); // Stack: ns, co 栈状态:ns=>co
                 ++m_stackSize;
 
-                createClassTable(name); // Stack: ns, co, class table (cl)
-                lua_pushcfunction(L, &CFunc::gcMetaMethod<T>); // Stack: ns, co, cl, function
-                LuaHelper::RawSetField(L, -2, "__gc"); // Stack: ns, co, cl
+                //create类的非const metadata表
+                createClassTable(name); // Stack: ns, co, class table (cl) 栈状态:ns=>co=>cl
+                //注册gc元方法
+                lua_pushcfunction(L, &CFunc::gcMetaMethod<T>); // Stack: ns, co, cl, gcfun 栈状态:ns=>co=>cl=>gcfun
+                LuaHelper::RawSetField(L, -2, "__gc"); // Stack: ns, co, cl  栈状态:ns=>co=>cl
                 ++m_stackSize;
 
-                createStaticTable(name); // Stack: ns, co, cl, st
+                //create类的static metadata表
+                createStaticTable(name); // Stack: ns, co, cl, st 栈状态:ns=>co=>cl=>st
                 ++m_stackSize;
 
-                // Map T back to its tables.
-                lua_pushvalue(L, -1); // Stack: ns, co, cl, st, st
-                lua_rawsetp(L, LUA_REGISTRYINDEX, ClassInfo<T>::getStaticKey()); // Stack: ns, co, cl, st
-                lua_pushvalue(L, -2); // Stack: ns, co, cl, st, cl
-                lua_rawsetp(L, LUA_REGISTRYINDEX, ClassInfo<T>::getClassKey()); // Stack: ns, co, cl, st
-                lua_pushvalue(L, -3); // Stack: ns, co, cl, st, co
-                lua_rawsetp(L, LUA_REGISTRYINDEX, ClassInfo<T>::getConstKey()); // Stack: ns, co, cl, st
+                //Map T back to its tables.
+                //把st元表作一个副本压栈。
+                lua_pushvalue(L, -1); // Stack: ns, co, cl, st, st 栈状态:ns=>co=>cl=>st=>st
+                //把static metadata表插入registry表
+                lua_rawsetp(L, LUA_REGISTRYINDEX, ClassInfo<T>::getStaticKey()); // Stack: ns, co, cl, st 栈状态:ns=>co=>cl=>st
+                //把cl元表作一个副本压栈。
+                lua_pushvalue(L, -2); // Stack: ns, co, cl, st, cl 栈状态:ns=>co=>cl=>st=>cl
+                //把metadata表插入registry表
+                lua_rawsetp(L, LUA_REGISTRYINDEX, ClassInfo<T>::getClassKey()); // Stack: ns, co, cl, st 栈状态:ns=>co=>cl=>st
+                //把co元表作一个副本压栈。
+                lua_pushvalue(L, -3); // Stack: ns, co, cl, st, co 栈状态:ns=>co=>cl=>st=>co
+                //把const metadata表插入registry表
+                lua_rawsetp(L, LUA_REGISTRYINDEX, ClassInfo<T>::getConstKey()); // Stack: ns, co, cl, st 栈状态:ns=>co=>cl=>st
+
+                //now 栈状态:ns=>co=>cl=>st
             }
-            else {
-                assert (lua_istable(L, -1)); // Stack: ns, st
+            else { //表存在
+                assert (lua_istable(L, -1)); // Stack: ns, st  栈状态:ns=>st
                 ++m_stackSize;
 
                 // Map T back from its stored tables
@@ -889,7 +906,6 @@ class Namespace: public detail::Registrar
             return *this;
         }
     };
-
 private:
     //----------------------------------------------------------------------------
     /**
