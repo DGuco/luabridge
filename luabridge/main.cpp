@@ -21,7 +21,7 @@ int Sub(int a, int b)
 
 void Say(const char *contex)
 {
-    printf("Say = %s\n",contex);
+    printf("Global Say = %s\n",contex);
 }
 
 class Test
@@ -58,7 +58,7 @@ struct OuterClass
         printf("~OuterClass\n");
     }
 
-    void Say(lua_State* )
+    void Say()
     {
         printf("*****OuterClass::Say******\n");
     }
@@ -71,7 +71,6 @@ int main(void)
 
     luabridge::getGlobalNamespace(L)
         .addCFunction("LuaFnAdd",LuaFnAdd)
-        .addFunction("Add",Add)
         .beginClass <OuterClass> ("OuterClass")
         .addConstructor<void(*)()>()
         .addFunction("Say",&OuterClass::Say)
@@ -81,24 +80,24 @@ int main(void)
     int ret = luaBridge.Call<int>("x11111_PrintG");
     printf("ret = %d\n", ret);
     printf("-------------------\n");
-//    LuaRegisterCFunc(luaBridge, "Add", int(int,int), Add);
+    LuaRegisterCFunc(luaBridge, "Add", int(int,int), Add);
     LuaRegisterCFunc(luaBridge, "Sub", int(int,int), Sub);
-//    LuaRegisterCFunc(luaBridge, "Say", void(const char*), Say);
+    LuaRegisterCFunc(luaBridge, "Say", void(const char*), Say);
     LuaRegisterLuaFunc(luaBridge, "LuaFnAdd", LuaFnAdd);
     ret = luaBridge.Call<int>("x11111_callfailedtest", 1, 2,200,100,"Hello lua");
     printf("ret = %d\n", ret);
     printf("-------------------\n");
     ret = luaBridge.Call<int>("x11111_test", 1, 2);
     printf("ret = %d\n", ret);
-    printf("-------------------\n");
-    ret = luaBridge.Call<int>("x11111_test",10,20);
-    printf("ret = %d\n",ret);
-    printf("-------------------\n");
-    ret = luaBridge.Call<int>("x11111_test",100,200);
-    printf("ret = %d\n",ret);
-    printf("-------------------\n");
-    ret = luaBridge.Call<int>("x11111_test",1000,2000);
-    printf("ret = %d\n",ret);
-    printf("-------------------\n");
+//    printf("-------------------\n");
+//    ret = luaBridge.Call<int>("x11111_test",10,20);
+//    printf("ret = %d\n",ret);
+//    printf("-------------------\n");
+//    ret = luaBridge.Call<int>("x11111_test",100,200);
+//    printf("ret = %d\n",ret);
+//    printf("-------------------\n");
+//    ret = luaBridge.Call<int>("x11111_test",1000,2000);
+//    printf("ret = %d\n",ret);
+//    printf("-------------------\n");
     return 0;
 }

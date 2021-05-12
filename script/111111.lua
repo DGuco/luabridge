@@ -16,7 +16,7 @@ function x11111_test(x,y)
     local subNum = Sub(x,y);
     print("addNum = "..addNum)
     print("subNum = "..subNum)
-    --Say("Hello world");
+    Say("Hello world");
     local testclass = OuterClass ()
     testclass:Say();
     print("x11111_test done")

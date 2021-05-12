@@ -99,7 +99,7 @@ struct Stack<int>
 
     static int get(lua_State *L, int index)
     {
-        LuaHelper::LuaAssert(L, LuaHelper::CheckLuaArg_Integer(L, index), "CheckLuaArg_Integer failed");
+        LUA_ASSERT(L, LuaHelper::CheckLuaArg_Integer(L, index), "CheckLuaArg_Integer failed");
         return static_cast<int>(lua_tointeger(L, index));
     }
 };
@@ -121,7 +121,7 @@ struct Stack<unsigned int>
      */
     static unsigned int get(lua_State *L, int index)
     {
-        LuaHelper::LuaAssert(L, LuaHelper::CheckLuaArg_Integer(L, index), "CheckLuaArg_Integer failed");
+        LUA_ASSERT(L, LuaHelper::CheckLuaArg_Integer(L, index), "CheckLuaArg_Integer failed");
         return static_cast<unsigned int>(lua_tointeger(L, index));
     }
 };
@@ -143,7 +143,7 @@ struct Stack<unsigned char>
      */
     static unsigned char get(lua_State *L, int index)
     {
-        LuaHelper::LuaAssert(L, LuaHelper::CheckLuaArg_Integer(L, index), "CheckLuaArg_Integer failed");
+        LUA_ASSERT(L, LuaHelper::CheckLuaArg_Integer(L, index), "CheckLuaArg_Integer failed");
         return static_cast <unsigned char> (luaL_checkinteger(L, index));
     }
 };
@@ -165,7 +165,7 @@ struct Stack<short>
      */
     static short get(lua_State *L, int index)
     {
-        LuaHelper::LuaAssert(L, LuaHelper::CheckLuaArg_Integer(L, index), "CheckLuaArg_Integer failed");
+        LUA_ASSERT(L, LuaHelper::CheckLuaArg_Integer(L, index), "CheckLuaArg_Integer failed");
         return static_cast <short> (luaL_checkinteger(L, index));
     }
 };
@@ -187,7 +187,7 @@ struct Stack<unsigned short>
     */
     static unsigned short get(lua_State *L, int index)
     {
-        LuaHelper::LuaAssert(L, LuaHelper::CheckLuaArg_Integer(L, index), "CheckLuaArg_Integer failed");
+        LUA_ASSERT(L, LuaHelper::CheckLuaArg_Integer(L, index), "CheckLuaArg_Integer failed");
         return static_cast <unsigned short> (luaL_checkinteger(L, index));
     }
 };
@@ -209,7 +209,7 @@ struct Stack<long>
     */
     static long get(lua_State *L, int index)
     {
-        LuaHelper::LuaAssert(L, LuaHelper::CheckLuaArg_Integer(L, index), "CheckLuaArg_Integer failed");
+        LUA_ASSERT(L, LuaHelper::CheckLuaArg_Integer(L, index), "CheckLuaArg_Integer failed");
         return static_cast <long> (luaL_checkinteger(L, index));
     }
 };
@@ -231,7 +231,7 @@ struct Stack<unsigned long>
     */
     static unsigned long get(lua_State *L, int index)
     {
-        LuaHelper::LuaAssert(L, LuaHelper::CheckLuaArg_Integer(L, index), "CheckLuaArg_Integer failed");
+        LUA_ASSERT(L, LuaHelper::CheckLuaArg_Integer(L, index), "CheckLuaArg_Integer failed");
         return static_cast <unsigned long> (luaL_checkinteger(L, index));
     }
 };
@@ -253,7 +253,7 @@ struct Stack<long long>
     */
     static long long get(lua_State *L, int index)
     {
-        LuaHelper::LuaAssert(L, LuaHelper::CheckLuaArg_Integer(L, index), "CheckLuaArg_Integer failed");
+        LUA_ASSERT(L, LuaHelper::CheckLuaArg_Integer(L, index), "CheckLuaArg_Integer failed");
         return static_cast <long long> (luaL_checkinteger(L, index));
     }
 };
@@ -271,7 +271,7 @@ struct Stack<unsigned long long>
     }
     static unsigned long long get(lua_State *L, int index)
     {
-        LuaHelper::LuaAssert(L, LuaHelper::CheckLuaArg_Integer(L, index), "CheckLuaArg_Integer failed");
+        LUA_ASSERT(L, LuaHelper::CheckLuaArg_Integer(L, index), "CheckLuaArg_Integer failed");
         return static_cast <unsigned long long> (luaL_checkinteger(L, index));
     }
 };
@@ -290,7 +290,7 @@ struct Stack<float>
 
     static float get(lua_State *L, int index)
     {
-        LuaHelper::LuaAssert(L, LuaHelper::CheckLuaArg_Num(L, index), "CheckLuaArg_Num failed");
+        LUA_ASSERT(L, LuaHelper::CheckLuaArg_Num(L, index), "CheckLuaArg_Num failed");
         return static_cast<float>(lua_tonumber(L, index));
     }
 };
@@ -309,7 +309,7 @@ struct Stack<double>
 
     static double get(lua_State *L, int index)
     {
-        LuaHelper::LuaAssert(L, LuaHelper::CheckLuaArg_Num(L, index), "CheckLuaArg_Num failed");
+        LUA_ASSERT(L, LuaHelper::CheckLuaArg_Num(L, index), "CheckLuaArg_Num failed");
         return static_cast<double>(lua_tonumber(L, index));
     }
 };
@@ -346,7 +346,7 @@ struct Stack<char>
 
     static char get(lua_State *L, int index)
     {
-        LuaHelper::LuaAssert(L, LuaHelper::CheckLuaArg_Str(L, index), "CheckLuaArg_Str failed");
+        LUA_ASSERT(L, LuaHelper::CheckLuaArg_Str(L, index), "CheckLuaArg_Str failed");
         if (lua_isnil(L, index))
         {
             return ' ';
@@ -372,7 +372,7 @@ struct Stack<const char *>
 
     static const char *get(lua_State *L, int index)
     {
-        LuaHelper::LuaAssert(L, LuaHelper::CheckLuaArg_Str(L, index), "CheckLuaArg_Str failed");
+        LUA_ASSERT(L, LuaHelper::CheckLuaArg_Str(L, index), "CheckLuaArg_Str failed");
         if (lua_isnil(L, index))
         {
             return "";
@@ -426,7 +426,7 @@ struct Stack<std::string>
 
     static std::string get(lua_State *L, int index)
     {
-        LuaHelper::LuaAssert(L, LuaHelper::CheckLuaArg_Str(L, index), "CheckLuaArg_Str failed");
+        LUA_ASSERT(L, LuaHelper::CheckLuaArg_Str(L, index), "CheckLuaArg_Str failed");
         if (lua_isnil(L, index)) {
             return "";
         }

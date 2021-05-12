@@ -641,35 +641,36 @@ struct Invoke
                      "Param count error need = %d,in fact num = %d",
                      FuncTraits<Fn>::arity,
                      LuaHelper::GetParamCount(L));
-            LuaHelper::LuaAssert(L, false, Msg);
+            LUA_ASSERT(L, false, Msg);
         }
         try {
             Stack<ReturnType>::push(L, FuncTraits<Fn>::call(L,fn));
             return 1;
         }
         catch (const std::exception &e) {
-            return LuaHelper::LuaAssert(L, false, e.what());
+            return LUA_ASSERT(L, false, e.what());
         }
     }
 
     template<class T, class MemFn>
     static int run(lua_State *L, T *object, const MemFn &fn)
     {
-        if (!(LuaHelper::GetParamCount(L) == FuncTraits<MemFn>::arity)) {
+        //参数个数:对象指针+成员函数参数个
+        if (!(LuaHelper::GetParamCount(L) == FuncTraits<MemFn>::arity + 1)) {
             char Msg[128] = {0};
             snprintf(Msg,
                      128,
                      "Param count error need = %d,in fact num = %d",
-                     FuncTraits<MemFn>::arity,
+                     FuncTraits<MemFn>::arity + 1,
                      LuaHelper::GetParamCount(L));
-            LuaHelper::LuaAssert(L, false, Msg);
+            LUA_ASSERT(L, false, Msg);
         }
         try {
             Stack<ReturnType>::push(L, FuncTraits<MemFn>::call(L,object, fn));
             return 1;
         }
         catch (const std::exception &e) {
-            return LuaHelper::LuaAssert(L, false, e.what());
+            return LUA_ASSERT(L, false, e.what());
         }
     }
 };
@@ -687,35 +688,36 @@ struct Invoke<void, Params, startParam>
                      "Param count error need = %d,in fact num = %d",
                      FuncTraits<Fn>::arity,
                      LuaHelper::GetParamCount(L));
-            LuaHelper::LuaAssert(L, false, Msg);
+            LUA_ASSERT(L, false, Msg);
         }
         try {
             FuncTraits<Fn>::call(L,fn);
             return 0;
         }
         catch (const std::exception &e) {
-            return LuaHelper::LuaAssert(L, false, e.what());
+            return LUA_ASSERT(L, false, e.what());
         }
     }
 
     template<class T, class MemFn>
     static int run(lua_State *L, T *object, const MemFn &fn)
     {
-        if (!LuaHelper::GetParamCount(L) == FuncTraits<MemFn>::arity) {
+        //参数个数:对象指针+成员函数参数个
+        if (!LuaHelper::GetParamCount(L) == FuncTraits<MemFn>::arity + 1) {
             char Msg[128] = {0};
             snprintf(Msg,
                      128,
                      "Param count error need = %d,in fact num = %d",
-                     FuncTraits<MemFn>::arity,
+                     FuncTraits<MemFn>::arity + 1,
                      LuaHelper::GetParamCount(L));
-            LuaHelper::LuaAssert(L, false, Msg);
+            LUA_ASSERT(L, false, Msg);
         }
         try {
             FuncTraits<MemFn>::call(L,object, fn);
             return 0;
         }
         catch (const std::exception &e) {
-            return LuaHelper::LuaAssert(L, false, e.what());
+            return LUA_ASSERT(L, false, e.what());
         }
     }
 };

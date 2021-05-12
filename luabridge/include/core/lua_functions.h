@@ -330,10 +330,10 @@ struct CFunc
 
         static int f(lua_State *L)
         {
-            assert (LuaHelper::IsFullUserData(L, lua_upvalueindex(1)));
+            LUA_ASSERT(L,LuaHelper::IsFullUserData(L, lua_upvalueindex(1)),"CallMember::f Assert IsFullUserData failed");
             T *const t = Userdata::get<T>(L, 1, false);
             MemFnPtr const &fnptr = *static_cast <MemFnPtr const *> (lua_touserdata(L, lua_upvalueindex (1)));
-            assert (fnptr != 0);
+            LUA_ASSERT(L,fnptr != 0,"CallMember::f Assert fnptr != 0 failed");
             return Invoke<ReturnType, Params, 2>::run(L, t, fnptr);
         }
     };
@@ -533,7 +533,7 @@ struct lua_function
     {
         return CFunc::CFCall<STD_FUNCTION>::f(L, fn);
     }
-};
+}; 
 
 template<typename FT, typename STD_FUNCTION,int FUNCID>
 STD_FUNCTION lua_function<FT, STD_FUNCTION,FUNCID>::fn;
