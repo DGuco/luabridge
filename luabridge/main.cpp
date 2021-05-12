@@ -58,9 +58,9 @@ struct OuterClass
         printf("~OuterClass\n");
     }
 
-    void Say()
+    void Say(lua_State* )
     {
-        printf("Say\n");
+        printf("*****OuterClass::Say******\n");
     }
 };
 
@@ -83,7 +83,7 @@ int main(void)
     printf("-------------------\n");
 //    LuaRegisterCFunc(luaBridge, "Add", int(int,int), Add);
     LuaRegisterCFunc(luaBridge, "Sub", int(int,int), Sub);
-    LuaRegisterCFunc(luaBridge, "Say", void(const char*), Say);
+//    LuaRegisterCFunc(luaBridge, "Say", void(const char*), Say);
     LuaRegisterLuaFunc(luaBridge, "LuaFnAdd", LuaFnAdd);
     ret = luaBridge.Call<int>("x11111_callfailedtest", 1, 2,200,100,"Hello lua");
     printf("ret = %d\n", ret);

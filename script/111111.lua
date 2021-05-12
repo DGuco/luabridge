@@ -16,39 +16,12 @@ function x11111_test(x,y)
     local subNum = Sub(x,y);
     print("addNum = "..addNum)
     print("subNum = "..subNum)
-    Say("Hello world");
+    --Say("Hello world");
+    local testclass = OuterClass ()
+    testclass:Say();
     print("x11111_test done")
     return 1
 end
-
-function x11111_PrintT(tt)
-    print("{\t");
-    for a,b in pairs(tt) do
-        if (type(b) == "table") then
-            print("\t",a,"\t",b,"\tlen = ",#b)
-        else
-            print("\t",a,"\t",b)
-        end
-
-        if  type(b) == "table" and tostring(a) ~= "_G" then
-            for x,y in pairs(b) do
-                if (type(y) == "table") then
-                    print("\t\t","|--",x,y,"\tlen = ",#y)
-                else
-                    print("\t\t","|--",x,y)
-                end
-                if type(y) == "table" and tostring(x) ~= tostring(a) then
-                    for x_,y_ in pairs(y) do
-                        print("\t\t\t","|--",x_,y_)
-                    end
-                end
-            end
-        end
-    end
-    print("}\t");
-    return 0
-end
-
 
 function x11111_PrintG()
     print("{\t");

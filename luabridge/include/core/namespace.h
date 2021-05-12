@@ -136,11 +136,21 @@ class Namespace: public detail::Registrar
             lua_newtable(L); // Stack: ns, const table (co)   栈状态:ns=>co
             lua_pushvalue(L, -1); // Stack: ns, co, co 栈状态:ns=>co=>co
             lua_setmetatable(L, -2); // co.__metatable = co,插入const table的__metatable(此时还是空表). Stack: ns, co, 栈状态:ns=>co
-
             lua_pushstring(L, type_name.c_str()); // const table name 栈状态:ns=>co=>type_name
             lua_rawsetp(L, -2, getTypeKey()); // co [typeKey] = name. Stack: ns, co 栈状态:ns=>co
 
-            lua_pushcfunction(L, &CFunc::indexMetaMethod); //栈状态:ns=>co=>indexMetaMethod
+            /**
+             *https://zilongshanren.com/post/bind-a-simple-cpp-class-in-lua/
+             *https://blog.csdn.net/qiuwen_521/article/details/107855867
+             *希望可以用Lua里面的面向对象的方式来访问。
+             *local s = cc.create()
+             *s:setName("zilongshanren")
+             *s:setAge(20)
+             *s:print()
+             *而我们知道s:setName(xx)就等价于s.setName(s,xx)，此时我们只需要给s提供一个metatable,并且给这个metatable设置一个key为"__index"，
+             *value等于它本身的metatable。最后，只需要把之前Student类的一些方法添加到这个metatable里面就可以了。
+            **/
+            lua_pushcfunction(L, &CFunc::IndexMetaMethod); //栈状态:ns=>co=>IndexMetaMethod
             LuaHelper::RawSetField(L, -2, "__index");
 
             lua_pushcfunction(L, &CFunc::newindexObjectMetaMethod);
@@ -193,7 +203,7 @@ class Namespace: public detail::Registrar
             LuaHelper::RawSetField(L, -5, name); // ns [name] = vst. Stack: ns, co, cl, st
 
 
-            lua_pushcfunction(L, &CFunc::indexMetaMethod);
+            lua_pushcfunction(L, &CFunc::IndexMetaMethod);
             LuaHelper::RawSetField(L, -2, "__index");
 
             lua_pushcfunction(L, &CFunc::newindexStaticMetaMethod);
@@ -944,8 +954,8 @@ private:
             // na.__metatable = ns
             lua_setmetatable(L, -2); // Stack: pns, ns
 
-            // ns.__index = indexMetaMethod
-            lua_pushcfunction(L, &CFunc::indexMetaMethod);
+            // ns.__index = IndexMetaMethod
+            lua_pushcfunction(L, &CFunc::IndexMetaMethod);
             LuaHelper::RawSetField(L, -2, "__index"); // Stack: pns, ns
 
             // ns.__newindex = newindexMetaMethod

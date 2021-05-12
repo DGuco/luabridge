@@ -70,64 +70,81 @@ struct CFunc
         __index metamethod for a namespace or class static and non-static members.
         Retrieves functions from metatables and properties from propget tables.
         Looks through the class hierarchy if inheritance is present.
+        __index = function(t, k) {}
     */
-    static int indexMetaMethod(lua_State *L)
+    static int IndexMetaMethod(lua_State *L)
     {
-        assert (lua_istable(L, 1) || lua_isuserdata(L, 1)); // Stack (further not shown): table | userdata, name
+        //栈状态lua_gettop(L) == 2:tu(t)=>field name(k)
+        //check第一个元素是否是一个表或者userdata
+        assert (lua_istable(L, 1) || lua_isuserdata(L, 1));
 
-        lua_getmetatable(L, 1); // Stack: class/const table (mt)
+        //将其元表压栈
+        assert (lua_getmetatable(L, 1)); //mt = tu.__metatable 栈状态lua_gettop(L) == 3:tu=>field name=>mt
         assert (lua_istable(L, -1));
 
         for (;;) {
-            lua_pushvalue(L, 2); // Stack: mt, field name
-            lua_rawget(L, -2);  // Stack: mt, field | nil
+            lua_pushvalue(L, 2); // 栈状态lua_gettop(L)==4:tu=>field name =>mt =>field name
+            lua_rawget(L, -2);  //func = mt[field name] 栈状态lua_gettop(L) == 4:tu=>field name=>mt=>func
 
-            if (lua_iscfunction(L, -1)) // Stack: mt, field
+            //找到了name对应的函数,return 1
+            if (lua_iscfunction(L, -1)) //栈状态lua_gettop(L) == 4:tu=>field name=>mt=>func
             {
-                lua_remove(L, -2);  // Stack: field
+                lua_remove(L, -2);  //栈状态lua_gettop(L) == 3:tu=>field name=>func
                 return 1;
             }
 
-            assert (lua_isnil(L, -1)); // Stack: mt, nil
-            lua_pop (L, 1); // Stack: mt
+            //没有找到了name对应的函数
+            assert (lua_isnil(L, -1)); // 栈状态lua_gettop(L) == 4:tu=>field name=>mt=>nil
+            lua_pop (L, 1); // 栈状态lua_gettop(L) == 3:tu=>field name=>mt
 
-            lua_rawgetp(L, -1, getPropgetKey()); // Stack: mt, propget table (pg)
+            lua_rawgetp(L, -1, getPropgetKey()); //pg=mg['getkey']  栈状态lua_gettop(L) == 4:tu=>field name=>mt=>pg
             assert (lua_istable(L, -1));
 
-            lua_pushvalue(L, 2); // Stack: mt, pg, field name
-            lua_rawget(L, -2);  // Stack: mt, pg, getter | nil
-            lua_remove(L, -2); // Stack: mt, getter | nil
+            lua_pushvalue(L, 2); //栈状态lua_gettop(L) == 5:tu=>field name=>mt=>pg=>field name
+            lua_rawget(L, -2);  //getter = pg[field name]栈状态lua_gettop(L) == 5:tu=>field name=>mt=>pg=>getter|nil
+            lua_remove(L, -2); // 栈状态lua_gettop(L) == 4:tu=>field name=>mt=>getter|nil
 
-            if (lua_iscfunction(L, -1)) // Stack: mt, getter
+            //找到了name对应getter的函数
+            if (lua_iscfunction(L, -1)) // 栈状态lua_gettop(L) == 4:tu=>field name=>mt=>getter
             {
-                lua_remove(L, -2);  // Stack: getter
-                lua_pushvalue(L, 1); // Stack: getter, table | userdata
-                lua_call(L, 1, 1); // Stack: value
+                lua_remove(L, -2);  //栈状态lua_gettop(L) == 3:tu=>field name=>getter
+                lua_pushvalue(L, 1); //栈状态lua_gettop(L) == 4:tu=>field name=>getter=>tu
+                /**
+                 *lua_call
+                 *调用一个函数。要调用一个函数请遵循以下协议： 首先，要调用的函数应该被压入栈； 接着，把需要传递给这个函数的参数按正序压栈； 这是指第一个参数首先压栈。
+                 *最后调用一下 lua_call； nargs 是你压入栈的参数个数。 当函数调用完毕后，所有的参数以及函数本身都会出栈。 而函数的返回值这时则被压栈。 返回值的个
+                 *数将被调整为 nresults 个， 除非 nresults 被设置成 LUA_MULTRET。 在这种情况下，所有的返回值都被压入堆栈中。 Lua 会保证返回值都放入栈空间中。
+                 *函数返回值将按正序压栈（第一个返回值首先压栈）， 因此在调用结束后，最后一个返回值将被放在栈顶。
+                 */
+                lua_call(L, 1, 1); // 栈状态lua_gettop(L) == 3:tu=>field name=>value
                 return 1;
             }
 
-            assert (lua_isnil(L, -1)); // Stack: mt, nil
-            lua_pop (L, 1); // Stack: mt
+            //没有找到了name对应getter的函数
+            assert (lua_isnil(L, -1)); // 栈状态lua_gettop(L) == 4:tu=>field name=>mt=>nil
+            lua_pop (L, 1);            // 栈状态lua_gettop(L) == 3:tu=>field name=>mt
 
             // It may mean that the field may be in const table and it's constness violation.
             // Don't check that, just return nil
 
             // Repeat the lookup in the parent metafield,
             // or return nil if the field doesn't exist.
-            lua_rawgetp(L, -1, getParentKey()); // Stack: mt, parent mt | nil
+            //尝试获取父类的metatable
+            lua_rawgetp(L, -1, getParentKey()); //pmt = mt['parentkey'] 栈状态lua_gettop(L) == 4:tu=>field name=>mt=>pmt|nil
 
-            if (lua_isnil (L, -1)) // Stack: mt, nil
+            //没有找到父类的metatable
+            if (lua_isnil (L, -1)) // 栈状态lua_gettop(L) == 4:tu=>field name=>mt=>nil
             {
-                lua_remove(L, -2); // Stack: nil
-                return 1;
+                lua_remove(L, -2); // 栈状态lua_gettop(L) == 3:tu=>field name=>nil
+                return 1; //返回nil
             }
 
+            //找到父类的metatable 栈状态lua_gettop(L) == 4:tu=>field name=>mt=>pmt
             // Removethe  metatable and repeat the search in the parent one.
-            assert (lua_istable(L, -1)); // Stack: mt, parent mt
-            lua_remove(L, -2); // Stack: parent mt
+            assert (lua_istable(L, -1));
+            lua_remove(L, -2);
+            //now 栈状态lua_gettop(L) == 3:tu=>field name=>pmt 回到开头在父类的metatable再找一遍
         }
-
-        // no return
     }
 
     //----------------------------------------------------------------------------
