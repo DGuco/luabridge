@@ -275,8 +275,18 @@ int LuaHelper::LuaAssert(lua_State *L, bool condition,const char* file,int line,
         }
 #else
         char Msg[128] = {0};
-        snprintf(Msg,128,"(%s:%d) assert fail: %s `%s' (%s)",file,line,ar.namewhat, ar.name, err_msg);
-        throw std::runtime_error(Msg);
+        std::string filename(file);
+        unsigned long pos = filename.find("\/luabridge\/include");
+        if (pos != std::string::npos)
+        {
+            std::string lastName = filename.substr(pos);
+            snprintf(Msg,128,"(%s:%d) assert fail: %s `%s' (%s)",lastName.c_str(),line,ar.namewhat, ar.name, err_msg);
+        }else
+        {
+            //filename.substr()
+            snprintf(Msg,128,"(%s:%d) assert fail: %s `%s' (%s)","?",line,ar.namewhat, ar.name, err_msg);
+        }
+        throw std::logic_error(Msg);
         return 0;
 #endif
 
