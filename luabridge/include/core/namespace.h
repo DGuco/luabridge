@@ -132,37 +132,41 @@ class Namespace: public detail::Registrar
         {
             std::string type_name = std::string(trueConst ? "const " : "") + name;
 
-            // Stack: namespace table (ns) 栈状态:ns
-            lua_newtable(L); // Stack: ns, const table (co)   栈状态:ns=>co
-            lua_pushvalue(L, -1); // Stack: ns, co, co 栈状态:ns=>co=>co
-            lua_setmetatable(L, -2); // co.__metatable = co,插入const table的__metatable(此时还是空表). Stack: ns, co, 栈状态:ns=>co
-            lua_pushstring(L, type_name.c_str()); // const table name 栈状态:ns=>co=>type_name
-            lua_rawsetp(L, -2, getTypeKey()); // co [typeKey] = name. Stack: ns, co 栈状态:ns=>co
+            // Stack: namespace table (ns) //栈状态lua_gettop(L) == n + 1:栈状态:ns
+            lua_newtable(L); // Stack: ns, const table (co)   栈状态lua_gettop(L) == n + 2:ns=>co
+            lua_pushvalue(L, -1); // Stack: ns, co, co 栈状态lua_gettop(L) == n + 3:ns=>co=>co
+            lua_setmetatable(L, -2); // co.__metatable = co. 栈状态lua_gettop(L) == n + 2:ns=>co
+            lua_pushstring(L, type_name.c_str()); // const table name 栈状态lua_gettop(L)== n + 3:ns=>co=>type_name
+            lua_rawsetp(L, -2, getTypeKey()); // co [typeKey] = name. 栈状态lua_gettop(L)== n + 2:ns=>co
 
             /**
              *https://zilongshanren.com/post/bind-a-simple-cpp-class-in-lua/
              *https://blog.csdn.net/qiuwen_521/article/details/107855867
-             *希望可以用Lua里面的面向对象的方式来访问。
+             *用Lua里面的面向对象的方式来访问。
              *local s = cc.create()
              *s:setName("zilongshanren")
              *s:setAge(20)
              *s:print()
-             *而我们知道s:setName(xx)就等价于s.setName(s,xx)，此时我们只需要给s提供一个metatable,并且给这个metatable设置一个key为"__index"，
-             *value等于它本身的metatable。最后，只需要把之前Student类的一些方法添加到这个metatable里面就可以了。
+             *s:setName(xx)就等价于s.setName(s,xx)，此时我们只需要给s提供一个metatable,并且给这个metatable设置一个key为"__index"，
+             *value等于它本身的metatable。最后，只需要把之前Student类的一些方法添加到这个metatable里面就可以了,或者key为"__index"，
+             *value位一个function(t,k)类型的函数，函数中可以根据k获取对应的类的方法,这里的实现是后者
             **/
-            lua_pushcfunction(L, &CFunc::IndexMetaMethod); //栈状态:ns=>co=>IndexMetaMethod
+            lua_pushcfunction(L, &CFunc::IndexMetaMethod); //栈状态lua_gettop(L)== n + 3:ns=>co=>IndexMetaMethod
+            //co.__index = &CFunc::IndexMetaMethod 栈状态lua_gettop(L)== n + 2:ns=>co
             LuaHelper::RawSetField(L, -2, "__index");
 
-            lua_pushcfunction(L, &CFunc::newindexObjectMetaMethod);
+            lua_pushcfunction(L, &CFunc::newindexObjectMetaMethod); //栈状态lua_gettop(L)== n + 3:ns=>co=>newindexObjectMetaMethod
+            //co.__newindex = &CFunc::newindexObjectMetaMethod 栈状态lua_gettop(L)== n + 2:ns=>co
             LuaHelper::RawSetField(L, -2, "__newindex");
 
-            lua_newtable(L);
-            lua_rawsetp(L, -2, getPropgetKey());
+            lua_newtable(L); //propget table(gt) 栈状态lua_gettop(L)== n + 3:ns=>co=>gt
+            lua_rawsetp(L, -2, getPropgetKey());//co[progetkey] = gt 栈状态lua_gettop(L)== n + 2:ns=>co
 
             if (Security::hideMetatables()) {
-                lua_pushnil(L);
-                LuaHelper::RawSetField(L, -2, "__metatable");
+                lua_pushnil(L);  //栈状态lua_gettop(L)== n + 3:ns=>co=>nil
+                LuaHelper::RawSetField(L, -2, "__metatable"); //co.__metatable = nil 栈状态lua_gettop(L)== n + 2:ns=>co
             }
+            //now 栈状态lua_gettop(L)== n + 2:ns=>co
         }
 
         //--------------------------------------------------------------------------
@@ -287,51 +291,56 @@ class Namespace: public detail::Registrar
             : ClassBase(parent)
         {
             //栈顶是否是表(_G)
-            assert (lua_istable(L, -1)); // Stack: namespace table (ns) 栈状态:ns
+            assert (lua_istable(L, -1)); //栈状态lua_gettop(L)== n + 1:ns
             //尝试find类的metadata表_G[name]
-            LuaHelper::RawGetField(L, -1, name); // Stack: ns, static table (st) | nil 栈状态:ns=>st(or nil)
+            LuaHelper::RawGetField(L, -1, name); // st = _G[name] 栈状态ua_gettop(L)== n + 2:ns=>st|nil
 
             //表不存在create it
             if (lua_isnil(L, -1)) // Stack: ns, nil 栈状态:ns=>st(or nil)
             {
                 //弹出nil值
-                lua_pop(L, 1); // Stack: ns 栈状态:ns
-                //create类的const metadata表
-                createConstTable(name); // Stack: ns, const table (co) 栈状态:ns=>co
+                lua_pop(L, 1); // Stack: ns 栈状态ua_gettop(L)== n + 1:ns
+                //create类的const metadata表(co),and set co.__metatable = co
+                createConstTable(name);
+                //now 栈状态lua_gettop(L)== n + 2:ns=>co
                 //注册gc元方法
-                lua_pushcfunction(L, &CFunc::gcMetaMethod<T>); // Stack: ns, co, gcfun 栈状态:ns=>co=>gcfun
-                LuaHelper::RawSetField(L, -2, "__gc"); // Stack: ns, co 栈状态:ns=>co
+                lua_pushcfunction(L, &CFunc::gcMetaMethod<T>); // 栈状态lua_gettop(L)== n + 3:ns=>co=>gcfun
+                //co.__gc = gcfun 即co.__metatable.__gc = gcfun 栈状态lua_gettop(L)== n + 2:ns=>co
+                LuaHelper::RawSetField(L, -2, "__gc");
                 ++m_stackSize;
 
-                //create类的非const metadata表
-                createClassTable(name); // Stack: ns, co, class table (cl) 栈状态:ns=>co=>cl
+                //create类的非const metadata表 and set cl.__metatable = cl
+                createClassTable(name); //class table (cl) stack栈状态lua_gettop(L)== n + 3:ns=>co=>cl
+                //now 栈状态lua_gettop(L) == n + 3:ns=>co=>cl
                 //注册gc元方法
-                lua_pushcfunction(L, &CFunc::gcMetaMethod<T>); // Stack: ns, co, cl, gcfun 栈状态:ns=>co=>cl=>gcfun
-                LuaHelper::RawSetField(L, -2, "__gc"); // Stack: ns, co, cl  栈状态:ns=>co=>cl
+                lua_pushcfunction(L, &CFunc::gcMetaMethod<T>); //gcfun stack栈状态lua_gettop(L)== n + 4:ns=>co=>cl=>gcfun
+                //cl.__gc = gcfun 即 cl.__metatable.__gc = gcfun stack栈状态lua_gettop(L)== n + 3:ns=>co=>cl
+                LuaHelper::RawSetField(L, -2, "__gc");
                 ++m_stackSize;
 
-                //create类的static metadata表
+                //create类的static metadata表 and set st.__metatable = st
                 createStaticTable(name); // Stack: ns, co, cl, st 栈状态:ns=>co=>cl=>st
+                //now 栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
                 ++m_stackSize;
 
                 //Map T back to its tables.
                 //把st元表作一个副本压栈。
-                lua_pushvalue(L, -1); // Stack: ns, co, cl, st, st 栈状态:ns=>co=>cl=>st=>st
+                lua_pushvalue(L, -1); // 栈状态lua_gettop(L) == n + 5:ns=>co=>cl=>st=>st
                 //把static metadata表插入registry表
-                lua_rawsetp(L, LUA_REGISTRYINDEX, ClassInfo<T>::getStaticKey()); // Stack: ns, co, cl, st 栈状态:ns=>co=>cl=>st
+                lua_rawsetp(L, LUA_REGISTRYINDEX, ClassInfo<T>::getStaticKey()); //stack栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
                 //把cl元表作一个副本压栈。
-                lua_pushvalue(L, -2); // Stack: ns, co, cl, st, cl 栈状态:ns=>co=>cl=>st=>cl
+                lua_pushvalue(L, -2); // stack 栈状态lua_gettop(L) == n + 5:ns=>co=>cl=>st=>cl
                 //把metadata表插入registry表
-                lua_rawsetp(L, LUA_REGISTRYINDEX, ClassInfo<T>::getClassKey()); // Stack: ns, co, cl, st 栈状态:ns=>co=>cl=>st
+                lua_rawsetp(L, LUA_REGISTRYINDEX, ClassInfo<T>::getClassKey()); //stack栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
                 //把co元表作一个副本压栈。
-                lua_pushvalue(L, -3); // Stack: ns, co, cl, st, co 栈状态:ns=>co=>cl=>st=>co
+                lua_pushvalue(L, -3); // 栈状态lua_gettop(L) == n + 5:ns=>co=>cl=>st=>co
                 //把const metadata表插入registry表
-                lua_rawsetp(L, LUA_REGISTRYINDEX, ClassInfo<T>::getConstKey()); // Stack: ns, co, cl, st 栈状态:ns=>co=>cl=>st
+                lua_rawsetp(L, LUA_REGISTRYINDEX, ClassInfo<T>::getConstKey()); //stack栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
 
-                //now 栈状态:ns=>co=>cl=>st
+                //now stack栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
             }
             else { //表存在
-                assert (lua_istable(L, -1)); // Stack: ns, st  栈状态:ns=>st
+                assert (lua_istable(L, -1)); // Stack: 栈状态ua_gettop(L)== n + 2:ns=>st
                 ++m_stackSize;
 
                 // Map T back from its stored tables
@@ -925,8 +934,6 @@ private:
         : Registrar(L)
     {
         lua_getglobal(L, "_G");
-        int top = lua_gettop(L);
-        int ret = lua_type(L,-1);
         ++m_stackSize;
     }
 
