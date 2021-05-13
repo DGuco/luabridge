@@ -66,12 +66,6 @@ struct OuterClass
 
 int main(void)
 {
-    const void* key = ClassInfo<int>::getClassKey();
-    key = ClassInfo<float>::getConstKey();
-    key = ClassInfo<int>::getStaticKey();
-    key = ClassInfo<float>::getClassKey();
-    key = ClassInfo<int>::getConstKey();
-    key = ClassInfo<float>::getStaticKey();
     lua_State* L =  luaL_newstate();
     LuaBridge luaBridge(L);
 

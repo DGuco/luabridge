@@ -310,8 +310,11 @@ class Namespace: public detail::Registrar
               __index = &CFunc::IndexMetaMethod,
               __newindex = &CFunc::newindexStaticMetaMethod,
               __gc = &CFunc::gcMetaMethod<T>,
-              propgetKey = {},
+              __call = class Constructor(class Constructor 会被注册在这个表里),
+              propgetKey = {table}(通过addProperty注册普通成员变量的get方法会注册在这里),
               classKey = cl,
+              func1_name = func1,(普通成员函数1 会被注册在这个表里),
+              func2_name = func12,(普通成员函数2 会被注册在这个表里),
           }
 
           cl(class table) = {
@@ -320,17 +323,21 @@ class Namespace: public detail::Registrar
               __index = &CFunc::IndexMetaMethod,
               __newindex = &CFunc::newindexStaticMetaMethod,
               __gc = &CFunc::gcMetaMethod<T>,
-              propgetKey = {}(table),
-              propsetKey = {}(table),
+              propgetKey = {}(table)(通过addProperty注册普通成员变量的get方法也会注册在这里),
+              propsetKey = {}(table)(通过addProperty注册普通成员变量的set方法也会注册在这里),,
               constKey = co,
+              func1_name = func1,(普通成员函数1 也会被注册在这个表里),
+              func2_name = func12,(普通成员函数2 也会被注册在这个表里),
           }
 
           st(static table) = {
               __index = &CFunc::IndexMetaMethod,
               __newindex = &CFunc::newindexStaticMetaMethod,
-              propgetKey = {}(table),
-              propsetKey = {}(table),
+              propgetKey = {}(table)(通过addStaticProperty注册静态成员变量的get方法会注册在这里),
+              propsetKey = {}(table)(通过addStaticProperty注册静态成员变量的set方法会注册在这里),
               classKey = cl,
+              static_func1_name = func1,(static成员函数1 也会被注册在这个表里),
+              static_ffunc2_name = func12,(static成员函数2 也会被注册在这个表里),
           }
 
           _G = {
@@ -383,44 +390,29 @@ class Namespace: public detail::Registrar
                 //把st元表作一个副本压栈。
                 lua_pushvalue(L, -1); // 栈状态lua_gettop(L) == n + 5:ns=>co=>cl=>st=>st
                 //把static metadata表插入registry表
-                lua_rawsetp(L,
-                            LUA_REGISTRYINDEX,
-                            ClassInfo<T>::getStaticKey()); //stack栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
+                lua_rawsetp(L, LUA_REGISTRYINDEX, ClassInfo<T>::getStaticKey()); //stack栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
                 //把cl元表作一个副本压栈。
                 lua_pushvalue(L, -2); // stack 栈状态lua_gettop(L) == n + 5:ns=>co=>cl=>st=>cl
                 //把metadata表插入registry表
-                lua_rawsetp(L,
-                            LUA_REGISTRYINDEX,
-                            ClassInfo<T>::getClassKey()); //stack栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
+                lua_rawsetp(L, LUA_REGISTRYINDEX, ClassInfo<T>::getClassKey()); //stack栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
                 //把co元表作一个副本压栈。
                 lua_pushvalue(L, -3); // 栈状态lua_gettop(L) == n + 5:ns=>co=>cl=>st=>co
                 //把const metadata表插入registry表
-                lua_rawsetp(L,
-                            LUA_REGISTRYINDEX,
-                            ClassInfo<T>::getConstKey()); //stack栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
+                lua_rawsetp(L, LUA_REGISTRYINDEX, ClassInfo<T>::getConstKey()); //stack栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
 
                 //now stack栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
             }
             else { //表存在
-                LUA_ASSERT_EX (L,
-                               lua_istable(L, -1),
-                               "lua_istable(L, -1)",
-                               false); // Stack: 栈状态ua_gettop(L)== n + 2:ns=>st
+                LUA_ASSERT_EX (L, lua_istable(L, -1), "lua_istable(L, -1)", false); // Stack: 栈状态ua_gettop(L)== n + 2:ns=>st
                 ++m_stackSize;
 
                 // Map T back from its stored tables
-
-
-                lua_rawgetp(L,
-                            LUA_REGISTRYINDEX,
-                            ClassInfo<T>::getConstKey()); // Stack 栈状态ua_gettop(L)== n + 3:ns=>st=>co
+                lua_rawgetp(L, LUA_REGISTRYINDEX, ClassInfo<T>::getConstKey()); // Stack 栈状态ua_gettop(L)== n + 3:ns=>st=>co
                 //调整co的位置
                 lua_insert(L, -2); // Stack 栈状态ua_gettop(L)== n + 3:ns=>co=>st
                 ++m_stackSize;
 
-                lua_rawgetp(L,
-                            LUA_REGISTRYINDEX,
-                            ClassInfo<T>::getClassKey()); // Stack 栈状态ua_gettop(L)== n + 4:ns=>co=>st=>cl
+                lua_rawgetp(L, LUA_REGISTRYINDEX, ClassInfo<T>::getClassKey()); // Stack 栈状态ua_gettop(L)== n + 4:ns=>co=>st=>cl
                 //调整cl的位置
                 lua_insert(L, -2); // Stack 栈状态ua_gettop(L)== n + 4:ns=>co=>cl=>st
                 ++m_stackSize;
@@ -739,9 +731,7 @@ class Namespace: public detail::Registrar
 
 #ifdef LUABRIDGE_CXX11
         template<class TG, class TS = TG>
-        Class<T> &addProperty(char const *name,
-                              std::function<TG(const T *)> get,
-                              std::function<void(T *, TS)> set = nullptr)
+        Class<T> &addProperty(char const *name, std::function<TG(const T *)> get, std::function<void(T *, TS)> set = nullptr)
         {
             using GetType = decltype(get);
             new(lua_newuserdata(L, sizeof(get))) GetType(std::move(get)); // Stack: co, cl, st, function userdata (ud)
