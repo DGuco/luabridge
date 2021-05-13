@@ -62,7 +62,7 @@ public:
      * @param err_msg
      * @return never return when assert failed
      */
-    static int LuaAssert(lua_State *L, bool condition,char* file,int line,const char *err_msg);
+    static int LuaAssert(lua_State *L, bool condition,const char* file,int line,const char *err_msg);
 
     /**
      * param count
@@ -207,7 +207,7 @@ bool LuaHelper::CheckLuaArg_Str(lua_State *L, int Index)
     return false;
 }
 
-int LuaHelper::LuaAssert(lua_State *L, bool condition,char* file,int line ,const char *err_msg)
+int LuaHelper::LuaAssert(lua_State *L, bool condition,const char* file,int line,const char *err_msg)
 {
     if (!condition) {
         lua_Debug ar;
@@ -236,7 +236,7 @@ int LuaHelper::LuaAssert(lua_State *L, bool condition,char* file,int line ,const
          * 如果用g++重新编译lua源码不会有问题
          **/
 #ifdef COMPILE_LUA_WITH_CXX
-        return luaL_error(L, "(%s:%d) assert fail: %s `%s' (%s)",file,line,ar.namewhat, ar.name, err_msg);
+        return luaL_error(L, "(%s:%d assert fail) %s `%s' (%s)",file,line,ar.namewhat, ar.name, err_msg);
 #else
         char Msg[128] = {0};
         snprintf(Msg,128,"(%s:%d) assert fail: %s `%s' (%s)",file,line,ar.namewhat, ar.name, err_msg);

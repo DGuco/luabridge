@@ -76,11 +76,12 @@ struct CFunc
     {
         //栈状态lua_gettop(L) == 2:tu(t)=>field name(k)
         //check第一个元素是否是一个表或者userdata
-        assert (lua_istable(L, 1) || lua_isuserdata(L, 1));
+        LUA_ASSERT(L,lua_istable(L, 1) || lua_isuserdata(L, 1),"lua_istable(L, 1) || lua_isuserdata(L, 1)");
 
         //将其元表压栈
-        assert (lua_getmetatable(L, 1)); //mt = tu.__metatable 栈状态lua_gettop(L) == 3:tu=>field name=>mt
-        assert (lua_istable(L, -1));
+        LUA_ASSERT (L,lua_getmetatable(L, 1) == 1,"lua_getmetatable(L, 1) == 1");
+        //mt = tu.__metatable 栈状态lua_gettop(L) == 3:tu=>field name=>mt
+        LUA_ASSERT (L,lua_istable(L, -1),"lua_istable(L, 1)");
 
         for (;;) {
             lua_pushvalue(L, 2); // 栈状态lua_gettop(L)==4:tu=>field name =>mt =>field name
@@ -94,11 +95,12 @@ struct CFunc
             }
 
             //没有找到了name对应的函数
-            assert (lua_isnil(L, -1)); // 栈状态lua_gettop(L) == 4:tu=>field name=>mt=>nil
+            // 栈状态lua_gettop(L) == 4:tu=>field name=>mt=>nil
+            LUA_ASSERT (L,lua_isnil(L, -1),"lua_istable(L, 1)");
             lua_pop (L, 1); // 栈状态lua_gettop(L) == 3:tu=>field name=>mt
 
             lua_rawgetp(L, -1, getPropgetKey()); //pg=mg['getkey']  栈状态lua_gettop(L) == 4:tu=>field name=>mt=>pg
-            assert (lua_istable(L, -1));
+            LUA_ASSERT (L,lua_istable(L, -1),"lua_istable(L, 1)");
 
             lua_pushvalue(L, 2); //栈状态lua_gettop(L) == 5:tu=>field name=>mt=>pg=>field name
             lua_rawget(L, -2);  //getter = pg[field name]栈状态lua_gettop(L) == 5:tu=>field name=>mt=>pg=>getter|nil
@@ -121,7 +123,8 @@ struct CFunc
             }
 
             //没有找到了name对应getter的函数
-            assert (lua_isnil(L, -1)); // 栈状态lua_gettop(L) == 4:tu=>field name=>mt=>nil
+            // 栈状态lua_gettop(L) == 4:tu=>field name=>mt=>nil
+            LUA_ASSERT (L,lua_isnil(L, -1),"lua_isnil(L, -1)");
             lua_pop (L, 1);            // 栈状态lua_gettop(L) == 3:tu=>field name=>mt
 
             // It may mean that the field may be in const table and it's constness violation.
@@ -141,7 +144,7 @@ struct CFunc
 
             //找到父类的metatable 栈状态lua_gettop(L) == 4:tu=>field name=>mt=>pmt
             // Removethe  metatable and repeat the search in the parent one.
-            assert (lua_istable(L, -1));
+            LUA_ASSERT (L,lua_istable(L, -1),"lua_istable(L, -1)");
             lua_remove(L, -2);
             //now 栈状态lua_gettop(L) == 3:tu=>field name=>pmt 回到开头在父类的metatable再找一遍
         }
@@ -330,10 +333,10 @@ struct CFunc
 
         static int f(lua_State *L)
         {
-            LUA_ASSERT(L,LuaHelper::IsFullUserData(L, lua_upvalueindex(1)),"CallMember::f Assert IsFullUserData failed");
+            LUA_ASSERT(L,LuaHelper::IsFullUserData(L, lua_upvalueindex(1)),"CallMember::f IsFullUserData");
             T *const t = Userdata::get<T>(L, 1, false);
             MemFnPtr const &fnptr = *static_cast <MemFnPtr const *> (lua_touserdata(L, lua_upvalueindex (1)));
-            LUA_ASSERT(L,fnptr != 0,"CallMember::f Assert fnptr != 0 failed");
+            LUA_ASSERT(L,fnptr != 0,"CallMember::f fnptr != 0 ");
             return Invoke<ReturnType, Params, 2>::run(L, t, fnptr);
         }
     };
