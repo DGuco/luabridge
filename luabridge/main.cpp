@@ -58,9 +58,9 @@ struct OuterClass
         printf("~OuterClass\n");
     }
 
-    void Say()
+    void Say(char* world)
     {
-        printf("*****OuterClass::Say******\n");
+        printf("*****OuterClass::Say: %s******\n",world);
     }
 };
 
@@ -75,7 +75,7 @@ int main(void)
         .addConstructor<void(*)()>()
         .addFunction("Say",&OuterClass::Say)
         .endClass ();
-
+    int top = lua_gettop(L);
     luaBridge.LoadFile("../script/111111.lua");
     int ret = luaBridge.Call<int>("x11111_PrintG");
     printf("ret = %d\n", ret);

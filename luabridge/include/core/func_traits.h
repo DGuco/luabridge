@@ -47,13 +47,13 @@ template<class ReturnType,class... ParamList>
 struct Caller<0,ReturnType,ParamList...>
 {
     template<class Fn>
-    static ReturnType f(lua_State*L,Fn &fn)
+    static ReturnType f(lua_State*L,Fn &fn,int startParam)
     {
         return fn();
     }
 
     template<class T, class MemFn>
-    static ReturnType f(lua_State*L,T *obj, MemFn &fn)
+    static ReturnType f(lua_State*L,T *obj, MemFn &fn,int startParam)
     {
         return (obj->*fn)();
     }
@@ -63,15 +63,15 @@ template<class ReturnType,class... ParamList>
 struct Caller<1,ReturnType,ParamList...>
 {
     template<class Fn>
-    static ReturnType f(lua_State*L,Fn &fn)
+    static ReturnType f(lua_State*L,Fn &fn,int startParam)
     {
-        return fn(Stack<LUA_PARAM_TYPE(0)>::get(L,1));
+        return fn(Stack<LUA_PARAM_TYPE(0)>::get(L,startParam + 0));
     }
 
     template<class T, class MemFn>
-    static ReturnType f(lua_State*L,T *obj, MemFn &fn)
+    static ReturnType f(lua_State*L,T *obj, MemFn &fn,int startParam)
     {
-        return (obj->*fn)(Stack<LUA_PARAM_TYPE(0)>::get(L,1));
+        return (obj->*fn)(Stack<LUA_PARAM_TYPE(0)>::get(L,startParam + 0));
     }
 };
 
@@ -79,17 +79,17 @@ template<class ReturnType,class... ParamList>
 struct Caller<2,ReturnType,ParamList...>
 {
     template<class Fn>
-    static ReturnType f(lua_State*L,Fn &fn)
+    static ReturnType f(lua_State*L,Fn &fn,int startParam)
     {
-        return fn(Stack<LUA_PARAM_TYPE(0)>::get(L,1),
-                  Stack<LUA_PARAM_TYPE(1)>::get(L,2));
+        return fn(Stack<LUA_PARAM_TYPE(0)>::get(L,startParam + 0),
+                  Stack<LUA_PARAM_TYPE(1)>::get(L,startParam + 1));
     }
 
     template<class T, class MemFn>
-    static ReturnType f(lua_State*L,T *obj, MemFn &fn)
+    static ReturnType f(lua_State*L,T *obj, MemFn &fn,int startParam)
     {
-        return (obj->*fn)(Stack<LUA_PARAM_TYPE(0)>::get(L,1),
-                          Stack<LUA_PARAM_TYPE(1)>::get(L,2));
+        return (obj->*fn)(Stack<LUA_PARAM_TYPE(0)>::get(L,startParam + 0),
+                          Stack<LUA_PARAM_TYPE(1)>::get(L,startParam + 1));
     }
 };
 
@@ -97,19 +97,19 @@ template<class ReturnType,class... ParamList>
 struct Caller<3,ReturnType,ParamList...>
 {
     template<class Fn>
-    static ReturnType f(lua_State*L,Fn &fn)
+    static ReturnType f(lua_State*L,Fn &fn,int startParam)
     {
-        return fn(Stack<LUA_PARAM_TYPE(0)>::get(L,1),
-                  Stack<LUA_PARAM_TYPE(1)>::get(L,2),
-                  Stack<LUA_PARAM_TYPE(2)>::get(L,3));
+        return fn(Stack<LUA_PARAM_TYPE(0)>::get(L,startParam + 0),
+                  Stack<LUA_PARAM_TYPE(1)>::get(L,startParam + 1),
+                  Stack<LUA_PARAM_TYPE(2)>::get(L,startParam + 2));
     }
 
     template<class T, class MemFn>
-    static ReturnType f(lua_State*L,T *obj, MemFn &fn)
+    static ReturnType f(lua_State*L,T *obj, MemFn &fn,int startParam)
     {
-        return (obj->*fn)(Stack<LUA_PARAM_TYPE(0)>::get(L,1),
-                          Stack<LUA_PARAM_TYPE(1)>::get(L,2),
-                          Stack<LUA_PARAM_TYPE(2)>::get(L,3));
+        return (obj->*fn)(Stack<LUA_PARAM_TYPE(0)>::get(L,startParam + 0),
+                          Stack<LUA_PARAM_TYPE(1)>::get(L,startParam + 1),
+                          Stack<LUA_PARAM_TYPE(2)>::get(L,startParam + 2));
     }
 };
 
@@ -117,21 +117,21 @@ template<class ReturnType,class... ParamList>
 struct Caller<4,ReturnType,ParamList...>
 {
     template<class Fn>
-    static ReturnType f(lua_State*L,Fn &fn)
+    static ReturnType f(lua_State*L,Fn &fn,int startParam)
     {
-        return fn(Stack<LUA_PARAM_TYPE(0)>::get(L,1),
-                  Stack<LUA_PARAM_TYPE(1)>::get(L,2),
-                  Stack<LUA_PARAM_TYPE(2)>::get(L,3),
-                  Stack<LUA_PARAM_TYPE(3)>::get(L,4));
+        return fn(Stack<LUA_PARAM_TYPE(0)>::get(L,startParam + 0),
+                  Stack<LUA_PARAM_TYPE(1)>::get(L,startParam + 1),
+                  Stack<LUA_PARAM_TYPE(2)>::get(L,startParam + 2),
+                  Stack<LUA_PARAM_TYPE(3)>::get(L,startParam + 3));
     }
 
     template<class T, class MemFn>
-    static ReturnType f(lua_State*L,T *obj, MemFn &fn)
+    static ReturnType f(lua_State*L,T *obj, MemFn &fn,int startParam)
     {
-        return (obj->*fn)(Stack<LUA_PARAM_TYPE(0)>::get(L,1),
-                          Stack<LUA_PARAM_TYPE(1)>::get(L,2),
-                          Stack<LUA_PARAM_TYPE(2)>::get(L,3),
-                          Stack<LUA_PARAM_TYPE(3)>::get(L,4));
+        return (obj->*fn)(Stack<LUA_PARAM_TYPE(0)>::get(L,startParam + 0),
+                          Stack<LUA_PARAM_TYPE(1)>::get(L,startParam + 1),
+                          Stack<LUA_PARAM_TYPE(2)>::get(L,startParam + 2),
+                          Stack<LUA_PARAM_TYPE(3)>::get(L,startParam + 3));
     }
 };
 
@@ -139,50 +139,49 @@ template<class ReturnType,class... ParamList>
 struct Caller<5,ReturnType,ParamList...>
 {
     template<class Fn>
-    static ReturnType f(lua_State*L,Fn &fn)
+    static ReturnType f(lua_State*L,Fn &fn,int startParam)
     {
-        return fn(Stack<LUA_PARAM_TYPE(0)>::get(L,1),
-                  Stack<LUA_PARAM_TYPE(1)>::get(L,2),
-                  Stack<LUA_PARAM_TYPE(2)>::get(L,3),
-                  Stack<LUA_PARAM_TYPE(3)>::get(L,4),
-                  Stack<LUA_PARAM_TYPE(4)>::get(L,5));
+        return fn(Stack<LUA_PARAM_TYPE(0)>::get(L,startParam + 0),
+                  Stack<LUA_PARAM_TYPE(1)>::get(L,startParam + 1),
+                  Stack<LUA_PARAM_TYPE(2)>::get(L,startParam + 2),
+                  Stack<LUA_PARAM_TYPE(3)>::get(L,startParam + 3),
+                  Stack<LUA_PARAM_TYPE(4)>::get(L,startParam + 4));
     }
 
     template<class T, class MemFn>
-    static ReturnType f(lua_State*L,T *obj, MemFn &fn)
+    static ReturnType f(lua_State*L,T *obj, MemFn &fn,int startParam)
     {
-        return (obj->*fn)(Stack<LUA_PARAM_TYPE(0)>::get(L,1),
-                          Stack<LUA_PARAM_TYPE(1)>::get(L,2),
-                          Stack<LUA_PARAM_TYPE(2)>::get(L,3),
-                          Stack<LUA_PARAM_TYPE(3)>::get(L,4),
-                          Stack<LUA_PARAM_TYPE(4)>::get(L,5));
+        return (obj->*fn)(Stack<LUA_PARAM_TYPE(0)>::get(L,startParam + 0),
+                          Stack<LUA_PARAM_TYPE(1)>::get(L,startParam + 1),
+                          Stack<LUA_PARAM_TYPE(2)>::get(L,startParam + 2),
+                          Stack<LUA_PARAM_TYPE(3)>::get(L,startParam + 3),
+                          Stack<LUA_PARAM_TYPE(4)>::get(L,startParam + 4));
     }
 };
-
 
 template<class ReturnType,class... ParamList>
 struct Caller<6,ReturnType,ParamList...>
 {
     template<class Fn>
-    static ReturnType f(lua_State*L,Fn &fn)
+    static ReturnType f(lua_State*L,Fn &fn,int startParam)
     {
-        return fn(Stack<LUA_PARAM_TYPE(0)>::get(L,1),
-                  Stack<LUA_PARAM_TYPE(1)>::get(L,2),
-                  Stack<LUA_PARAM_TYPE(2)>::get(L,3),
-                  Stack<LUA_PARAM_TYPE(3)>::get(L,4),
-                  Stack<LUA_PARAM_TYPE(4)>::get(L,5),
-                  Stack<LUA_PARAM_TYPE(5)>::get(L,6));
+        return fn(Stack<LUA_PARAM_TYPE(0)>::get(L,startParam + 0),
+                  Stack<LUA_PARAM_TYPE(1)>::get(L,startParam + 1),
+                  Stack<LUA_PARAM_TYPE(2)>::get(L,startParam + 2),
+                  Stack<LUA_PARAM_TYPE(3)>::get(L,startParam + 3),
+                  Stack<LUA_PARAM_TYPE(4)>::get(L,startParam + 4),
+                  Stack<LUA_PARAM_TYPE(5)>::get(L,startParam + 5));
     }
 
     template<class T, class MemFn>
-    static ReturnType f(lua_State*L,T *obj, MemFn &fn)
+    static ReturnType f(lua_State*L,T *obj, MemFn &fn,int startParam)
     {
-        return (obj->*fn)(Stack<LUA_PARAM_TYPE(0)>::get(L,1),
-                          Stack<LUA_PARAM_TYPE(1)>::get(L,2),
-                          Stack<LUA_PARAM_TYPE(2)>::get(L,3),
-                          Stack<LUA_PARAM_TYPE(3)>::get(L,4),
-                          Stack<LUA_PARAM_TYPE(4)>::get(L,5),
-                          Stack<LUA_PARAM_TYPE(5)>::get(L,6));
+        return (obj->*fn)(Stack<LUA_PARAM_TYPE(0)>::get(L,startParam + 0),
+                          Stack<LUA_PARAM_TYPE(1)>::get(L,startParam + 1),
+                          Stack<LUA_PARAM_TYPE(2)>::get(L,startParam + 2),
+                          Stack<LUA_PARAM_TYPE(3)>::get(L,startParam + 3),
+                          Stack<LUA_PARAM_TYPE(4)>::get(L,startParam + 4),
+                          Stack<LUA_PARAM_TYPE(5)>::get(L,startParam + 5));
     }
 };
 
@@ -190,27 +189,27 @@ template<class ReturnType,class... ParamList>
 struct Caller<7,ReturnType,ParamList...>
 {
     template<class Fn>
-    static ReturnType f(lua_State*L,Fn &fn)
+    static ReturnType f(lua_State*L,Fn &fn,int startParam)
     {
-        return fn(Stack<LUA_PARAM_TYPE(0)>::get(L,1),
-                  Stack<LUA_PARAM_TYPE(1)>::get(L,2),
-                  Stack<LUA_PARAM_TYPE(2)>::get(L,3),
-                  Stack<LUA_PARAM_TYPE(3)>::get(L,4),
-                  Stack<LUA_PARAM_TYPE(4)>::get(L,5),
-                  Stack<LUA_PARAM_TYPE(5)>::get(L,6),
-                  Stack<LUA_PARAM_TYPE(6)>::get(L,7));
+        return fn(Stack<LUA_PARAM_TYPE(0)>::get(L,startParam + 0),
+                  Stack<LUA_PARAM_TYPE(1)>::get(L,startParam + 1),
+                  Stack<LUA_PARAM_TYPE(2)>::get(L,startParam + 2),
+                  Stack<LUA_PARAM_TYPE(3)>::get(L,startParam + 3),
+                  Stack<LUA_PARAM_TYPE(4)>::get(L,startParam + 4),
+                  Stack<LUA_PARAM_TYPE(5)>::get(L,startParam + 5),
+                  Stack<LUA_PARAM_TYPE(6)>::get(L,startParam + 6));
     }
 
     template<class T, class MemFn>
-    static ReturnType f(lua_State*L,T *obj, MemFn &fn)
+    static ReturnType f(lua_State*L,T *obj, MemFn &fn,int startParam)
     {
-        return (obj->*fn)(Stack<LUA_PARAM_TYPE(0)>::get(L,1),
-                          Stack<LUA_PARAM_TYPE(1)>::get(L,2),
-                          Stack<LUA_PARAM_TYPE(2)>::get(L,3),
-                          Stack<LUA_PARAM_TYPE(3)>::get(L,4),
-                          Stack<LUA_PARAM_TYPE(4)>::get(L,5),
-                          Stack<LUA_PARAM_TYPE(5)>::get(L,6),
-                          Stack<LUA_PARAM_TYPE(6)>::get(L,7));
+        return (obj->*fn)(Stack<LUA_PARAM_TYPE(0)>::get(L,startParam + 0),
+                          Stack<LUA_PARAM_TYPE(1)>::get(L,startParam + 1),
+                          Stack<LUA_PARAM_TYPE(2)>::get(L,startParam + 2),
+                          Stack<LUA_PARAM_TYPE(3)>::get(L,startParam + 3),
+                          Stack<LUA_PARAM_TYPE(4)>::get(L,startParam + 4),
+                          Stack<LUA_PARAM_TYPE(5)>::get(L,startParam + 5),
+                          Stack<LUA_PARAM_TYPE(6)>::get(L,startParam + 6));
     }
 };
 
@@ -218,29 +217,29 @@ template<class ReturnType,class... ParamList>
 struct Caller<8,ReturnType,ParamList...>
 {
     template<class Fn>
-    static ReturnType f(lua_State*L,Fn &fn)
+    static ReturnType f(lua_State*L,Fn &fn,int startParam)
     {
-        return fn(Stack<LUA_PARAM_TYPE(0)>::get(L,1),
-                  Stack<LUA_PARAM_TYPE(1)>::get(L,2),
-                  Stack<LUA_PARAM_TYPE(2)>::get(L,3),
-                  Stack<LUA_PARAM_TYPE(3)>::get(L,4),
-                  Stack<LUA_PARAM_TYPE(4)>::get(L,5),
-                  Stack<LUA_PARAM_TYPE(5)>::get(L,6),
-                  Stack<LUA_PARAM_TYPE(6)>::get(L,7),
-                  Stack<LUA_PARAM_TYPE(7)>::get(L,8));
+        return fn(Stack<LUA_PARAM_TYPE(0)>::get(L,startParam + 0),
+                  Stack<LUA_PARAM_TYPE(1)>::get(L,startParam + 1),
+                  Stack<LUA_PARAM_TYPE(2)>::get(L,startParam + 2),
+                  Stack<LUA_PARAM_TYPE(3)>::get(L,startParam + 3),
+                  Stack<LUA_PARAM_TYPE(4)>::get(L,startParam + 4),
+                  Stack<LUA_PARAM_TYPE(5)>::get(L,startParam + 5),
+                  Stack<LUA_PARAM_TYPE(6)>::get(L,startParam + 6),
+                  Stack<LUA_PARAM_TYPE(7)>::get(L,startParam + 7));
     }
 
     template<class T, class MemFn>
-    static ReturnType f(lua_State*L,T *obj, MemFn &fn)
+    static ReturnType f(lua_State*L,T *obj, MemFn &fn,int startParam)
     {
-        return (obj->*fn)(Stack<LUA_PARAM_TYPE(0)>::get(L,1),
-                          Stack<LUA_PARAM_TYPE(1)>::get(L,2),
-                          Stack<LUA_PARAM_TYPE(2)>::get(L,3),
-                          Stack<LUA_PARAM_TYPE(3)>::get(L,4),
-                          Stack<LUA_PARAM_TYPE(4)>::get(L,5),
-                          Stack<LUA_PARAM_TYPE(5)>::get(L,6),
-                          Stack<LUA_PARAM_TYPE(6)>::get(L,7),
-                          Stack<LUA_PARAM_TYPE(7)>::get(L,8));
+        return (obj->*fn)(Stack<LUA_PARAM_TYPE(0)>::get(L,startParam + 0),
+                          Stack<LUA_PARAM_TYPE(1)>::get(L,startParam + 1),
+                          Stack<LUA_PARAM_TYPE(2)>::get(L,startParam + 2),
+                          Stack<LUA_PARAM_TYPE(3)>::get(L,startParam + 3),
+                          Stack<LUA_PARAM_TYPE(4)>::get(L,startParam + 4),
+                          Stack<LUA_PARAM_TYPE(5)>::get(L,startParam + 5),
+                          Stack<LUA_PARAM_TYPE(6)>::get(L,startParam + 6),
+                          Stack<LUA_PARAM_TYPE(7)>::get(L,startParam + 7));
     }
 };
 
@@ -248,66 +247,65 @@ template<class ReturnType,class... ParamList>
 struct Caller<9,ReturnType,ParamList...>
 {
     template<class Fn>
-    static ReturnType f(lua_State*L,Fn &fn)
+    static ReturnType f(lua_State*L,Fn &fn,int startParam)
     {
-        return fn(Stack<LUA_PARAM_TYPE(0)>::get(L,1),
-                  Stack<LUA_PARAM_TYPE(1)>::get(L,2),
-                  Stack<LUA_PARAM_TYPE(2)>::get(L,3),
-                  Stack<LUA_PARAM_TYPE(3)>::get(L,4),
-                  Stack<LUA_PARAM_TYPE(4)>::get(L,5),
-                  Stack<LUA_PARAM_TYPE(5)>::get(L,6),
-                  Stack<LUA_PARAM_TYPE(6)>::get(L,7),
-                  Stack<LUA_PARAM_TYPE(7)>::get(L,8),
-                  Stack<LUA_PARAM_TYPE(8)>::get(L,9));
+        return fn(Stack<LUA_PARAM_TYPE(0)>::get(L,startParam + 0),
+                  Stack<LUA_PARAM_TYPE(1)>::get(L,startParam + 1),
+                  Stack<LUA_PARAM_TYPE(2)>::get(L,startParam + 2),
+                  Stack<LUA_PARAM_TYPE(3)>::get(L,startParam + 3),
+                  Stack<LUA_PARAM_TYPE(4)>::get(L,startParam + 4),
+                  Stack<LUA_PARAM_TYPE(5)>::get(L,startParam + 5),
+                  Stack<LUA_PARAM_TYPE(6)>::get(L,startParam + 6),
+                  Stack<LUA_PARAM_TYPE(7)>::get(L,startParam + 7),
+                  Stack<LUA_PARAM_TYPE(8)>::get(L,startParam + 8));
     }
 
     template<class T, class MemFn>
-    static ReturnType f(lua_State*L,T *obj, MemFn &fn)
+    static ReturnType f(lua_State*L,T *obj, MemFn &fn,int startParam)
     {
-        return (obj->*fn)(Stack<LUA_PARAM_TYPE(0)>::get(L,1),
-                          Stack<LUA_PARAM_TYPE(1)>::get(L,2),
-                          Stack<LUA_PARAM_TYPE(2)>::get(L,3),
-                          Stack<LUA_PARAM_TYPE(3)>::get(L,4),
-                          Stack<LUA_PARAM_TYPE(4)>::get(L,5),
-                          Stack<LUA_PARAM_TYPE(5)>::get(L,6),
-                          Stack<LUA_PARAM_TYPE(6)>::get(L,7),
-                          Stack<LUA_PARAM_TYPE(7)>::get(L,8),
-                          Stack<LUA_PARAM_TYPE(8)>::get(L,9));
+        return (obj->*fn)(Stack<LUA_PARAM_TYPE(0)>::get(L,startParam + 0),
+                          Stack<LUA_PARAM_TYPE(1)>::get(L,startParam + 1),
+                          Stack<LUA_PARAM_TYPE(2)>::get(L,startParam + 2),
+                          Stack<LUA_PARAM_TYPE(3)>::get(L,startParam + 3),
+                          Stack<LUA_PARAM_TYPE(4)>::get(L,startParam + 4),
+                          Stack<LUA_PARAM_TYPE(5)>::get(L,startParam + 5),
+                          Stack<LUA_PARAM_TYPE(6)>::get(L,startParam + 6),
+                          Stack<LUA_PARAM_TYPE(7)>::get(L,startParam + 7),
+                          Stack<LUA_PARAM_TYPE(8)>::get(L,startParam + 8));
     }
 };
-
 
 template<class ReturnType,class... ParamList>
 struct Caller<10,ReturnType,ParamList...>
 {
     template<class Fn>
-    static ReturnType f(lua_State*L,Fn &fn)
+    static ReturnType f(lua_State*L,Fn &fn,int startParam)
     {
-        return fn(Stack<LUA_PARAM_TYPE(0)>::get(L,1),
-                  Stack<LUA_PARAM_TYPE(1)>::get(L,2),
-                  Stack<LUA_PARAM_TYPE(2)>::get(L,3),
-                  Stack<LUA_PARAM_TYPE(3)>::get(L,4),
-                  Stack<LUA_PARAM_TYPE(4)>::get(L,5),
-                  Stack<LUA_PARAM_TYPE(5)>::get(L,6),
-                  Stack<LUA_PARAM_TYPE(6)>::get(L,7),
-                  Stack<LUA_PARAM_TYPE(7)>::get(L,8),
-                  Stack<LUA_PARAM_TYPE(8)>::get(L,9),
-                  Stack<LUA_PARAM_TYPE(9)>::get(L,10));
+        return fn(Stack<LUA_PARAM_TYPE(0)>::get(L,startParam + 0),
+                  Stack<LUA_PARAM_TYPE(1)>::get(L,startParam + 1),
+                  Stack<LUA_PARAM_TYPE(2)>::get(L,startParam + 2),
+                  Stack<LUA_PARAM_TYPE(3)>::get(L,startParam + 3),
+                  Stack<LUA_PARAM_TYPE(4)>::get(L,startParam + 4),
+                  Stack<LUA_PARAM_TYPE(5)>::get(L,startParam + 5),
+                  Stack<LUA_PARAM_TYPE(6)>::get(L,startParam + 6),
+                  Stack<LUA_PARAM_TYPE(7)>::get(L,startParam + 7),
+                  Stack<LUA_PARAM_TYPE(8)>::get(L,startParam + 8),
+                  Stack<LUA_PARAM_TYPE(9)>::get(L,startParam + 9));
     }
 
     template<class T, class MemFn>
-    static ReturnType f(lua_State*L,T *obj, MemFn &fn)
+    static ReturnType f(lua_State*L,T *obj, MemFn &fn,int startParam)
     {
-        return (obj->*fn)(Stack<LUA_PARAM_TYPE(0)>::get(L,1),
-                          Stack<LUA_PARAM_TYPE(1)>::get(L,2),
-                          Stack<LUA_PARAM_TYPE(2)>::get(L,3),
-                          Stack<LUA_PARAM_TYPE(3)>::get(L,4),
-                          Stack<LUA_PARAM_TYPE(4)>::get(L,5),
-                          Stack<LUA_PARAM_TYPE(5)>::get(L,6),
-                          Stack<LUA_PARAM_TYPE(6)>::get(L,7),
-                          Stack<LUA_PARAM_TYPE(7)>::get(L,8),
-                          Stack<LUA_PARAM_TYPE(8)>::get(L,9),
-                          Stack<LUA_PARAM_TYPE(9)>::get(L,10));
+        return (obj->*fn)(Stack<LUA_PARAM_TYPE(0)>::get(L,startParam + 0),
+                          Stack<LUA_PARAM_TYPE(1)>::get(L,startParam + 1),
+                          Stack<LUA_PARAM_TYPE(2)>::get(L,startParam + 2),
+                          Stack<LUA_PARAM_TYPE(3)>::get(L,startParam + 3),
+                          Stack<LUA_PARAM_TYPE(4)>::get(L,startParam + 4),
+                          Stack<LUA_PARAM_TYPE(5)>::get(L,startParam + 5),
+                          Stack<LUA_PARAM_TYPE(6)>::get(L,startParam + 6),
+                          Stack<LUA_PARAM_TYPE(7)>::get(L,startParam + 7),
+                          Stack<LUA_PARAM_TYPE(8)>::get(L,startParam + 8),
+                          Stack<LUA_PARAM_TYPE(9)>::get(L,startParam + 9));
     }
 };
 
@@ -315,35 +313,35 @@ template<class ReturnType,class... ParamList>
 struct Caller<11,ReturnType,ParamList...>
 {
     template<class Fn>
-    static ReturnType f(lua_State*L,Fn &fn)
+    static ReturnType f(lua_State*L,Fn &fn,int startParam)
     {
-        return fn(Stack<LUA_PARAM_TYPE(0)>::get(L,1),
-                  Stack<LUA_PARAM_TYPE(1)>::get(L,2),
-                  Stack<LUA_PARAM_TYPE(2)>::get(L,3),
-                  Stack<LUA_PARAM_TYPE(3)>::get(L,4),
-                  Stack<LUA_PARAM_TYPE(4)>::get(L,5),
-                  Stack<LUA_PARAM_TYPE(5)>::get(L,6),
-                  Stack<LUA_PARAM_TYPE(6)>::get(L,7),
-                  Stack<LUA_PARAM_TYPE(7)>::get(L,8),
-                  Stack<LUA_PARAM_TYPE(8)>::get(L,9),
-                  Stack<LUA_PARAM_TYPE(9)>::get(L,10),
-                  Stack<LUA_PARAM_TYPE(10)>::get(L,11));
+        return fn(Stack<LUA_PARAM_TYPE(0)>::get(L,startParam + 0),
+                  Stack<LUA_PARAM_TYPE(1)>::get(L,startParam + 1),
+                  Stack<LUA_PARAM_TYPE(2)>::get(L,startParam + 2),
+                  Stack<LUA_PARAM_TYPE(3)>::get(L,startParam + 3),
+                  Stack<LUA_PARAM_TYPE(4)>::get(L,startParam + 4),
+                  Stack<LUA_PARAM_TYPE(5)>::get(L,startParam + 5),
+                  Stack<LUA_PARAM_TYPE(6)>::get(L,startParam + 6),
+                  Stack<LUA_PARAM_TYPE(7)>::get(L,startParam + 7),
+                  Stack<LUA_PARAM_TYPE(8)>::get(L,startParam + 8),
+                  Stack<LUA_PARAM_TYPE(9)>::get(L,startParam + 9),
+                  Stack<LUA_PARAM_TYPE(10)>::get(L,startParam + 10));
     }
 
     template<class T, class MemFn>
-    static ReturnType f(lua_State*L,T *obj, MemFn &fn)
+    static ReturnType f(lua_State*L,T *obj, MemFn &fn,int startParam)
     {
-        return (obj->*fn)(Stack<LUA_PARAM_TYPE(0)>::get(L,1),
-                          Stack<LUA_PARAM_TYPE(1)>::get(L,2),
-                          Stack<LUA_PARAM_TYPE(2)>::get(L,3),
-                          Stack<LUA_PARAM_TYPE(3)>::get(L,4),
-                          Stack<LUA_PARAM_TYPE(4)>::get(L,5),
-                          Stack<LUA_PARAM_TYPE(5)>::get(L,6),
-                          Stack<LUA_PARAM_TYPE(6)>::get(L,7),
-                          Stack<LUA_PARAM_TYPE(7)>::get(L,8),
-                          Stack<LUA_PARAM_TYPE(8)>::get(L,9),
-                          Stack<LUA_PARAM_TYPE(9)>::get(L,10),
-                          Stack<LUA_PARAM_TYPE(10)>::get(L,11));
+        return (obj->*fn)(Stack<LUA_PARAM_TYPE(0)>::get(L,startParam + 0),
+                          Stack<LUA_PARAM_TYPE(1)>::get(L,startParam + 1),
+                          Stack<LUA_PARAM_TYPE(2)>::get(L,startParam + 2),
+                          Stack<LUA_PARAM_TYPE(3)>::get(L,startParam + 3),
+                          Stack<LUA_PARAM_TYPE(4)>::get(L,startParam + 4),
+                          Stack<LUA_PARAM_TYPE(5)>::get(L,startParam + 5),
+                          Stack<LUA_PARAM_TYPE(6)>::get(L,startParam + 6),
+                          Stack<LUA_PARAM_TYPE(7)>::get(L,startParam + 7),
+                          Stack<LUA_PARAM_TYPE(8)>::get(L,startParam + 8),
+                          Stack<LUA_PARAM_TYPE(9)>::get(L,startParam + 9),
+                          Stack<LUA_PARAM_TYPE(10)>::get(L,startParam + 10));
     }
 };
 
@@ -351,78 +349,77 @@ template<class ReturnType,class... ParamList>
 struct Caller<12,ReturnType,ParamList...>
 {
     template<class Fn>
-    static ReturnType f(lua_State*L,Fn &fn)
+    static ReturnType f(lua_State*L,Fn &fn,int startParam)
     {
-        return fn(Stack<LUA_PARAM_TYPE(0)>::get(L,1),
-                  Stack<LUA_PARAM_TYPE(1)>::get(L,2),
-                  Stack<LUA_PARAM_TYPE(2)>::get(L,3),
-                  Stack<LUA_PARAM_TYPE(3)>::get(L,4),
-                  Stack<LUA_PARAM_TYPE(4)>::get(L,5),
-                  Stack<LUA_PARAM_TYPE(5)>::get(L,6),
-                  Stack<LUA_PARAM_TYPE(6)>::get(L,7),
-                  Stack<LUA_PARAM_TYPE(7)>::get(L,8),
-                  Stack<LUA_PARAM_TYPE(8)>::get(L,9),
-                  Stack<LUA_PARAM_TYPE(9)>::get(L,10),
-                  Stack<LUA_PARAM_TYPE(10)>::get(L,11),
-                  Stack<LUA_PARAM_TYPE(11)>::get(L,12));
+        return fn(Stack<LUA_PARAM_TYPE(0)>::get(L,startParam + 0),
+                  Stack<LUA_PARAM_TYPE(1)>::get(L,startParam + 1),
+                  Stack<LUA_PARAM_TYPE(2)>::get(L,startParam + 2),
+                  Stack<LUA_PARAM_TYPE(3)>::get(L,startParam + 3),
+                  Stack<LUA_PARAM_TYPE(4)>::get(L,startParam + 4),
+                  Stack<LUA_PARAM_TYPE(5)>::get(L,startParam + 5),
+                  Stack<LUA_PARAM_TYPE(6)>::get(L,startParam + 6),
+                  Stack<LUA_PARAM_TYPE(7)>::get(L,startParam + 7),
+                  Stack<LUA_PARAM_TYPE(8)>::get(L,startParam + 8),
+                  Stack<LUA_PARAM_TYPE(9)>::get(L,startParam + 9),
+                  Stack<LUA_PARAM_TYPE(10)>::get(L,startParam + 10),
+                  Stack<LUA_PARAM_TYPE(11)>::get(L,startParam + 11));
     }
 
     template<class T, class MemFn>
-    static ReturnType f(lua_State*L,T *obj, MemFn &fn)
+    static ReturnType f(lua_State*L,T *obj, MemFn &fn,int startParam)
     {
-        return (obj->*fn)(Stack<LUA_PARAM_TYPE(0)>::get(L,1),
-                          Stack<LUA_PARAM_TYPE(1)>::get(L,2),
-                          Stack<LUA_PARAM_TYPE(2)>::get(L,3),
-                          Stack<LUA_PARAM_TYPE(3)>::get(L,4),
-                          Stack<LUA_PARAM_TYPE(4)>::get(L,5),
-                          Stack<LUA_PARAM_TYPE(5)>::get(L,6),
-                          Stack<LUA_PARAM_TYPE(6)>::get(L,7),
-                          Stack<LUA_PARAM_TYPE(7)>::get(L,8),
-                          Stack<LUA_PARAM_TYPE(8)>::get(L,9),
-                          Stack<LUA_PARAM_TYPE(9)>::get(L,10),
-                          Stack<LUA_PARAM_TYPE(10)>::get(L,11),
-                          Stack<LUA_PARAM_TYPE(11)>::get(L,12));
+        return (obj->*fn)(Stack<LUA_PARAM_TYPE(0)>::get(L,startParam + 0),
+                          Stack<LUA_PARAM_TYPE(1)>::get(L,startParam + 1),
+                          Stack<LUA_PARAM_TYPE(2)>::get(L,startParam + 2),
+                          Stack<LUA_PARAM_TYPE(3)>::get(L,startParam + 3),
+                          Stack<LUA_PARAM_TYPE(4)>::get(L,startParam + 4),
+                          Stack<LUA_PARAM_TYPE(5)>::get(L,startParam + 5),
+                          Stack<LUA_PARAM_TYPE(6)>::get(L,startParam + 6),
+                          Stack<LUA_PARAM_TYPE(7)>::get(L,startParam + 7),
+                          Stack<LUA_PARAM_TYPE(8)>::get(L,startParam + 8),
+                          Stack<LUA_PARAM_TYPE(9)>::get(L,startParam + 9),
+                          Stack<LUA_PARAM_TYPE(10)>::get(L,startParam + 10),
+                          Stack<LUA_PARAM_TYPE(11)>::get(L,startParam + 11));
     }
 };
-
 
 template<class ReturnType,class... ParamList>
 struct Caller<13,ReturnType,ParamList...>
 {
     template<class Fn>
-    static ReturnType f(lua_State*L,Fn &fn)
+    static ReturnType f(lua_State*L,Fn &fn,int startParam)
     {
-        return fn(Stack<LUA_PARAM_TYPE(0)>::get(L,1),
-                  Stack<LUA_PARAM_TYPE(1)>::get(L,2),
-                  Stack<LUA_PARAM_TYPE(2)>::get(L,3),
-                  Stack<LUA_PARAM_TYPE(3)>::get(L,4),
-                  Stack<LUA_PARAM_TYPE(4)>::get(L,5),
-                  Stack<LUA_PARAM_TYPE(5)>::get(L,6),
-                  Stack<LUA_PARAM_TYPE(6)>::get(L,7),
-                  Stack<LUA_PARAM_TYPE(7)>::get(L,8),
-                  Stack<LUA_PARAM_TYPE(8)>::get(L,9),
-                  Stack<LUA_PARAM_TYPE(9)>::get(L,10),
-                  Stack<LUA_PARAM_TYPE(10)>::get(L,11),
-                  Stack<LUA_PARAM_TYPE(11)>::get(L,12),
-                  Stack<LUA_PARAM_TYPE(12)>::get(L,13));
+        return fn(Stack<LUA_PARAM_TYPE(0)>::get(L,startParam + 0),
+                  Stack<LUA_PARAM_TYPE(1)>::get(L,startParam + 1),
+                  Stack<LUA_PARAM_TYPE(2)>::get(L,startParam + 2),
+                  Stack<LUA_PARAM_TYPE(3)>::get(L,startParam + 3),
+                  Stack<LUA_PARAM_TYPE(4)>::get(L,startParam + 4),
+                  Stack<LUA_PARAM_TYPE(5)>::get(L,startParam + 5),
+                  Stack<LUA_PARAM_TYPE(6)>::get(L,startParam + 6),
+                  Stack<LUA_PARAM_TYPE(7)>::get(L,startParam + 7),
+                  Stack<LUA_PARAM_TYPE(8)>::get(L,startParam + 8),
+                  Stack<LUA_PARAM_TYPE(9)>::get(L,startParam + 9),
+                  Stack<LUA_PARAM_TYPE(10)>::get(L,startParam + 10),
+                  Stack<LUA_PARAM_TYPE(11)>::get(L,startParam + 11),
+                  Stack<LUA_PARAM_TYPE(12)>::get(L,startParam + 12));
     }
 
     template<class T, class MemFn>
-    static ReturnType f(lua_State*L,T *obj, MemFn &fn)
+    static ReturnType f(lua_State*L,T *obj, MemFn &fn,int startParam)
     {
-        return (obj->*fn)(Stack<LUA_PARAM_TYPE(0)>::get(L,1),
-                          Stack<LUA_PARAM_TYPE(1)>::get(L,2),
-                          Stack<LUA_PARAM_TYPE(2)>::get(L,3),
-                          Stack<LUA_PARAM_TYPE(3)>::get(L,4),
-                          Stack<LUA_PARAM_TYPE(4)>::get(L,5),
-                          Stack<LUA_PARAM_TYPE(5)>::get(L,6),
-                          Stack<LUA_PARAM_TYPE(6)>::get(L,7),
-                          Stack<LUA_PARAM_TYPE(7)>::get(L,8),
-                          Stack<LUA_PARAM_TYPE(8)>::get(L,9),
-                          Stack<LUA_PARAM_TYPE(9)>::get(L,10),
-                          Stack<LUA_PARAM_TYPE(10)>::get(L,11),
-                          Stack<LUA_PARAM_TYPE(11)>::get(L,12),
-                          Stack<LUA_PARAM_TYPE(12)>::get(L,13));
+        return (obj->*fn)(Stack<LUA_PARAM_TYPE(0)>::get(L,startParam + 0),
+                          Stack<LUA_PARAM_TYPE(1)>::get(L,startParam + 1),
+                          Stack<LUA_PARAM_TYPE(2)>::get(L,startParam + 2),
+                          Stack<LUA_PARAM_TYPE(3)>::get(L,startParam + 3),
+                          Stack<LUA_PARAM_TYPE(4)>::get(L,startParam + 4),
+                          Stack<LUA_PARAM_TYPE(5)>::get(L,startParam + 5),
+                          Stack<LUA_PARAM_TYPE(6)>::get(L,startParam + 6),
+                          Stack<LUA_PARAM_TYPE(7)>::get(L,startParam + 7),
+                          Stack<LUA_PARAM_TYPE(8)>::get(L,startParam + 8),
+                          Stack<LUA_PARAM_TYPE(9)>::get(L,startParam + 9),
+                          Stack<LUA_PARAM_TYPE(10)>::get(L,startParam + 10),
+                          Stack<LUA_PARAM_TYPE(11)>::get(L,startParam + 11),
+                          Stack<LUA_PARAM_TYPE(12)>::get(L,startParam + 12));
     }
 };
 
@@ -430,41 +427,41 @@ template<class ReturnType,class... ParamList>
 struct Caller<14,ReturnType,ParamList...>
 {
     template<class Fn>
-    static ReturnType f(lua_State*L,Fn &fn)
+    static ReturnType f(lua_State*L,Fn &fn,int startParam)
     {
-        return fn(Stack<LUA_PARAM_TYPE(0)>::get(L,1),
-                  Stack<LUA_PARAM_TYPE(1)>::get(L,2),
-                  Stack<LUA_PARAM_TYPE(2)>::get(L,3),
-                  Stack<LUA_PARAM_TYPE(3)>::get(L,4),
-                  Stack<LUA_PARAM_TYPE(4)>::get(L,5),
-                  Stack<LUA_PARAM_TYPE(5)>::get(L,6),
-                  Stack<LUA_PARAM_TYPE(6)>::get(L,7),
-                  Stack<LUA_PARAM_TYPE(7)>::get(L,8),
-                  Stack<LUA_PARAM_TYPE(8)>::get(L,9),
-                  Stack<LUA_PARAM_TYPE(9)>::get(L,10),
-                  Stack<LUA_PARAM_TYPE(10)>::get(L,11),
-                  Stack<LUA_PARAM_TYPE(11)>::get(L,12),
-                  Stack<LUA_PARAM_TYPE(12)>::get(L,13),
-                  Stack<LUA_PARAM_TYPE(13)>::get(L,14));
+        return fn(Stack<LUA_PARAM_TYPE(0)>::get(L,startParam + 0),
+                  Stack<LUA_PARAM_TYPE(1)>::get(L,startParam + 1),
+                  Stack<LUA_PARAM_TYPE(2)>::get(L,startParam + 2),
+                  Stack<LUA_PARAM_TYPE(3)>::get(L,startParam + 3),
+                  Stack<LUA_PARAM_TYPE(4)>::get(L,startParam + 4),
+                  Stack<LUA_PARAM_TYPE(5)>::get(L,startParam + 5),
+                  Stack<LUA_PARAM_TYPE(6)>::get(L,startParam + 6),
+                  Stack<LUA_PARAM_TYPE(7)>::get(L,startParam + 7),
+                  Stack<LUA_PARAM_TYPE(8)>::get(L,startParam + 8),
+                  Stack<LUA_PARAM_TYPE(9)>::get(L,startParam + 9),
+                  Stack<LUA_PARAM_TYPE(10)>::get(L,startParam + 10),
+                  Stack<LUA_PARAM_TYPE(11)>::get(L,startParam + 11),
+                  Stack<LUA_PARAM_TYPE(12)>::get(L,startParam + 12),
+                  Stack<LUA_PARAM_TYPE(13)>::get(L,startParam + 13));
     }
 
     template<class T, class MemFn>
-    static ReturnType f(lua_State*L,T *obj, MemFn &fn)
+    static ReturnType f(lua_State*L,T *obj, MemFn &fn,int startParam)
     {
-        return (obj->*fn)(Stack<LUA_PARAM_TYPE(0)>::get(L,1),
-                          Stack<LUA_PARAM_TYPE(1)>::get(L,2),
-                          Stack<LUA_PARAM_TYPE(2)>::get(L,3),
-                          Stack<LUA_PARAM_TYPE(3)>::get(L,4),
-                          Stack<LUA_PARAM_TYPE(4)>::get(L,5),
-                          Stack<LUA_PARAM_TYPE(5)>::get(L,6),
-                          Stack<LUA_PARAM_TYPE(6)>::get(L,7),
-                          Stack<LUA_PARAM_TYPE(7)>::get(L,8),
-                          Stack<LUA_PARAM_TYPE(8)>::get(L,9),
-                          Stack<LUA_PARAM_TYPE(9)>::get(L,10),
-                          Stack<LUA_PARAM_TYPE(10)>::get(L,11),
-                          Stack<LUA_PARAM_TYPE(11)>::get(L,12),
-                          Stack<LUA_PARAM_TYPE(12)>::get(L,13),
-                          Stack<LUA_PARAM_TYPE(13)>::get(L,14));
+        return (obj->*fn)(Stack<LUA_PARAM_TYPE(0)>::get(L,startParam + 0),
+                          Stack<LUA_PARAM_TYPE(1)>::get(L,startParam + 1),
+                          Stack<LUA_PARAM_TYPE(2)>::get(L,startParam + 2),
+                          Stack<LUA_PARAM_TYPE(3)>::get(L,startParam + 3),
+                          Stack<LUA_PARAM_TYPE(4)>::get(L,startParam + 4),
+                          Stack<LUA_PARAM_TYPE(5)>::get(L,startParam + 5),
+                          Stack<LUA_PARAM_TYPE(6)>::get(L,startParam + 6),
+                          Stack<LUA_PARAM_TYPE(7)>::get(L,startParam + 7),
+                          Stack<LUA_PARAM_TYPE(8)>::get(L,startParam + 8),
+                          Stack<LUA_PARAM_TYPE(9)>::get(L,startParam + 9),
+                          Stack<LUA_PARAM_TYPE(10)>::get(L,startParam + 10),
+                          Stack<LUA_PARAM_TYPE(11)>::get(L,startParam + 11),
+                          Stack<LUA_PARAM_TYPE(12)>::get(L,startParam + 12),
+                          Stack<LUA_PARAM_TYPE(13)>::get(L,startParam + 13));
     }
 };
 
@@ -472,55 +469,56 @@ template<class ReturnType,class... ParamList>
 struct Caller<15,ReturnType,ParamList...>
 {
     template<class Fn>
-    static ReturnType f(lua_State*L,Fn &fn)
+    static ReturnType f(lua_State*L,Fn &fn,int startParam)
     {
-        return fn(Stack<LUA_PARAM_TYPE(0)>::get(L,1),
-                  Stack<LUA_PARAM_TYPE(1)>::get(L,2),
-                  Stack<LUA_PARAM_TYPE(2)>::get(L,3),
-                  Stack<LUA_PARAM_TYPE(3)>::get(L,4),
-                  Stack<LUA_PARAM_TYPE(4)>::get(L,5),
-                  Stack<LUA_PARAM_TYPE(5)>::get(L,6),
-                  Stack<LUA_PARAM_TYPE(6)>::get(L,7),
-                  Stack<LUA_PARAM_TYPE(7)>::get(L,8),
-                  Stack<LUA_PARAM_TYPE(8)>::get(L,9),
-                  Stack<LUA_PARAM_TYPE(9)>::get(L,10),
-                  Stack<LUA_PARAM_TYPE(10)>::get(L,11),
-                  Stack<LUA_PARAM_TYPE(11)>::get(L,12),
-                  Stack<LUA_PARAM_TYPE(12)>::get(L,13),
-                  Stack<LUA_PARAM_TYPE(14)>::get(L,15));
+        return fn(Stack<LUA_PARAM_TYPE(0)>::get(L,startParam + 0),
+                  Stack<LUA_PARAM_TYPE(1)>::get(L,startParam + 1),
+                  Stack<LUA_PARAM_TYPE(2)>::get(L,startParam + 2),
+                  Stack<LUA_PARAM_TYPE(3)>::get(L,startParam + 3),
+                  Stack<LUA_PARAM_TYPE(4)>::get(L,startParam + 4),
+                  Stack<LUA_PARAM_TYPE(5)>::get(L,startParam + 5),
+                  Stack<LUA_PARAM_TYPE(6)>::get(L,startParam + 6),
+                  Stack<LUA_PARAM_TYPE(7)>::get(L,startParam + 7),
+                  Stack<LUA_PARAM_TYPE(8)>::get(L,startParam + 8),
+                  Stack<LUA_PARAM_TYPE(9)>::get(L,startParam + 9),
+                  Stack<LUA_PARAM_TYPE(10)>::get(L,startParam + 10),
+                  Stack<LUA_PARAM_TYPE(11)>::get(L,startParam + 11),
+                  Stack<LUA_PARAM_TYPE(12)>::get(L,startParam + 12),
+                  Stack<LUA_PARAM_TYPE(13)>::get(L,startParam + 13),
+                  Stack<LUA_PARAM_TYPE(14)>::get(L,startParam + 14));
     }
 
     template<class T, class MemFn>
-    static ReturnType f(lua_State*L,T *obj, MemFn &fn)
+    static ReturnType f(lua_State*L,T *obj, MemFn &fn,int startParam)
     {
-        return (obj->*fn)(Stack<LUA_PARAM_TYPE(0)>::get(L,1),
-                          Stack<LUA_PARAM_TYPE(1)>::get(L,2),
-                          Stack<LUA_PARAM_TYPE(2)>::get(L,3),
-                          Stack<LUA_PARAM_TYPE(3)>::get(L,4),
-                          Stack<LUA_PARAM_TYPE(4)>::get(L,5),
-                          Stack<LUA_PARAM_TYPE(5)>::get(L,6),
-                          Stack<LUA_PARAM_TYPE(6)>::get(L,7),
-                          Stack<LUA_PARAM_TYPE(7)>::get(L,8),
-                          Stack<LUA_PARAM_TYPE(8)>::get(L,9),
-                          Stack<LUA_PARAM_TYPE(9)>::get(L,10),
-                          Stack<LUA_PARAM_TYPE(10)>::get(L,11),
-                          Stack<LUA_PARAM_TYPE(11)>::get(L,12),
-                          Stack<LUA_PARAM_TYPE(12)>::get(L,13),
-                          Stack<LUA_PARAM_TYPE(13)>::get(L,14),
-                          Stack<LUA_PARAM_TYPE(14)>::get(L,15));
+        return (obj->*fn)(Stack<LUA_PARAM_TYPE(0)>::get(L,startParam + 0),
+                          Stack<LUA_PARAM_TYPE(1)>::get(L,startParam + 1),
+                          Stack<LUA_PARAM_TYPE(2)>::get(L,startParam + 2),
+                          Stack<LUA_PARAM_TYPE(3)>::get(L,startParam + 3),
+                          Stack<LUA_PARAM_TYPE(4)>::get(L,startParam + 4),
+                          Stack<LUA_PARAM_TYPE(5)>::get(L,startParam + 5),
+                          Stack<LUA_PARAM_TYPE(6)>::get(L,startParam + 6),
+                          Stack<LUA_PARAM_TYPE(7)>::get(L,startParam + 7),
+                          Stack<LUA_PARAM_TYPE(8)>::get(L,startParam + 8),
+                          Stack<LUA_PARAM_TYPE(9)>::get(L,startParam + 9),
+                          Stack<LUA_PARAM_TYPE(10)>::get(L,startParam + 10),
+                          Stack<LUA_PARAM_TYPE(11)>::get(L,startParam + 11),
+                          Stack<LUA_PARAM_TYPE(12)>::get(L,startParam + 12),
+                          Stack<LUA_PARAM_TYPE(13)>::get(L,startParam + 13),
+                          Stack<LUA_PARAM_TYPE(14)>::get(L,startParam + 14));
     }
 };
 
 template<class ReturnType, class Fn, class... ParamList>
-ReturnType doCall(lua_State*L,const Fn &fn)
+ReturnType doCall(lua_State*L,const Fn &fn,int startParam)
 {
-    return Caller<ArgTypeList<ParamList...>::arity,ReturnType,ParamList...>::f(L,fn);
+    return Caller<ArgTypeList<ParamList...>::arity,ReturnType,ParamList...>::f(L,fn,startParam);
 }
 
 template<class ReturnType, class T, class MemFn, class... ParamList>
-static ReturnType doCall(lua_State*L,T *obj,const MemFn &fn)
+static ReturnType doCall(lua_State*L,T *obj,const MemFn &fn,int startParam)
 {
-    return Caller<ArgTypeList<ParamList...>::arity,ReturnType, ParamList...>::f(L,obj, fn);
+    return Caller<ArgTypeList<ParamList...>::arity,ReturnType, ParamList...>::f(L,obj, fn,startParam);
 }
 
 //==============================================================================
@@ -579,15 +577,15 @@ struct FuncTraits<R (T::*)(ParamList...)>
     using ReturnType = R;
     using Params = typename MakeTypeList<ParamList...>::Result;
 
-    static R call(lua_State*L,ClassType *obj,const DeclType &fp)
+    static R call(lua_State*L,ClassType *obj,const DeclType &fp,int startParam)
     {
-        return doCall<R,T,DeclType,ParamList...>(L,obj, fp);
+        return doCall<R,T,DeclType,ParamList...>(L,obj, fp,startParam);
     }
 };
 
 /* Const member function pointers. */
 
-template<class T, class R, class... ParamList>
+template<class T, class R,class... ParamList>
 struct FuncTraits<R (T::*)(ParamList...) const>
 {
     enum
@@ -601,9 +599,9 @@ struct FuncTraits<R (T::*)(ParamList...) const>
     using ReturnType = R;
     using Params = typename MakeTypeList<ParamList...>::Result;
 
-    static R call(lua_State*L,const ClassType *obj,const DeclType &fp)
+    static R call(lua_State*L,const ClassType *obj,const DeclType &fp,int startParam)
     {
-        return doCall<R,T,DeclType,ParamList...>(L,obj, fp);
+        return doCall<R,T,DeclType,ParamList...>(L,obj, fp,startParam);
     }
 };
 
@@ -622,9 +620,9 @@ struct FuncTraits<std::function<R(ParamList...)>>
     using ReturnType = R;
     using Params = typename MakeTypeList<ParamList...>::Result;
 
-    static ReturnType call(lua_State*L,DeclType &fn)
+    static ReturnType call(lua_State*L,DeclType &fn,int startParam)
     {
-        return doCall<ReturnType,DeclType,ParamList...>(L,fn);
+        return doCall<ReturnType,DeclType,ParamList...>(L,fn,startParam);
     }
 };
 
@@ -644,7 +642,7 @@ struct Invoke
             LUA_ASSERT(L, false, Msg);
         }
         try {
-            Stack<ReturnType>::push(L, FuncTraits<Fn>::call(L,fn));
+            Stack<ReturnType>::push(L, FuncTraits<Fn>::call(L,fn,startParam));
             return 1;
         }
         catch (const std::exception &e) {
@@ -666,7 +664,7 @@ struct Invoke
             LUA_ASSERT(L, false, Msg);
         }
         try {
-            Stack<ReturnType>::push(L, FuncTraits<MemFn>::call(L,object, fn));
+            Stack<ReturnType>::push(L, FuncTraits<MemFn>::call(L,object, fn,startParam));
             return 1;
         }
         catch (const std::exception &e) {
@@ -691,7 +689,7 @@ struct Invoke<void, Params, startParam>
             LUA_ASSERT(L, false, Msg);
         }
         try {
-            FuncTraits<Fn>::call(L,fn);
+            FuncTraits<Fn>::call(L,fn,startParam);
             return 0;
         }
         catch (const std::exception &e) {
@@ -713,7 +711,7 @@ struct Invoke<void, Params, startParam>
             LUA_ASSERT(L, false, Msg);
         }
         try {
-            FuncTraits<MemFn>::call(L,object, fn);
+            FuncTraits<MemFn>::call(L,object, fn,startParam);
             return 0;
         }
         catch (const std::exception &e) {

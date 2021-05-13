@@ -18,7 +18,7 @@ function x11111_test(x,y)
     print("subNum = "..subNum)
     Say("Hello world");
     local testclass = OuterClass ()
-    testclass:Say();
+    testclass:Say("Hello cpp");
     print("x11111_test done")
     return 1
 end
