@@ -362,6 +362,7 @@ void LuaHelper::PrintTable(lua_State* L, int idx)
 }
 
 #define  LUA_ASSERT(L,con,msg) LuaHelper::LuaAssert(L,con,__FILE__,__LINE__,msg)
+#define  LUA_ASSERT_EX(L,con,msg,luaerror) LuaHelper::LuaAssert(L,con,__FILE__,__LINE__,msg,luaerror)
 
 } // namespace luabridge
 

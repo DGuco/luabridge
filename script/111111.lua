@@ -32,18 +32,18 @@ function x11111_PrintG()
             print("\t",a,"\t",b)
         end
 
-        if  type(b) == "table" and tostring(a) ~= "_G" then
+        if  type(b) == "table"  then
             for x,y in pairs(b) do
                 if (type(y) == "table") then
                     print("\t\t","|--",x,y,"\tlen = ",#y)
                 else
                     print("\t\t","|--",x,y)
                 end
-                if type(y) == "table" and tostring(x) ~= tostring(a) then
-                    for x_,y_ in pairs(y) do
-                        print("\t\t\t","|--",x_,y_)
-                    end
-                end
+--                if type(y) == "table" then
+--                    for x_,y_ in pairs(y) do
+--                        print("\t\t\t","|--",x_,y_)
+--                    end
+--                end
             end
         end
     end

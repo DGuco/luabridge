@@ -127,6 +127,7 @@ inline const void* getParentKey ()
     Each registered class inserts three keys into the registry, whose
     values are the corresponding static, class, and const metatables. This
     allows a quick and reliable lookup for a metatable from a template type.
+    利用静态函数，静态局部变量的特性，取每个类的模板类ClassInfo<T>的三个函数的局部变量的地址给每个类的不同的三个table生成唯一的key，全局唯一
 */
 template <class T>
 class ClassInfo

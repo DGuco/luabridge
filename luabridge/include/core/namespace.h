@@ -137,7 +137,7 @@ class Namespace: public detail::Registrar
             lua_pushvalue(L, -1); // Stack: ns, co, co 栈状态lua_gettop(L) == n + 3:ns=>co=>co
             lua_setmetatable(L, -2); // co.__metatable = co. 栈状态lua_gettop(L) == n + 2:ns=>co
             lua_pushstring(L, type_name.c_str()); // const table name 栈状态lua_gettop(L)== n + 3:ns=>co=>type_name
-            lua_rawsetp(L, -2, getTypeKey()); // co [typeKey] = name. 栈状态lua_gettop(L)== n + 2:ns=>co
+            lua_rawsetp(L, -2, getTypeKey()); // co [typeKey] = type_name. 栈状态lua_gettop(L)== n + 2:ns=>co
 
             /**
              *https://zilongshanren.com/post/bind-a-simple-cpp-class-in-lua/
@@ -155,7 +155,8 @@ class Namespace: public detail::Registrar
             //co.__index = &CFunc::IndexMetaMethod 栈状态lua_gettop(L)== n + 2:ns=>co
             LuaHelper::RawSetField(L, -2, "__index");
 
-            lua_pushcfunction(L, &CFunc::newindexObjectMetaMethod); //栈状态lua_gettop(L)== n + 3:ns=>co=>newindexObjectMetaMethod
+            lua_pushcfunction(L,
+                              &CFunc::newindexObjectMetaMethod); //栈状态lua_gettop(L)== n + 3:ns=>co=>newindexObjectMetaMethod
             //co.__newindex = &CFunc::newindexObjectMetaMethod 栈状态lua_gettop(L)== n + 2:ns=>co
             LuaHelper::RawSetField(L, -2, "__newindex");
 
@@ -178,18 +179,20 @@ class Namespace: public detail::Registrar
         void createClassTable(char const *name)
         {
             // Stack: namespace table (ns), const table (co)
+            // Stack 栈状态lua_gettop(L) == n + 2:ns=>co
 
             // Class table is the same as const table except the propset table
-            createConstTable(name, false); // Stack: ns, co, cl
+            createConstTable(name, false); // Stack 栈状态lua_gettop(L) == n + 3:ns=>co=>cl
 
-            lua_newtable(L); // Stack: ns, co, cl, propset table (ps)
-            lua_rawsetp(L, -2, getPropsetKey()); // cl [propsetKey] = ps. Stack: ns, co, cl
+            lua_newtable(L); // propset table (ps)  Stack 栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>ps
+            lua_rawsetp(L, -2, getPropsetKey()); // cl [propsetKey] = ps. Stack 栈状态lua_gettop(L) == n + 3:ns=>co=>cl
 
-            lua_pushvalue(L, -2); // Stack: ns, co, cl, co
-            lua_rawsetp(L, -2, getConstKey()); // cl [constKey] = co. Stack: ns, co, cl
+            lua_pushvalue(L, -2); // Stack 栈状态lua_gettop(L) == n + 3:ns=>co=>cl=>co
+            lua_rawsetp(L, -2, getConstKey()); // cl [constKey] = co. Stack 栈状态lua_gettop(L) == n + 3:ns=>co=>cl=>co
 
-            lua_pushvalue(L, -1); // Stack: ns, co, cl, cl
-            lua_rawsetp(L, -3, getClassKey()); // co [classKey] = cl. Stack: ns, co, cl
+            lua_pushvalue(L, -1); // Stack 栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>cl
+            lua_rawsetp(L, -3, getClassKey()); // co [classKey] = cl.Stack 栈状态lua_gettop(L) == n + 3:ns=>co=>cl
+            //now 栈状态lua_gettop(L)== n + 3:ns=>co=>cl
         }
 
         //--------------------------------------------------------------------------
@@ -199,33 +202,41 @@ class Namespace: public detail::Registrar
         void createStaticTable(char const *name)
         {
             // Stack: namespace table (ns), const table (co), class table (cl)
-            lua_newtable(L); // Stack: ns, co, cl, visible static table (vst)
-            lua_newtable(L); // Stack: ns, co, cl, st, static metatable (st)
-            lua_pushvalue(L, -1); // Stack: ns, co, cl, vst, st, st
-            lua_setmetatable(L, -3); // st.__metatable = mt. Stack: ns, co, cl, vst, st
-            lua_insert(L, -2); // Stack: ns, co, cl, st, vst
-            LuaHelper::RawSetField(L, -5, name); // ns [name] = vst. Stack: ns, co, cl, st
+            // Stack 栈状态lua_gettop(L) == n + 3:ns=>co=>cl
+            lua_newtable(L); //visible static table (vst) Stack 栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>vst
+            lua_newtable(L); //static metatable (st) Stack 栈状态lua_gettop(L) == n + 5:ns=>co=>cl=>vst=>st
+            lua_pushvalue(L, -1); // Stack 栈状态lua_gettop(L) == n + 6:ns=>co=>cl=>vst=>st=>st
+            lua_setmetatable(L, -3); // vst.__metatable = st. Stack 栈状态lua_gettop(L) == n + 5:ns=>co=>cl=>vst=>st
+            lua_insert(L, -2); // Stack 栈状态lua_gettop(L) == n + 5:ns=>co=>cl=>st=>vst
+            LuaHelper::RawSetField(L, -5, name); // ns [name] = vst. Stack 栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
 
 
-            lua_pushcfunction(L, &CFunc::IndexMetaMethod);
+            lua_pushcfunction(L,
+                              &CFunc::IndexMetaMethod); //Stack 栈状态lua_gettop(L) == n + 5:ns=>co=>cl=>st=>IndexMetaMethod
+            //st.__index = IndexMetaMethod,Stack 栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
             LuaHelper::RawSetField(L, -2, "__index");
 
-            lua_pushcfunction(L, &CFunc::newindexStaticMetaMethod);
+            lua_pushcfunction(L,
+                              &CFunc::newindexStaticMetaMethod); //Stack 栈状态lua_gettop(L) == n + 5:ns=>co=>cl=>st=>newindexStaticMetaMethod
+            //st.__newindex = newindexStaticMetaMethod,Stack 栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
             LuaHelper::RawSetField(L, -2, "__newindex");
 
-            lua_newtable(L); // Stack: ns, co, cl, st, proget table (pg)
-            lua_rawsetp(L, -2, getPropgetKey()); // st [propgetKey] = pg. Stack: ns, co, cl, st
+            lua_newtable(L); // proget table (pg) Stack 栈状态lua_gettop(L) == n + 5:ns=>co=>cl=>st=>pg
+            lua_rawsetp(L, -2, getPropgetKey()); // st [propgetKey] = pg. Stack 栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
 
-            lua_newtable(L); // Stack: ns, co, cl, st, propset table (ps)
-            lua_rawsetp(L, -2, getPropsetKey()); // st [propsetKey] = pg. Stack: ns, co, cl, st
+            lua_newtable(L); // Stack: ns, co, cl, st, propset table (ps) Stack 栈状态lua_gettop(L) == n + 5:ns=>co=>cl=>st=>ps
+            lua_rawsetp(L, -2, getPropsetKey()); // st [propsetKey] = pg. Stack 栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
 
-            lua_pushvalue(L, -2); // Stack: ns, co, cl, st, cl
-            lua_rawsetp(L, -2, getClassKey()); // st [classKey] = cl. Stack: ns, co, cl, st
+            lua_pushvalue(L, -2); //Stack 栈状态lua_gettop(L) == n + 5:ns=>co=>cl=>st=>cl
+            lua_rawsetp(L, -2, getClassKey()); // st [classKey] = cl.  Stack 栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
 
             if (Security::hideMetatables()) {
-                lua_pushnil(L);
-                LuaHelper::RawSetField(L, -2, "__metatable");
+                lua_pushnil(L); // Stack 栈状态lua_gettop(L) == n + 5:ns=>co=>cl=>st=>nil
+                LuaHelper::RawSetField(L,
+                                       -2,
+                                       "__metatable"); //st.__metatable = nil   Stack 栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
             }
+            //now 栈状态lua_gettop(L)== n + 4:ns=>co=>cl=>st
         }
 
         //==========================================================================
@@ -286,17 +297,62 @@ class Namespace: public detail::Registrar
         //==========================================================================
         /**
           Register a new class or add to an existing class registration.
-        */
+          构造函数完成后
+          vst(visible static table) = {
+              __metatable =  {
+                  __index = &CFunc::IndexMetaMethod,
+                  __newindex = &CFunc::newindexStaticMetaMethod,
+              }
+          }
+          co(const table) = {
+              __metatable = co,
+              typekey = const_name,
+              __index = &CFunc::IndexMetaMethod,
+              __newindex = &CFunc::newindexStaticMetaMethod,
+              __gc = &CFunc::gcMetaMethod<T>,
+              propgetKey = {},
+              classKey = cl,
+          }
+
+          cl(class table) = {
+              __metatable = cl,
+              typekey = name,
+              __index = &CFunc::IndexMetaMethod,
+              __newindex = &CFunc::newindexStaticMetaMethod,
+              __gc = &CFunc::gcMetaMethod<T>,
+              propgetKey = {}(table),
+              propsetKey = {}(table),
+              constKey = co,
+          }
+
+          st(static table) = {
+              __index = &CFunc::IndexMetaMethod,
+              __newindex = &CFunc::newindexStaticMetaMethod,
+              propgetKey = {}(table),
+              propsetKey = {}(table),
+              classKey = cl,
+          }
+
+          _G = {
+              name = vst;
+          }
+
+          registry = {
+              ClassInfo<T>_static_key = st,
+              ClassInfo<T>_class_key = cl,
+              ClassInfo<T>_const_key = co,
+          }
+         **/
         Class(char const *name, Namespace &parent)
             : ClassBase(parent)
         {
             //栈顶是否是表(_G)
-            assert (lua_istable(L, -1)); //栈状态lua_gettop(L)== n + 1:ns
+            LUA_ASSERT_EX(L, lua_istable(L, -1), "lua_istable(L, -1)", false); //栈状态lua_gettop(L)== n + 1:ns
             //尝试find类的metadata表_G[name]
             LuaHelper::RawGetField(L, -1, name); // st = _G[name] 栈状态ua_gettop(L)== n + 2:ns=>st|nil
 
             //表不存在create it
-            if (lua_isnil(L, -1)) // Stack: ns, nil 栈状态:ns=>st(or nil)
+            if (lua_isnil(L, -1)) // Stack: ns, nil 栈状态:ns=>nil
             {
                 //弹出nil值
                 lua_pop(L, 1); // Stack: ns 栈状态ua_gettop(L)== n + 1:ns
@@ -327,30 +383,46 @@ class Namespace: public detail::Registrar
                 //把st元表作一个副本压栈。
                 lua_pushvalue(L, -1); // 栈状态lua_gettop(L) == n + 5:ns=>co=>cl=>st=>st
                 //把static metadata表插入registry表
-                lua_rawsetp(L, LUA_REGISTRYINDEX, ClassInfo<T>::getStaticKey()); //stack栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
+                lua_rawsetp(L,
+                            LUA_REGISTRYINDEX,
+                            ClassInfo<T>::getStaticKey()); //stack栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
                 //把cl元表作一个副本压栈。
                 lua_pushvalue(L, -2); // stack 栈状态lua_gettop(L) == n + 5:ns=>co=>cl=>st=>cl
                 //把metadata表插入registry表
-                lua_rawsetp(L, LUA_REGISTRYINDEX, ClassInfo<T>::getClassKey()); //stack栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
+                lua_rawsetp(L,
+                            LUA_REGISTRYINDEX,
+                            ClassInfo<T>::getClassKey()); //stack栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
                 //把co元表作一个副本压栈。
                 lua_pushvalue(L, -3); // 栈状态lua_gettop(L) == n + 5:ns=>co=>cl=>st=>co
                 //把const metadata表插入registry表
-                lua_rawsetp(L, LUA_REGISTRYINDEX, ClassInfo<T>::getConstKey()); //stack栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
+                lua_rawsetp(L,
+                            LUA_REGISTRYINDEX,
+                            ClassInfo<T>::getConstKey()); //stack栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
 
                 //now stack栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
             }
             else { //表存在
-                assert (lua_istable(L, -1)); // Stack: 栈状态ua_gettop(L)== n + 2:ns=>st
+                LUA_ASSERT_EX (L,
+                               lua_istable(L, -1),
+                               "lua_istable(L, -1)",
+                               false); // Stack: 栈状态ua_gettop(L)== n + 2:ns=>st
                 ++m_stackSize;
 
                 // Map T back from its stored tables
 
-                lua_rawgetp(L, LUA_REGISTRYINDEX, ClassInfo<T>::getConstKey()); // Stack: ns, st, co
-                lua_insert(L, -2); // Stack: ns, co, st
+
+                lua_rawgetp(L,
+                            LUA_REGISTRYINDEX,
+                            ClassInfo<T>::getConstKey()); // Stack 栈状态ua_gettop(L)== n + 3:ns=>st=>co
+                //调整co的位置
+                lua_insert(L, -2); // Stack 栈状态ua_gettop(L)== n + 3:ns=>co=>st
                 ++m_stackSize;
 
-                lua_rawgetp(L, LUA_REGISTRYINDEX, ClassInfo<T>::getClassKey()); // Stack: ns, co, st, cl
-                lua_insert(L, -2); // Stack: ns, co, cl, st
+                lua_rawgetp(L,
+                            LUA_REGISTRYINDEX,
+                            ClassInfo<T>::getClassKey()); // Stack 栈状态ua_gettop(L)== n + 4:ns=>co=>st=>cl
+                //调整cl的位置
+                lua_insert(L, -2); // Stack 栈状态ua_gettop(L)== n + 4:ns=>co=>cl=>st
                 ++m_stackSize;
             }
         }
