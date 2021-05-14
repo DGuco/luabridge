@@ -350,8 +350,8 @@ const char *LuaBridge::Call(const char *func, const char *sig, ...)
  * }
  */
 
-#define LuaRegisterCFunc(luaBridge, funcname, type, func)                       \
-    luaBridge.Register(funcname, (LuaCFunctionWrap<__COUNTER__,type>(func)))
+#define LuaRegisterCFunc(luaBridge, funcname, func)                       \
+    luaBridge.Register(funcname, (LuaCFunctionWrap<__COUNTER__>(func)))
 #define LuaRegisterLuaFunc(luaBridge, funcname, func)                           \
     luaBridge.Register(funcname, func)
 //////////////////////////////////////////////////////////////////////////////////////////////////////////

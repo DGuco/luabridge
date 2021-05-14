@@ -32,9 +32,9 @@
 #ifndef __LUA_FUNCTION_H__
 #define __LUA_FUNCTION_H__
 
-#include "func_traits.h"
-
 #include <string>
+#include "func_traits.h"
+#include "lua_library.h"
 
 namespace luabridge
 {
@@ -522,33 +522,56 @@ struct CFunc
     }
 };
 
-template<typename FT, typename STD_FUNCTION,int FUNCID>
+template<typename Func,int FUNCID>
 struct lua_function
 {
-    static STD_FUNCTION fn;
+    static Func fn;
     static int Call(lua_State *L)
     {
-        return CFunc::CFCall<STD_FUNCTION>::f(L, fn);
-    }
-}; 
-
-template<typename FT, typename STD_FUNCTION,int FUNCID>
-STD_FUNCTION lua_function<FT, STD_FUNCTION,FUNCID>::fn;
-
-template<typename FT, typename STD_FUNCTION,int FUNCID>
-struct LuaCFunctionWrapI
-{
-    inline lua_CFunction operator()(STD_FUNCTION f)
-    {
-        lua_function<FT, STD_FUNCTION,FUNCID>::fn = f;
-        return &lua_function<FT, STD_FUNCTION,FUNCID>::Call;
+        return CFunc::CFCall<Func>::f(L, fn);
     }
 };
 
-template<int FUNCID,typename FT, typename F>
-inline lua_CFunction LuaCFunctionWrap(F f)
+template<typename Func,int FUNCID>
+Func lua_function<Func,FUNCID>::fn;
+
+template<int FUNCID,class FT>
+struct LuaCFunctionWrapI
 {
-    return LuaCFunctionWrapI<FT, std::function<FT>,FUNCID>()(std::function<FT>(f));
+
+};
+
+template<int FUNCID,class R, class... ParamList>
+struct LuaCFunctionWrapI<FUNCID,R (*)(ParamList...)>
+{
+    using DeclType = R (*)(ParamList...);
+    typedef typename ArgTypeList<ParamList...>::template args<0>::type ParType;
+    static_assert(!std::is_same<ParType,lua_State*>::value,"Please use LuaRegisterLuaFunc register luaFunc");
+    inline lua_CFunction operator()(DeclType f)
+    {
+        lua_function<DeclType,FUNCID>::fn = f;
+        return &lua_function<DeclType,FUNCID>::Call;
+    }
+};
+
+template<int FUNCID,class R, class... ParamList>
+struct LuaCFunctionWrapI<FUNCID,std::function<R(ParamList...)>>
+{
+    using DeclType = std::function<R(ParamList...)>;
+
+    typedef typename ArgTypeList<ParamList...>::template args<0>::type ParType;
+    static_assert(!std::is_same<ParType,lua_State*>::value,"Please use LuaRegisterLuaFunc register luaFunc");
+    inline lua_CFunction operator()(DeclType f)
+    {
+        lua_function<DeclType,FUNCID>::fn = f;
+        return &lua_function<DeclType,FUNCID>::Call;
+    }
+};
+
+template<int FUNCID,typename Func>
+inline lua_CFunction LuaCFunctionWrap(Func f)
+{
+    return LuaCFunctionWrapI<FUNCID,Func>()(f);
 }
 
 } // namespace luabridge

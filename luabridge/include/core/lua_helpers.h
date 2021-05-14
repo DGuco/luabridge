@@ -35,6 +35,7 @@
 #include "lua_exception.h"
 #include <cassert>
 #include <cstring>
+#include <iostream>
 
 namespace luabridge
 {
@@ -63,7 +64,8 @@ public:
      * @param luaerror throw luaerror or not
      * @return never return when assert failed
      */
-    static int LuaAssert(lua_State *L, bool condition,const char* file,int line,const char *err_msg, bool luaerror = false);
+    static int
+    LuaAssert(lua_State *L, bool condition, const char *file, int line, const char *err_msg, bool luaerror = false);
 
     /**
      * param count
@@ -101,14 +103,14 @@ public:
     /**
         Wrapper for lua_pcall that throws.
     */
-    static void Pcall (lua_State* L, int nargs = 0, int nresults = 0, int msgh = 0);
+    static void Pcall(lua_State *L, int nargs = 0, int nresults = 0, int msgh = 0);
 
     /**
      * print lua table
      * @param L
      * @param idx
      */
-    static void PrintTable(lua_State* L, int idx);
+    static bool PrintTable(lua_State *L, int idx);
 };
 
 void LuaHelper::LuaStackInfo(lua_State *L)
@@ -215,7 +217,7 @@ bool LuaHelper::CheckLuaArg_Str(lua_State *L, int Index)
     return false;
 }
 
-int LuaHelper::LuaAssert(lua_State *L, bool condition,const char* file,int line,const char *err_msg, bool luaerror)
+int LuaHelper::LuaAssert(lua_State *L, bool condition, const char *file, int line, const char *err_msg, bool luaerror)
 {
     if (!condition) {
         lua_Debug ar;
@@ -244,31 +246,41 @@ int LuaHelper::LuaAssert(lua_State *L, bool condition,const char* file,int line,
          * 如果用g++重新编译lua源码不会有问题
          **/
 #ifdef COMPILE_LUA_WITH_CXX
-        if (luaerror)
-        {
+        if (luaerror) {
             std::string filename(file);
             unsigned long pos = filename.find("\/luabridge\/include");
-            if (pos != std::string::npos)
-            {
+            if (pos != std::string::npos) {
                 std::string lastName = filename.substr(pos);
-                return luaL_error(L, "(%s:%d assert fail) %s `%s' (%s)",lastName.c_str(),line,ar.namewhat, ar.name, err_msg);
-            }else
-            {
-                return luaL_error(L, "(%s:%d assert fail) %s `%s' (%s)"," ? ",line,ar.namewhat, ar.name, err_msg);
+                return luaL_error(L,
+                                  "(%s:%d assert fail) %s `%s' (%s)",
+                                  lastName.c_str(),
+                                  line,
+                                  ar.namewhat,
+                                  ar.name,
+                                  err_msg);
+            }
+            else {
+                return luaL_error(L, "(%s:%d assert fail) %s `%s' (%s)", " ? ", line, ar.namewhat, ar.name, err_msg);
             }
         }
-        else{
+        else {
             char Msg[128] = {0};
             std::string filename(file);
             unsigned long pos = filename.find("\/luabridge\/include");
-            if (pos != std::string::npos)
-            {
+            if (pos != std::string::npos) {
                 std::string lastName = filename.substr(pos);
-                snprintf(Msg,128,"(%s:%d) assert fail: %s `%s' (%s)",lastName.c_str(),line,ar.namewhat, ar.name, err_msg);
-            }else
-            {
+                snprintf(Msg,
+                         128,
+                         "(%s:%d) assert fail: %s `%s' (%s)",
+                         lastName.c_str(),
+                         line,
+                         ar.namewhat,
+                         ar.name,
+                         err_msg);
+            }
+            else {
                 //filename.substr()
-                snprintf(Msg,128,"(%s:%d) assert fail: %s `%s' (%s)","?",line,ar.namewhat, ar.name, err_msg);
+                snprintf(Msg, 128, "(%s:%d) assert fail: %s `%s' (%s)", "?", line, ar.namewhat, ar.name, err_msg);
             }
             throw std::logic_error(Msg);
             return 0;
@@ -319,7 +331,6 @@ int LuaHelper::GetStackLen(lua_State *L, int idx)
     return len;
 }
 
-
 void LuaHelper::RawGetField(lua_State *L, int index, char const *key)
 {
     assert (lua_istable(L, index));
@@ -337,7 +348,6 @@ void LuaHelper::RawSetField(lua_State *L, int index, char const *key)
     lua_rawset(L, index);
 }
 
-
 bool LuaHelper::IsFullUserData(lua_State *L, int index)
 {
     return lua_isuserdata(L, index) && !lua_islightuserdata (L, index);
@@ -349,20 +359,93 @@ bool LuaHelper::EqualStates(lua_State *L1, lua_State *L2)
         lua_topointer(L2, LUA_REGISTRYINDEX);
 }
 
-void LuaHelper::Pcall(lua_State* L, int nargs, int nresults, int msgh)
+void LuaHelper::Pcall(lua_State *L, int nargs, int nresults, int msgh)
 {
     int code = lua_pcall (L, nargs, nresults, msgh);
     if (code != LUA_OK)
-        throw (LuaException (L, code));
+        throw (LuaException(L, code));
 }
 
-void LuaHelper::PrintTable(lua_State* L, int idx)
+bool LuaHelper::PrintTable(lua_State *L, int idx)
 {
-
+    try {
+        lua_pushnil(L);
+        while (lua_next(L, idx) != 0) {
+            char Msg[256] = {0};
+            std::string key;
+            std::string value;
+            int keyType = lua_type(L, -2);
+            if (keyType == LUA_TNUMBER) {
+                double value = lua_tonumber(L, -2);
+                key = std::to_string(value);
+            }
+            else if (keyType == LUA_TSTRING) {
+                const char *value = lua_tostring(L, -2);
+                key = value;
+            }
+            else {
+                std::cout << "Invalid key type: " << keyType << std::endl;
+                return false;
+            }
+            int valueType = lua_type(L, -1);
+            switch (valueType) {
+            case LUA_TNIL: {
+                value = "NIL";
+                break;
+            }
+            case LUA_TBOOLEAN: {
+                value = std::to_string(lua_toboolean(L, -1));
+                break;
+            }
+            case LUA_TNUMBER: {
+                value = std::to_string(lua_tonumber(L, -1));
+                break;
+            }
+            case LUA_TSTRING: {
+                value = lua_tostring(L, -1);
+                break;
+            }
+            case LUA_TTABLE: {
+                std::cout << "====sub table===" << std::endl;
+                int index = lua_gettop(L);
+                if (!LuaHelper::PrintTable(L, index)) {
+                    std::cout << "popTable error in  popTable,error occured" << std::endl;
+                    return false;
+                }
+                break;
+            }
+            default: {
+                std::cout << "Invalid value type: " << valueType << std::endl;
+                return false;
+            }
+            }
+            snprintf(Msg,256,"key = %s,value = %s\n",key.c_str(),value.c_str());
+            lua_pop(L, 1);
+        }
+    }
+    catch (const char *s) {
+        std::string errMsg = s;
+        lua_pop(L, 1);
+        std::cout << errMsg << std::endl;
+        return false;
+    }
+    catch (std::exception &e) {
+        const char *errMsg = e.what();
+        lua_pop(L, 1);
+        std::cout << errMsg << std::endl;
+        return false;
+    }
+    catch (...) {
+        const char *errMsg = lua_tostring(L, -1);
+        lua_pop(L, 1);
+        std::cout << errMsg << std::endl;
+        return false;
+    }
+    return true;
 }
 
-#define  LUA_ASSERT(L,con,msg) LuaHelper::LuaAssert(L,con,__FILE__,__LINE__,msg)
-#define  LUA_ASSERT_EX(L,con,msg,luaerror) LuaHelper::LuaAssert(L,con,__FILE__,__LINE__,msg,luaerror)
+#define  LUA_ASSERT(L, con, msg) LuaHelper::LuaAssert(L,con,__FILE__,__LINE__,msg)
+#define  LUA_ASSERT_EX(L, con, msg, luaerror) LuaHelper::LuaAssert(L,con,__FILE__,__LINE__,msg,luaerror)
 
 } // namespace luabridge
 

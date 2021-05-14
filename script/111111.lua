@@ -1,7 +1,7 @@
 #!/usr/bin/lua
 
 function x11111_callfailedtest(x,y,i,j,world)
-    local addNum = Add(x,y);
+    local addNum = LambdaAdd(x,y);
     local subNum = Sub(i,j);
     print("addNum = "..addNum)
     print("subNum = "..subNum)
@@ -12,12 +12,12 @@ end
 
 
 function x11111_test(x,y)
-    local addNum = Add(x,y);
+    local addNum = LambdaAdd(x,y);
     local subNum = Sub(x,y);
     print("addNum = "..addNum)
     print("subNum = "..subNum)
     Say("Hello world");
-    local testclass = OuterClass ()
+    local testclass = OuterClass (10)
     testclass:Say("Hello cpp");
     print("x11111_test done")
     return 1

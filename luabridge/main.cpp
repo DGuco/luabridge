@@ -3,25 +3,26 @@
 //
 
 #include <stdio.h>
+#include <functional>
 #include "lua_bridge.h"
 
 using namespace luabridge;
 
 int Add(int a, int b)
 {
-    printf("lua call Add,a = %d,b = %d\n",a,b);
+    printf("lua call Add,a = %d,b = %d\n", a, b);
     return a + b;
 }
 
 int Sub(int a, int b)
 {
-    printf("lua call Sub,a = %d,b = %d\n",a,b);
+    printf("lua call Sub,a = %d,b = %d\n", a, b);
     return a - b;
 }
 
 void Say(const char *contex)
 {
-    printf("Global Say = %s\n",contex);
+    printf("Global Say = %s\n", contex);
 }
 
 class Test
@@ -48,9 +49,9 @@ int LuaFnAdd(lua_State *L)
 
 struct OuterClass
 {
-    OuterClass()
+    OuterClass(int a)
     {
-        printf("OuterClass\n");
+        printf("OuterClass,a = %d\n", a);
     }
 
     ~OuterClass()
@@ -58,33 +59,40 @@ struct OuterClass
         printf("~OuterClass\n");
     }
 
-    void Say(char* world)
+    void Say(char *world)
     {
-        printf("*****OuterClass::Say: %s******\n",world);
+        printf("*****OuterClass::Say: %s******\n", world);
     }
+};
+
+static std::function<int(int, int)> func = [](int a, int b) -> int
+{
+    printf("c++ Lambda  func add a = %d,b = %d",a,b);
+    return a + b;
 };
 
 int main(void)
 {
-    lua_State* L =  luaL_newstate();
+    lua_State *L = luaL_newstate();
     LuaBridge luaBridge(L);
 
     luabridge::getGlobalNamespace(L)
-        .addCFunction("LuaFnAdd",LuaFnAdd)
-        .beginClass <OuterClass> ("OuterClass")
-        .addConstructor<void(*)()>()
-        .addFunction("Say",&OuterClass::Say)
-        .endClass ();
+        .addCFunction("LuaFnAdd", LuaFnAdd)
+        .beginClass<OuterClass>("OuterClass")
+        .addConstructor <void(*)(int)>()
+        .addFunction("Say", &OuterClass::Say)
+        .endClass();
     int top = lua_gettop(L);
     luaBridge.LoadFile("../script/111111.lua");
     int ret = luaBridge.Call<int>("x11111_PrintG");
     printf("ret = %d\n", ret);
     printf("-------------------\n");
-    LuaRegisterCFunc(luaBridge, "Add", int(int,int), Add);
-    LuaRegisterCFunc(luaBridge, "Sub", int(int,int), Sub);
-    LuaRegisterCFunc(luaBridge, "Say", void(const char*), Say);
+    LuaRegisterCFunc(luaBridge, "Add", Add);
+    LuaRegisterCFunc(luaBridge, "LambdaAdd", func);
+    LuaRegisterCFunc(luaBridge, "Sub", Sub);
+    LuaRegisterCFunc(luaBridge, "Say", Say);
     LuaRegisterLuaFunc(luaBridge, "LuaFnAdd", LuaFnAdd);
-    ret = luaBridge.Call<int>("x11111_callfailedtest", 1, 2,200,100,"Hello lua");
+    ret = luaBridge.Call<int>("x11111_callfailedtest", 1, 2, 200, 100, "Hello lua");
     printf("ret = %d\n", ret);
     printf("-------------------\n");
     ret = luaBridge.Call<int>("x11111_test", 1, 2);
