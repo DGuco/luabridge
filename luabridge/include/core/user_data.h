@@ -207,7 +207,7 @@ public:
       const-ness, a Lua error is raised.
     */
     template<class T>
-    static inline T *get(lua_State *L, int index, bool canBeConst)
+    static inline T *get(lua_State *L, int index, bool canBeConst, bool luaerror = true)
     {
         if (lua_isnil(L, index))
             return 0;
@@ -676,9 +676,9 @@ struct StackOpSelector<T *, true>
         UserdataPtr::push(L, value);
     }
 
-    static T *get(lua_State *L, int index)
+    static T *get(lua_State *L, int index, bool luaerror = true)
     {
-        return Userdata::get<T>(L, index, false);
+        return Userdata::get<T>(L, index, false,luaerror);
     }
 };
 
@@ -693,9 +693,9 @@ struct StackOpSelector<const T *, true>
         UserdataPtr::push(L, value);
     }
 
-    static const T *get(lua_State *L, int index)
+    static const T *get(lua_State *L, int index, bool luaerror = true)
     {
-        return Userdata::get<T>(L, index, true);
+        return Userdata::get<T>(L, index, true,luaerror);
     }
 };
 
@@ -711,9 +711,9 @@ struct StackOpSelector<T &, true>
         UserdataPtr::push(L, &value);
     }
 
-    static ReturnType get(lua_State *L, int index)
+    static ReturnType get(lua_State *L, int index, bool luaerror = true)
     {
-        return Helper::get(L, index);
+        return Helper::get(L, index,luaerror);
     }
 };
 
@@ -729,9 +729,9 @@ struct StackOpSelector<const T &, true>
         Helper::push(L, value);
     }
 
-    static ReturnType get(lua_State *L, int index)
+    static ReturnType get(lua_State *L, int index, bool luaerror = true)
     {
-        return Helper::get(L, index);
+        return Helper::get(L, index,luaerror);
     }
 };
 

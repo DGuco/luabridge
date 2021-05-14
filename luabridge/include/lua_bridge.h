@@ -187,7 +187,7 @@ R LuaBridge::SafeEndCall(const char *func, int nArg)
     else {
         try
         {
-            R r = Stack<R>::get(L, -1);
+            R r = Stack<R>::get(L, -1, false);
             //恢复调用前的堆栈索引
             lua_settop(L, m_iTopIndex);
             return r;
