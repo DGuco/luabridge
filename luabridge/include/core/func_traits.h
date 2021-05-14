@@ -33,12 +33,10 @@
 
 #include <functional>
 #include "type_list.h"
+#include "constructor.h"
 
 namespace luabridge
 {
-
-//get参数的类型
-#define  LUA_PARAM_TYPE(n) typename ArgTypeList<ParamList...>::template args<n>::type
 
 template<size_t NUM_PARAMS,class ReturnType,class... ParamList>
 struct Caller;
@@ -554,11 +552,22 @@ struct FuncTraits<R (*)(ParamList...)>
     static bool const isMemberFunction = false;
     using DeclType = R (*)(ParamList...);
     using ReturnType = R;
-    using Params = typename MakeTypeList<ParamList...>::Result;
 
-    static R call(lua_State*L,const DeclType &fp)
+    template<class T>
+    static T* callnew(lua_State*L,void* mem,int startParam)
     {
-        return doCall<R,DeclType ,ParamList...>(L,fp);
+        return Constructor<arity,T, ParamList...>::call(L,mem, startParam);
+    }
+
+    template<class T>
+    static T* callnew(lua_State*L,int startParam)
+    {
+        return Constructor<arity,T, ParamList...>::call(L, startParam);
+    }
+
+    static R call(lua_State*L,const DeclType &fp,int startParam)
+    {
+        return doCall<R,DeclType,ParamList...>(L,fp,startParam);
     }
 };
 
@@ -575,7 +584,6 @@ struct FuncTraits<R (T::*)(ParamList...)>
     using DeclType = R (T::*)(ParamList...);
     using ClassType = T;
     using ReturnType = R;
-    using Params = typename MakeTypeList<ParamList...>::Result;
 
     static R call(lua_State*L,ClassType *obj,const DeclType &fp,int startParam)
     {
@@ -597,7 +605,6 @@ struct FuncTraits<R (T::*)(ParamList...) const>
     using DeclType = R (T::*)(ParamList...) const;
     using ClassType = T;
     using ReturnType = R;
-    using Params = typename MakeTypeList<ParamList...>::Result;
 
     static R call(lua_State*L,const ClassType *obj,const DeclType &fp,int startParam)
     {
@@ -618,7 +625,6 @@ struct FuncTraits<std::function<R(ParamList...)>>
     static bool const isConstMemberFunction = false;
     using DeclType = std::function<R(ParamList...)>;
     using ReturnType = R;
-    using Params = typename MakeTypeList<ParamList...>::Result;
 
     static ReturnType call(lua_State*L,DeclType &fn,int startParam)
     {
@@ -626,7 +632,7 @@ struct FuncTraits<std::function<R(ParamList...)>>
     }
 };
 
-template<class ReturnType, class Params, int startParam>
+template<class ReturnType,int startParam>
 struct Invoke
 {
     template<class Fn>
@@ -673,8 +679,8 @@ struct Invoke
     }
 };
 
-template<class Params, int startParam>
-struct Invoke<void, Params, startParam>
+template<int startParam>
+struct Invoke<void,startParam>
 {
     template<class Fn>
     static int run(lua_State *L, Fn &fn)

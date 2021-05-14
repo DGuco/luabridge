@@ -266,6 +266,7 @@ public:
         if (!lua_istable(L, -1)) {
             throw std::logic_error("The class is not registered in LuaBridge");
         }
+        int top = lua_gettop(L);
         lua_setmetatable(L, -2);
         return ud;
     }

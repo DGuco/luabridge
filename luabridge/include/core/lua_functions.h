@@ -286,14 +286,13 @@ struct CFunc
     template<class FnPtr>
     struct Call
     {
-        typedef typename FuncTraits<FnPtr>::Params Params;
         typedef typename FuncTraits<FnPtr>::ReturnType ReturnType;
         static int f(lua_State *L)
         {
             assert (lua_islightuserdata(L, lua_upvalueindex(1)));
             FnPtr fnptr = reinterpret_cast <FnPtr> (lua_touserdata(L, lua_upvalueindex (1)));
             assert (fnptr != 0);
-            return Invoke<ReturnType, Params, 1>::run(L, fnptr);
+            return Invoke<ReturnType, 1>::run(L, fnptr);
         }
     };
 
@@ -309,12 +308,11 @@ struct CFunc
     template<class FnPtr>
     struct CFCall
     {
-        typedef typename FuncTraits<FnPtr>::Params Params;
         typedef typename FuncTraits<FnPtr>::ReturnType ReturnType;
 
         static int f(lua_State *L,FnPtr fnptr)
         {
-            return Invoke<ReturnType, Params, 1>::run(L, fnptr);
+            return Invoke<ReturnType, 1>::run(L, fnptr);
         }
     };
     //----------------------------------------------------------------------------
@@ -328,7 +326,6 @@ struct CFunc
     struct CallMember
     {
         typedef typename FuncTraits<MemFnPtr>::ClassType T;
-        typedef typename FuncTraits<MemFnPtr>::Params Params;
         typedef typename FuncTraits<MemFnPtr>::ReturnType ReturnType;
 
         static int f(lua_State *L)
@@ -337,7 +334,7 @@ struct CFunc
             T *const t = Userdata::get<T>(L, 1, false);
             MemFnPtr const &fnptr = *static_cast <MemFnPtr const *> (lua_touserdata(L, lua_upvalueindex (1)));
             LUA_ASSERT(L,fnptr != 0,"CallMember::f fnptr != 0 ");
-            return Invoke<ReturnType, Params, 2>::run(L, t, fnptr);
+            return Invoke<ReturnType, 2>::run(L, t, fnptr);
         }
     };
 
@@ -345,7 +342,6 @@ struct CFunc
     struct CallConstMember
     {
         typedef typename FuncTraits<MemFnPtr>::ClassType T;
-        typedef typename FuncTraits<MemFnPtr>::Params Params;
         typedef typename FuncTraits<MemFnPtr>::ReturnType ReturnType;
 
         static int f(lua_State *L)
@@ -354,7 +350,7 @@ struct CFunc
             T const *const t = Userdata::get<T>(L, 1, true);
             MemFnPtr const &fnptr = *static_cast <MemFnPtr const *> (lua_touserdata(L, lua_upvalueindex (1)));
             assert (fnptr != 0);
-            return Invoke<ReturnType, Params, 2>::run(L, t, fnptr);
+            return Invoke<ReturnType, 2>::run(L, t, fnptr);
         }
     };
 
@@ -405,7 +401,6 @@ struct CFunc
   template <class FnPtr>
   struct CallProxyFunction
   {
-    using Params = typename FuncTraits <FnPtr>::Params;
     using ReturnType = typename FuncTraits <FnPtr>::ReturnType;
 
     static int f (lua_State* L)
@@ -413,21 +408,20 @@ struct CFunc
       assert (lua_islightuserdata (L, lua_upvalueindex (1)));
       auto fnptr = reinterpret_cast <FnPtr> (lua_touserdata (L, lua_upvalueindex (1)));
       assert (fnptr != 0);
-      return Invoke <ReturnType, Params, 1>::run (L, fnptr);
+      return Invoke <ReturnType, 1>::run (L, fnptr);
     }
   };
 
   template <class Functor>
   struct CallProxyFunctor
   {
-    using Params = typename FuncTraits <Functor>::Params;
     using ReturnType = typename FuncTraits <Functor>::ReturnType;
 
     static int f (lua_State* L)
     {
       assert (LuaHelper::IsFullUserData(L, lua_upvalueindex(1)));
       Functor& fn = *static_cast <Functor*> (lua_touserdata (L, lua_upvalueindex (1)));
-      return Invoke <ReturnType, Params, 1>::run (L, fn);
+      return Invoke <ReturnType, 1>::run (L, fn);
     }
   };
 

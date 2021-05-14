@@ -35,10 +35,15 @@
 #include <functional>
 #include <stdexcept>
 #include <string>
+#include <assert.h>
+#include "lua_library.h"
 #include "classinfo.h"
 #include "lua_exception.h"
 #include "security.h"
 #include "type_traits.h"
+#include "lua_helpers.h"
+#include "lua_functions.h"
+#include "constructor.h"
 
 using namespace std;
 
@@ -243,12 +248,11 @@ class Namespace: public detail::Registrar
         /**
           lua_CFunction to construct a class object wrapped in a container.
         */
-        template<class Params, class C>
+        template<class MemFn,class C>
         static int ctorContainerProxy(lua_State *L)
         {
             typedef typename ContainerTraits<C>::Type T;
-            ArgList<Params, 2> args(L);
-            T *const p = Constructor<T, Params>::call(args);
+            T *const p = FuncTraits<MemFn>::template callnew<T>(L,2);
             UserdataSharedHelper<C, false>::push(L, p);
             return 1;
         }
@@ -257,12 +261,11 @@ class Namespace: public detail::Registrar
         /**
           lua_CFunction to construct a class object in-place in the userdata.
         */
-        template<class Params, class T>
+        template<class MemFn,class T>
         static int ctorPlacementProxy(lua_State *L)
         {
-            ArgList<Params, 2> args(L);
             UserdataValue<T> *value = UserdataValue<T>::place(L);
-            Constructor<T, Params>::call(value->getObject(), args);
+            FuncTraits<MemFn>::template callnew<T>(L,value->getObject(),2);
             value->commit();
             return 1;
         }
@@ -746,8 +749,7 @@ class Namespace: public detail::Registrar
 
             if (set != nullptr) {
                 using SetType = decltype(set);
-                new(lua_newuserdata(L,
-                                    sizeof(set))) SetType(std::move(set)); // Stack: co, cl, st, function userdata (ud)
+                new(lua_newuserdata(L, sizeof(set))) SetType(std::move(set)); // Stack: co, cl, st, function userdata (ud)
                 lua_newtable (L); // Stack: co, cl, st, ud, ud metatable (mt)
                 lua_pushcfunction (L, &CFunc::gcMetaMethodAny<SetType>); // Stack: co, cl, st, ud, mt, gc function
                 LuaHelper::RawSetField(L, -2, "__gc"); // Stack: co, cl, st, ud, mt
@@ -970,7 +972,7 @@ class Namespace: public detail::Registrar
         {
             assertStackState(); // Stack: const table (co), class table (cl), static table (st)
 
-            lua_pushcclosure(L, &ctorContainerProxy < typename FuncTraits<MemFn>::Params, C > , 0);
+            lua_pushcclosure(L, &ctorContainerProxy<MemFn,C> , 0);
             LuaHelper::RawSetField(L, -2, "__call");
 
             return *this;
@@ -981,7 +983,7 @@ class Namespace: public detail::Registrar
         {
             assertStackState(); // Stack: const table (co), class table (cl), static table (st)
 
-            lua_pushcclosure(L, &ctorPlacementProxy < typename FuncTraits<MemFn>::Params, T > , 0);
+            lua_pushcclosure(L, &ctorPlacementProxy<MemFn,T>, 0);
             LuaHelper::RawSetField(L, -2, "__call");
 
             return *this;

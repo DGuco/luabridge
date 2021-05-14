@@ -7,7 +7,7 @@ function x11111_callfailedtest(x,y,i,j,world)
     print("subNum = "..subNum)
     print("world = "..world)
     print("x11111_test1 done")
-    return "1"
+    return 1
 end
 
 

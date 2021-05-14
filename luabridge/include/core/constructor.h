@@ -47,162 +47,426 @@ namespace luabridge {
     of call() are provided. One performs a regular new, the other performs
     a placement new.
 */
-template <class T, typename List>
+template <size_t NUM_PARAMS,class T, typename... ParamList>
 struct Constructor {};
 
 template <class T>
-struct Constructor <T, None>
+struct Constructor <0,T>
 {
-    static T* call (TypeListValues <None> const&)
+    static T* call (lua_State* L,int startParam)
     {
         return new T;
     }
-    static T* call (void* mem, TypeListValues <None> const&)
+    static T* call (lua_State* L,void* mem,int startParam)
     {
         return new (mem) T;
     }
 };
 
-template <class T, class P1>
-struct Constructor <T, TypeList <P1> >
+template <class T, class ... ParamList>
+struct Constructor <1,T, ParamList...>
 {
-static T* call (const TypeListValues<TypeList <P1> > &tvl)
-{
-    return new T(tvl.hd);
-}
-static T* call (void* mem, const TypeListValues<TypeList <P1> > &tvl)
-{
-    return new (mem) T(tvl.hd);
-}
+    static T* call (lua_State* L,int startParam)
+    {
+        return new T(Stack<LUA_PARAM_TYPE(0)>::get(L,startParam + 0));
+    }
+    static T* call (lua_State* L,void* mem,int startParam)
+    {
+        return new (mem) T(Stack<LUA_PARAM_TYPE(0)>::get(L,startParam + 0));
+    }
 };
 
-template <class T, class P1, class P2>
-struct Constructor <T, TypeList <P1, TypeList <P2> > >
+template <class T, class ... ParamList>
+struct Constructor <2,T, ParamList...>
 {
-static T* call (const TypeListValues<TypeList <P1, TypeList <P2> > > &tvl)
-{
-return new T(tvl.hd, tvl.tl.hd);
-}
-static T* call (void* mem, const TypeListValues<TypeList <P1, TypeList <P2> > > &tvl)
-{
-return new (mem) T(tvl.hd, tvl.tl.hd);
-}
+    static T* call (lua_State* L,int startParam)
+    {
+        return new T(Stack<LUA_PARAM_TYPE(0)>::get(L,startParam + 0),
+                     Stack<LUA_PARAM_TYPE(1)>::get(L,startParam + 1));
+    }
+    static T* call (lua_State* L,void* mem,int startParam)
+    {
+        return new (mem) T(Stack<LUA_PARAM_TYPE(0)>::get(L,startParam + 0),
+                           Stack<LUA_PARAM_TYPE(1)>::get(L,startParam + 1));
+    }
 };
 
-template <class T, class P1, class P2, class P3>
-struct Constructor <T, TypeList <P1, TypeList <P2, TypeList <P3> > > >
+template <class T, class ... ParamList>
+struct Constructor <3,T, ParamList...>
 {
-static T* call (const TypeListValues<TypeList <P1, TypeList <P2,
-                                               TypeList <P3> > > > &tvl)
-{
-return new T(tvl.hd, tvl.tl.hd, tvl.tl.tl.hd);
-}
-static T* call (void* mem, const TypeListValues<TypeList <P1, TypeList <P2,
-                                                          TypeList <P3> > > > &tvl)
-{
-return new (mem) T(tvl.hd, tvl.tl.hd, tvl.tl.tl.hd);
-}
+    static T* call (lua_State* L,int startParam)
+    {
+        return new T(Stack<LUA_PARAM_TYPE(0)>::get(L,startParam + 0),
+                     Stack<LUA_PARAM_TYPE(1)>::get(L,startParam + 1),
+                     Stack<LUA_PARAM_TYPE(2)>::get(L,startParam + 2));
+    }
+    static T* call (lua_State* L,void* mem,int startParam)
+    {
+        return new (mem) T(Stack<LUA_PARAM_TYPE(0)>::get(L,startParam + 0),
+                           Stack<LUA_PARAM_TYPE(1)>::get(L,startParam + 1),
+                           Stack<LUA_PARAM_TYPE(2)>::get(L,startParam + 2));
+    }
 };
 
-template <class T, class P1, class P2, class P3, class P4>
-struct Constructor <T, TypeList <P1, TypeList <P2, TypeList <P3,
-                    TypeList <P4> > > > >
+template <class T, class ... ParamList>
+struct Constructor <4,T, ParamList...>
 {
-static T* call (const TypeListValues<TypeList <P1, TypeList <P2,
-                                               TypeList <P3, TypeList <P4> > > > > &tvl)
-{
-return new T(tvl.hd, tvl.tl.hd, tvl.tl.tl.hd, tvl.tl.tl.tl.hd);
-}
-static T* call (void* mem, const TypeListValues<TypeList <P1, TypeList <P2,
-                                                          TypeList <P3, TypeList <P4> > > > > &tvl)
-{
-return new (mem) T(tvl.hd, tvl.tl.hd, tvl.tl.tl.hd, tvl.tl.tl.tl.hd);
-}
+    static T* call (lua_State* L,int startParam)
+    {
+        return new T(Stack<LUA_PARAM_TYPE(0)>::get(L,startParam + 0),
+                     Stack<LUA_PARAM_TYPE(1)>::get(L,startParam + 1),
+                     Stack<LUA_PARAM_TYPE(2)>::get(L,startParam + 2),
+                     Stack<LUA_PARAM_TYPE(3)>::get(L,startParam + 3));
+    }
+    static T* call (lua_State* L,void* mem,int startParam)
+    {
+        return new (mem) T(Stack<LUA_PARAM_TYPE(0)>::get(L,startParam + 0),
+                           Stack<LUA_PARAM_TYPE(1)>::get(L,startParam + 1),
+                           Stack<LUA_PARAM_TYPE(2)>::get(L,startParam + 2),
+                           Stack<LUA_PARAM_TYPE(3)>::get(L,startParam + 3));
+    }
 };
 
-template <class T, class P1, class P2, class P3, class P4,
-    class P5>
-struct Constructor <T, TypeList <P1, TypeList <P2, TypeList <P3,
-                    TypeList <P4, TypeList <P5> > > > > >
+template <class T, class ... ParamList>
+struct Constructor <5,T, ParamList...>
 {
-static T* call (const TypeListValues<TypeList <P1, TypeList <P2,
-                                               TypeList <P3, TypeList <P4, TypeList <P5> > > > > > &tvl)
-{
-return new T(tvl.hd, tvl.tl.hd, tvl.tl.tl.hd, tvl.tl.tl.tl.hd,
-tvl.tl.tl.tl.tl.hd);
-}
-static T* call (void* mem, const TypeListValues<TypeList <P1, TypeList <P2,
-                                                          TypeList <P3, TypeList <P4, TypeList <P5> > > > > > &tvl)
-{
-return new (mem) T(tvl.hd, tvl.tl.hd, tvl.tl.tl.hd, tvl.tl.tl.tl.hd,
-tvl.tl.tl.tl.tl.hd);
-}
+    static T* call (lua_State* L,int startParam)
+    {
+        return new T(Stack<LUA_PARAM_TYPE(0)>::get(L,startParam + 0),
+                     Stack<LUA_PARAM_TYPE(1)>::get(L,startParam + 1),
+                     Stack<LUA_PARAM_TYPE(2)>::get(L,startParam + 2),
+                     Stack<LUA_PARAM_TYPE(3)>::get(L,startParam + 3),
+                     Stack<LUA_PARAM_TYPE(4)>::get(L,startParam + 4));
+    }
+    static T* call (lua_State* L,void* mem,int startParam)
+    {
+        return new (mem) T(Stack<LUA_PARAM_TYPE(0)>::get(L,startParam + 0),
+                           Stack<LUA_PARAM_TYPE(1)>::get(L,startParam + 1),
+                           Stack<LUA_PARAM_TYPE(2)>::get(L,startParam + 2),
+                           Stack<LUA_PARAM_TYPE(3)>::get(L,startParam + 3),
+                           Stack<LUA_PARAM_TYPE(4)>::get(L,startParam + 4));
+    }
 };
 
-template <class T, class P1, class P2, class P3, class P4,
-    class P5, class P6>
-struct Constructor <T, TypeList <P1, TypeList <P2, TypeList <P3,
-                    TypeList <P4, TypeList <P5, TypeList <P6> > > > > > >
+template <class T, class ... ParamList>
+struct Constructor <6,T, ParamList...>
 {
-static T* call (const TypeListValues<TypeList <P1, TypeList <P2,
-                                               TypeList <P3, TypeList <P4, TypeList <P5, TypeList <P6> > > > > > > &tvl)
-{
-return new T(tvl.hd, tvl.tl.hd, tvl.tl.tl.hd, tvl.tl.tl.tl.hd,
-tvl.tl.tl.tl.tl.hd, tvl.tl.tl.tl.tl.tl.hd);
-}
-static T* call (void* mem, const TypeListValues<TypeList <P1, TypeList <P2,
-                                                          TypeList <P3, TypeList <P4, TypeList <P5, TypeList <P6> > > > > > > &tvl)
-{
-return new (mem) T(tvl.hd, tvl.tl.hd, tvl.tl.tl.hd, tvl.tl.tl.tl.hd,
-tvl.tl.tl.tl.tl.hd, tvl.tl.tl.tl.tl.tl.hd);
-}
+    static T* call (lua_State* L,int startParam)
+    {
+        return new T(Stack<LUA_PARAM_TYPE(0)>::get(L,startParam + 0),
+                     Stack<LUA_PARAM_TYPE(1)>::get(L,startParam + 1),
+                     Stack<LUA_PARAM_TYPE(2)>::get(L,startParam + 2),
+                     Stack<LUA_PARAM_TYPE(3)>::get(L,startParam + 3),
+                     Stack<LUA_PARAM_TYPE(4)>::get(L,startParam + 4),
+                     Stack<LUA_PARAM_TYPE(5)>::get(L,startParam + 5));
+    }
+    static T* call (lua_State* L,void* mem,int startParam)
+    {
+        return new (mem) T(Stack<LUA_PARAM_TYPE(0)>::get(L,startParam + 0),
+                           Stack<LUA_PARAM_TYPE(1)>::get(L,startParam + 1),
+                           Stack<LUA_PARAM_TYPE(2)>::get(L,startParam + 2),
+                           Stack<LUA_PARAM_TYPE(3)>::get(L,startParam + 3),
+                           Stack<LUA_PARAM_TYPE(4)>::get(L,startParam + 4),
+                           Stack<LUA_PARAM_TYPE(5)>::get(L,startParam + 5));
+    }
 };
 
-template <class T, class P1, class P2, class P3, class P4,
-    class P5, class P6, class P7>
-struct Constructor <T, TypeList <P1, TypeList <P2, TypeList <P3,
-                    TypeList <P4, TypeList <P5, TypeList <P6, TypeList <P7> > > > > > > >
+template <class T, class ... ParamList>
+struct Constructor <7,T, ParamList...>
 {
-static T* call (const TypeListValues<TypeList <P1, TypeList <P2,
-                                               TypeList <P3, TypeList <P4, TypeList <P5, TypeList <P6,
-                                               TypeList <P7> > > > > > > > &tvl)
-{
-return new T(tvl.hd, tvl.tl.hd, tvl.tl.tl.hd, tvl.tl.tl.tl.hd,
-tvl.tl.tl.tl.tl.hd, tvl.tl.tl.tl.tl.tl.hd,
-tvl.tl.tl.tl.tl.tl.tl.hd);
-}
-static T* call (void* mem, const TypeListValues<TypeList <P1, TypeList <P2,
-                                                          TypeList <P3, TypeList <P4, TypeList <P5, TypeList <P6,
-                                                          TypeList <P7> > > > > > > > &tvl)
-{
-return new (mem) T(tvl.hd, tvl.tl.hd, tvl.tl.tl.hd, tvl.tl.tl.tl.hd,
-tvl.tl.tl.tl.tl.hd, tvl.tl.tl.tl.tl.tl.hd,
-tvl.tl.tl.tl.tl.tl.tl.hd);
-}
+    static T* call (lua_State* L,int startParam)
+    {
+        return new T(Stack<LUA_PARAM_TYPE(0)>::get(L,startParam + 0),
+                     Stack<LUA_PARAM_TYPE(1)>::get(L,startParam + 1),
+                     Stack<LUA_PARAM_TYPE(2)>::get(L,startParam + 2),
+                     Stack<LUA_PARAM_TYPE(3)>::get(L,startParam + 3),
+                     Stack<LUA_PARAM_TYPE(4)>::get(L,startParam + 4),
+                     Stack<LUA_PARAM_TYPE(5)>::get(L,startParam + 5),
+                     Stack<LUA_PARAM_TYPE(6)>::get(L,startParam + 6));
+    }
+    static T* call (lua_State* L,void* mem,int startParam)
+    {
+        return new (mem) T(Stack<LUA_PARAM_TYPE(0)>::get(L,startParam + 0),
+                           Stack<LUA_PARAM_TYPE(1)>::get(L,startParam + 1),
+                           Stack<LUA_PARAM_TYPE(2)>::get(L,startParam + 2),
+                           Stack<LUA_PARAM_TYPE(3)>::get(L,startParam + 3),
+                           Stack<LUA_PARAM_TYPE(4)>::get(L,startParam + 4),
+                           Stack<LUA_PARAM_TYPE(5)>::get(L,startParam + 5),
+                           Stack<LUA_PARAM_TYPE(6)>::get(L,startParam + 6));
+    }
 };
 
-template <class T, class P1, class P2, class P3, class P4,
-    class P5, class P6, class P7, class P8>
-struct Constructor <T, TypeList <P1, TypeList <P2, TypeList <P3,
-                    TypeList <P4, TypeList <P5, TypeList <P6, TypeList <P7,
-                    TypeList <P8> > > > > > > > >
+template <class T, class ... ParamList>
+struct Constructor <8,T, ParamList...>
 {
-static T* call (const TypeListValues<TypeList <P1, TypeList <P2,
-                                               TypeList <P3, TypeList <P4, TypeList <P5, TypeList <P6,
-                                               TypeList <P7, TypeList <P8> > > > > > > > > &tvl)
-{
-return new T(tvl.hd, tvl.tl.hd, tvl.tl.tl.hd, tvl.tl.tl.tl.hd,
-tvl.tl.tl.tl.tl.hd, tvl.tl.tl.tl.tl.tl.hd,
-tvl.tl.tl.tl.tl.tl.tl.hd, tvl.tl.tl.tl.tl.tl.tl.tl.hd);
-}
-static T* call (void* mem, const TypeListValues<TypeList <P1, TypeList <P2,
-                                                          TypeList <P3, TypeList <P4, TypeList <P5, TypeList <P6,
-                                                          TypeList <P7, TypeList <P8> > > > > > > > > &tvl)
-{
-return new (mem) T(tvl.hd, tvl.tl.hd, tvl.tl.tl.hd, tvl.tl.tl.tl.hd,
-tvl.tl.tl.tl.tl.hd, tvl.tl.tl.tl.tl.tl.hd,
-tvl.tl.tl.tl.tl.tl.tl.hd, tvl.tl.tl.tl.tl.tl.tl.tl.hd);
-}
+    static T* call (lua_State* L,int startParam)
+    {
+        return new T(Stack<LUA_PARAM_TYPE(0)>::get(L,startParam + 0),
+                     Stack<LUA_PARAM_TYPE(1)>::get(L,startParam + 1),
+                     Stack<LUA_PARAM_TYPE(2)>::get(L,startParam + 2),
+                     Stack<LUA_PARAM_TYPE(3)>::get(L,startParam + 3),
+                     Stack<LUA_PARAM_TYPE(4)>::get(L,startParam + 4),
+                     Stack<LUA_PARAM_TYPE(5)>::get(L,startParam + 5),
+                     Stack<LUA_PARAM_TYPE(6)>::get(L,startParam + 6),
+                     Stack<LUA_PARAM_TYPE(7)>::get(L,startParam + 7));
+    }
+    static T* call (lua_State* L,void* mem,int startParam)
+    {
+        return new (mem) T(Stack<LUA_PARAM_TYPE(0)>::get(L,startParam + 0),
+                           Stack<LUA_PARAM_TYPE(1)>::get(L,startParam + 1),
+                           Stack<LUA_PARAM_TYPE(2)>::get(L,startParam + 2),
+                           Stack<LUA_PARAM_TYPE(3)>::get(L,startParam + 3),
+                           Stack<LUA_PARAM_TYPE(4)>::get(L,startParam + 4),
+                           Stack<LUA_PARAM_TYPE(5)>::get(L,startParam + 5),
+                           Stack<LUA_PARAM_TYPE(6)>::get(L,startParam + 6),
+                           Stack<LUA_PARAM_TYPE(7)>::get(L,startParam + 7));
+    }
 };
 
+template <class T, class ... ParamList>
+struct Constructor <9,T, ParamList...>
+{
+    static T* call (lua_State* L,int startParam)
+    {
+        return new T(Stack<LUA_PARAM_TYPE(0)>::get(L,startParam + 0),
+                     Stack<LUA_PARAM_TYPE(1)>::get(L,startParam + 1),
+                     Stack<LUA_PARAM_TYPE(2)>::get(L,startParam + 2),
+                     Stack<LUA_PARAM_TYPE(3)>::get(L,startParam + 3),
+                     Stack<LUA_PARAM_TYPE(4)>::get(L,startParam + 4),
+                     Stack<LUA_PARAM_TYPE(5)>::get(L,startParam + 5),
+                     Stack<LUA_PARAM_TYPE(6)>::get(L,startParam + 6),
+                     Stack<LUA_PARAM_TYPE(7)>::get(L,startParam + 7),
+                     Stack<LUA_PARAM_TYPE(8)>::get(L,startParam + 8));
+    }
+    static T* call (lua_State* L,void* mem,int startParam)
+    {
+        return new (mem) T(Stack<LUA_PARAM_TYPE(0)>::get(L,startParam + 0),
+                           Stack<LUA_PARAM_TYPE(1)>::get(L,startParam + 1),
+                           Stack<LUA_PARAM_TYPE(2)>::get(L,startParam + 2),
+                           Stack<LUA_PARAM_TYPE(3)>::get(L,startParam + 3),
+                           Stack<LUA_PARAM_TYPE(4)>::get(L,startParam + 4),
+                           Stack<LUA_PARAM_TYPE(5)>::get(L,startParam + 5),
+                           Stack<LUA_PARAM_TYPE(6)>::get(L,startParam + 6),
+                           Stack<LUA_PARAM_TYPE(7)>::get(L,startParam + 7),
+                           Stack<LUA_PARAM_TYPE(8)>::get(L,startParam + 8));
+    }
+};
+
+template <class T, class ... ParamList>
+struct Constructor <10,T, ParamList...>
+{
+    static T* call (lua_State* L,int startParam)
+    {
+        return new T(Stack<LUA_PARAM_TYPE(0)>::get(L,startParam + 0),
+                     Stack<LUA_PARAM_TYPE(1)>::get(L,startParam + 1),
+                     Stack<LUA_PARAM_TYPE(2)>::get(L,startParam + 2),
+                     Stack<LUA_PARAM_TYPE(3)>::get(L,startParam + 3),
+                     Stack<LUA_PARAM_TYPE(4)>::get(L,startParam + 4),
+                     Stack<LUA_PARAM_TYPE(5)>::get(L,startParam + 5),
+                     Stack<LUA_PARAM_TYPE(6)>::get(L,startParam + 6),
+                     Stack<LUA_PARAM_TYPE(7)>::get(L,startParam + 7),
+                     Stack<LUA_PARAM_TYPE(8)>::get(L,startParam + 8),
+                     Stack<LUA_PARAM_TYPE(9)>::get(L,startParam + 9));
+    }
+    static T* call (lua_State* L,void* mem,int startParam)
+    {
+        return new (mem) T(Stack<LUA_PARAM_TYPE(0)>::get(L,startParam + 0),
+                           Stack<LUA_PARAM_TYPE(1)>::get(L,startParam + 1),
+                           Stack<LUA_PARAM_TYPE(2)>::get(L,startParam + 2),
+                           Stack<LUA_PARAM_TYPE(3)>::get(L,startParam + 3),
+                           Stack<LUA_PARAM_TYPE(4)>::get(L,startParam + 4),
+                           Stack<LUA_PARAM_TYPE(5)>::get(L,startParam + 5),
+                           Stack<LUA_PARAM_TYPE(6)>::get(L,startParam + 6),
+                           Stack<LUA_PARAM_TYPE(7)>::get(L,startParam + 7),
+                           Stack<LUA_PARAM_TYPE(8)>::get(L,startParam + 8),
+                           Stack<LUA_PARAM_TYPE(9)>::get(L,startParam + 9));
+    }
+};
+
+template <class T, class ... ParamList>
+struct Constructor <11,T, ParamList...>
+{
+    static T* call (lua_State* L,int startParam)
+    {
+        return new T(Stack<LUA_PARAM_TYPE(0)>::get(L,startParam + 0),
+                     Stack<LUA_PARAM_TYPE(1)>::get(L,startParam + 1),
+                     Stack<LUA_PARAM_TYPE(2)>::get(L,startParam + 2),
+                     Stack<LUA_PARAM_TYPE(3)>::get(L,startParam + 3),
+                     Stack<LUA_PARAM_TYPE(4)>::get(L,startParam + 4),
+                     Stack<LUA_PARAM_TYPE(5)>::get(L,startParam + 5),
+                     Stack<LUA_PARAM_TYPE(6)>::get(L,startParam + 6),
+                     Stack<LUA_PARAM_TYPE(7)>::get(L,startParam + 7),
+                     Stack<LUA_PARAM_TYPE(8)>::get(L,startParam + 8),
+                     Stack<LUA_PARAM_TYPE(9)>::get(L,startParam + 9),
+                     Stack<LUA_PARAM_TYPE(10)>::get(L,startParam + 10));
+    }
+    static T* call (lua_State* L,void* mem,int startParam)
+    {
+        return new (mem) T(Stack<LUA_PARAM_TYPE(0)>::get(L,startParam + 0),
+                           Stack<LUA_PARAM_TYPE(1)>::get(L,startParam + 1),
+                           Stack<LUA_PARAM_TYPE(2)>::get(L,startParam + 2),
+                           Stack<LUA_PARAM_TYPE(3)>::get(L,startParam + 3),
+                           Stack<LUA_PARAM_TYPE(4)>::get(L,startParam + 4),
+                           Stack<LUA_PARAM_TYPE(5)>::get(L,startParam + 5),
+                           Stack<LUA_PARAM_TYPE(6)>::get(L,startParam + 6),
+                           Stack<LUA_PARAM_TYPE(7)>::get(L,startParam + 7),
+                           Stack<LUA_PARAM_TYPE(8)>::get(L,startParam + 8),
+                           Stack<LUA_PARAM_TYPE(9)>::get(L,startParam + 9),
+                           Stack<LUA_PARAM_TYPE(10)>::get(L,startParam + 10));
+    }
+};
+
+template <class T, class ... ParamList>
+struct Constructor <12,T, ParamList...>
+{
+    static T* call (lua_State* L,int startParam)
+    {
+        return new T(Stack<LUA_PARAM_TYPE(0)>::get(L,startParam + 0),
+                     Stack<LUA_PARAM_TYPE(1)>::get(L,startParam + 1),
+                     Stack<LUA_PARAM_TYPE(2)>::get(L,startParam + 2),
+                     Stack<LUA_PARAM_TYPE(3)>::get(L,startParam + 3),
+                     Stack<LUA_PARAM_TYPE(4)>::get(L,startParam + 4),
+                     Stack<LUA_PARAM_TYPE(5)>::get(L,startParam + 5),
+                     Stack<LUA_PARAM_TYPE(6)>::get(L,startParam + 6),
+                     Stack<LUA_PARAM_TYPE(7)>::get(L,startParam + 7),
+                     Stack<LUA_PARAM_TYPE(8)>::get(L,startParam + 8),
+                     Stack<LUA_PARAM_TYPE(9)>::get(L,startParam + 9),
+                     Stack<LUA_PARAM_TYPE(10)>::get(L,startParam + 10),
+                     Stack<LUA_PARAM_TYPE(11)>::get(L,startParam + 11));
+    }
+    static T* call (lua_State* L,void* mem,int startParam)
+    {
+        return new (mem) T(Stack<LUA_PARAM_TYPE(0)>::get(L,startParam + 0),
+                           Stack<LUA_PARAM_TYPE(1)>::get(L,startParam + 1),
+                           Stack<LUA_PARAM_TYPE(2)>::get(L,startParam + 2),
+                           Stack<LUA_PARAM_TYPE(3)>::get(L,startParam + 3),
+                           Stack<LUA_PARAM_TYPE(4)>::get(L,startParam + 4),
+                           Stack<LUA_PARAM_TYPE(5)>::get(L,startParam + 5),
+                           Stack<LUA_PARAM_TYPE(6)>::get(L,startParam + 6),
+                           Stack<LUA_PARAM_TYPE(7)>::get(L,startParam + 7),
+                           Stack<LUA_PARAM_TYPE(8)>::get(L,startParam + 8),
+                           Stack<LUA_PARAM_TYPE(9)>::get(L,startParam + 9),
+                           Stack<LUA_PARAM_TYPE(10)>::get(L,startParam + 10),
+                           Stack<LUA_PARAM_TYPE(11)>::get(L,startParam + 11));
+    }
+};
+
+
+template <class T, class ... ParamList>
+struct Constructor <13,T, ParamList...>
+{
+    static T* call (lua_State* L,int startParam)
+    {
+        return new T(Stack<LUA_PARAM_TYPE(0)>::get(L,startParam + 0),
+                     Stack<LUA_PARAM_TYPE(1)>::get(L,startParam + 1),
+                     Stack<LUA_PARAM_TYPE(2)>::get(L,startParam + 2),
+                     Stack<LUA_PARAM_TYPE(3)>::get(L,startParam + 3),
+                     Stack<LUA_PARAM_TYPE(4)>::get(L,startParam + 4),
+                     Stack<LUA_PARAM_TYPE(5)>::get(L,startParam + 5),
+                     Stack<LUA_PARAM_TYPE(6)>::get(L,startParam + 6),
+                     Stack<LUA_PARAM_TYPE(7)>::get(L,startParam + 7),
+                     Stack<LUA_PARAM_TYPE(8)>::get(L,startParam + 8),
+                     Stack<LUA_PARAM_TYPE(9)>::get(L,startParam + 9),
+                     Stack<LUA_PARAM_TYPE(10)>::get(L,startParam + 10),
+                     Stack<LUA_PARAM_TYPE(11)>::get(L,startParam + 11),
+                     Stack<LUA_PARAM_TYPE(12)>::get(L,startParam + 12));
+    }
+    static T* call (lua_State* L,void* mem,int startParam)
+    {
+        return new (mem) T(Stack<LUA_PARAM_TYPE(0)>::get(L,startParam + 0),
+                           Stack<LUA_PARAM_TYPE(1)>::get(L,startParam + 1),
+                           Stack<LUA_PARAM_TYPE(2)>::get(L,startParam + 2),
+                           Stack<LUA_PARAM_TYPE(3)>::get(L,startParam + 3),
+                           Stack<LUA_PARAM_TYPE(4)>::get(L,startParam + 4),
+                           Stack<LUA_PARAM_TYPE(5)>::get(L,startParam + 5),
+                           Stack<LUA_PARAM_TYPE(6)>::get(L,startParam + 6),
+                           Stack<LUA_PARAM_TYPE(7)>::get(L,startParam + 7),
+                           Stack<LUA_PARAM_TYPE(8)>::get(L,startParam + 8),
+                           Stack<LUA_PARAM_TYPE(9)>::get(L,startParam + 9),
+                           Stack<LUA_PARAM_TYPE(10)>::get(L,startParam + 10),
+                           Stack<LUA_PARAM_TYPE(11)>::get(L,startParam + 11),
+                           Stack<LUA_PARAM_TYPE(12)>::get(L,startParam + 12));
+    }
+};
+
+template <class T, class ... ParamList>
+struct Constructor <14,T, ParamList...>
+{
+    static T* call (lua_State* L,int startParam)
+    {
+        return new T(Stack<LUA_PARAM_TYPE(0)>::get(L,startParam + 0),
+                     Stack<LUA_PARAM_TYPE(1)>::get(L,startParam + 1),
+                     Stack<LUA_PARAM_TYPE(2)>::get(L,startParam + 2),
+                     Stack<LUA_PARAM_TYPE(3)>::get(L,startParam + 3),
+                     Stack<LUA_PARAM_TYPE(4)>::get(L,startParam + 4),
+                     Stack<LUA_PARAM_TYPE(5)>::get(L,startParam + 5),
+                     Stack<LUA_PARAM_TYPE(6)>::get(L,startParam + 6),
+                     Stack<LUA_PARAM_TYPE(7)>::get(L,startParam + 7),
+                     Stack<LUA_PARAM_TYPE(8)>::get(L,startParam + 8),
+                     Stack<LUA_PARAM_TYPE(9)>::get(L,startParam + 9),
+                     Stack<LUA_PARAM_TYPE(10)>::get(L,startParam + 10),
+                     Stack<LUA_PARAM_TYPE(11)>::get(L,startParam + 11),
+                     Stack<LUA_PARAM_TYPE(12)>::get(L,startParam + 12),
+                     Stack<LUA_PARAM_TYPE(13)>::get(L,startParam + 13));
+    }
+    static T* call (lua_State* L,void* mem,int startParam)
+    {
+        return new (mem) T(Stack<LUA_PARAM_TYPE(0)>::get(L,startParam + 0),
+                           Stack<LUA_PARAM_TYPE(1)>::get(L,startParam + 1),
+                           Stack<LUA_PARAM_TYPE(2)>::get(L,startParam + 2),
+                           Stack<LUA_PARAM_TYPE(3)>::get(L,startParam + 3),
+                           Stack<LUA_PARAM_TYPE(4)>::get(L,startParam + 4),
+                           Stack<LUA_PARAM_TYPE(5)>::get(L,startParam + 5),
+                           Stack<LUA_PARAM_TYPE(6)>::get(L,startParam + 6),
+                           Stack<LUA_PARAM_TYPE(7)>::get(L,startParam + 7),
+                           Stack<LUA_PARAM_TYPE(8)>::get(L,startParam + 8),
+                           Stack<LUA_PARAM_TYPE(9)>::get(L,startParam + 9),
+                           Stack<LUA_PARAM_TYPE(10)>::get(L,startParam + 10),
+                           Stack<LUA_PARAM_TYPE(11)>::get(L,startParam + 11),
+                           Stack<LUA_PARAM_TYPE(12)>::get(L,startParam + 12),
+                           Stack<LUA_PARAM_TYPE(13)>::get(L,startParam + 13));
+    }
+};
+
+
+template <class T, class ... ParamList>
+struct Constructor <15,T, ParamList...>
+{
+    static T* call (lua_State* L,int startParam)
+    {
+        return new T(Stack<LUA_PARAM_TYPE(0)>::get(L,startParam + 0),
+                     Stack<LUA_PARAM_TYPE(1)>::get(L,startParam + 1),
+                     Stack<LUA_PARAM_TYPE(2)>::get(L,startParam + 2),
+                     Stack<LUA_PARAM_TYPE(3)>::get(L,startParam + 3),
+                     Stack<LUA_PARAM_TYPE(4)>::get(L,startParam + 4),
+                     Stack<LUA_PARAM_TYPE(5)>::get(L,startParam + 5),
+                     Stack<LUA_PARAM_TYPE(6)>::get(L,startParam + 6),
+                     Stack<LUA_PARAM_TYPE(7)>::get(L,startParam + 7),
+                     Stack<LUA_PARAM_TYPE(8)>::get(L,startParam + 8),
+                     Stack<LUA_PARAM_TYPE(9)>::get(L,startParam + 9),
+                     Stack<LUA_PARAM_TYPE(10)>::get(L,startParam + 10),
+                     Stack<LUA_PARAM_TYPE(11)>::get(L,startParam + 11),
+                     Stack<LUA_PARAM_TYPE(12)>::get(L,startParam + 12),
+                     Stack<LUA_PARAM_TYPE(13)>::get(L,startParam + 13),
+                     Stack<LUA_PARAM_TYPE(14)>::get(L,startParam + 14));
+    }
+    static T* call (lua_State* L,void* mem,int startParam)
+    {
+        return new (mem) T(Stack<LUA_PARAM_TYPE(0)>::get(L,startParam + 0),
+                           Stack<LUA_PARAM_TYPE(1)>::get(L,startParam + 1),
+                           Stack<LUA_PARAM_TYPE(2)>::get(L,startParam + 2),
+                           Stack<LUA_PARAM_TYPE(3)>::get(L,startParam + 3),
+                           Stack<LUA_PARAM_TYPE(4)>::get(L,startParam + 4),
+                           Stack<LUA_PARAM_TYPE(5)>::get(L,startParam + 5),
+                           Stack<LUA_PARAM_TYPE(6)>::get(L,startParam + 6),
+                           Stack<LUA_PARAM_TYPE(7)>::get(L,startParam + 7),
+                           Stack<LUA_PARAM_TYPE(8)>::get(L,startParam + 8),
+                           Stack<LUA_PARAM_TYPE(9)>::get(L,startParam + 9),
+                           Stack<LUA_PARAM_TYPE(10)>::get(L,startParam + 10),
+                           Stack<LUA_PARAM_TYPE(11)>::get(L,startParam + 11),
+                           Stack<LUA_PARAM_TYPE(12)>::get(L,startParam + 12),
+                           Stack<LUA_PARAM_TYPE(13)>::get(L,startParam + 13),
+                           Stack<LUA_PARAM_TYPE(14)>::get(L,startParam + 14));
+    }
+};
 } // namespace luabridge
