@@ -75,22 +75,22 @@ int main(void)
 {
     lua_State *L = luaL_newstate();
     LuaBridge luaBridge(L);
-
-    luabridge::getGlobalNamespace(L)
-        .beginClass<OuterClass>("OuterClass")
-        .addConstructor <void(*)(int)>()
-        .addFunction("Say", &OuterClass::Say)
-        .endClass();
-    int top = lua_gettop(L);
     luaBridge.LoadFile("../script/111111.lua");
+
+    BEGIN_CLASS(luaBridge,OuterClass,"OuterClass")
+        CLASS_ADD_CONSTRUCTOR(void(*)(int))
+        CLASS_ADD_FUNC("Say",&OuterClass::Say)
+    END_CLASS
+
+    REGISTER_LUA_CFUNC(luaBridge, "Add", Add)
+    REGISTER_LUA_CFUNC(luaBridge, "LambdaAdd", func)
+    REGISTER_LUA_CFUNC(luaBridge, "Sub", Sub)
+    REGISTER_LUA_CFUNC(luaBridge, "Say", Say)
+    REGISTER_LUA_CFUNC(luaBridge, "LuaFnAdd", LuaFnAdd)
+
     int ret = luaBridge.CallLuaFunc<int>("x11111_PrintG");
     printf("ret = %d\n", ret);
     printf("-------------------\n");
-    LuaRegisterCFunc(luaBridge, "Add", Add);
-    LuaRegisterCFunc(luaBridge, "LambdaAdd", func);
-    LuaRegisterCFunc(luaBridge, "Sub", Sub);
-    LuaRegisterCFunc(luaBridge, "Say", Say);
-    LuaRegisterCFunc(luaBridge, "LuaFnAdd", LuaFnAdd);
     ret = luaBridge.CallLuaFunc<int>("x11111_callfailedtest", 1, 2, 200, 100, "Hello lua");
     printf("ret = %d\n", ret);
     printf("-------------------\n");

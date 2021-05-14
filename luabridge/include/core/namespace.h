@@ -116,6 +116,7 @@ protected:
 */
 class Namespace: public detail::Registrar
 {
+public:
     //============================================================================
     /**
       Factored base to reduce template instantiations.
@@ -1065,7 +1066,7 @@ public:
     /**
         Open the global namespace.
     */
-    static Namespace getGlobalNamespace(lua_State *L)
+    static Namespace GetGlobalNamespace(lua_State *L)
     {
         enableExceptions(L);
         return Namespace(L);
@@ -1075,7 +1076,7 @@ public:
     /**
         Open a new or existing namespace for registrations.
     */
-    Namespace beginNamespace(char const *name)
+    Namespace BeginNamespace(char const *name)
     {
         assertIsActive();
         return Namespace(name, *this);
@@ -1272,7 +1273,7 @@ public:
 */
 inline Namespace getGlobalNamespace(lua_State *L)
 {
-    return Namespace::getGlobalNamespace(L);
+    return Namespace::GetGlobalNamespace(L);
 }
 
 } // namespace luabridge

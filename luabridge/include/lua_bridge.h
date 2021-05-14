@@ -65,7 +65,7 @@ public:
      */
     void RegisterCFunc(const char *func, lua_CFunction f);
 
-    template <class Func>
+    template<class Func>
     void RegisterCFunc(const char *func, Func const fp);
     /**
      * Call Lua function
@@ -90,6 +90,17 @@ public:
     // 例1︰ double f; const char* error_msg = lua.CallLuaFunc(const char* scriptName, "test01", "nnnn:f", 1,2,3,4,&f);
     // 例2︰ const char* s; int len; const char* error_msg = lua.CallLuaFunc(const char* scriptName, "test01", "S:S", 11, "Hello\0World", &len, &s);
     const char *Call(const char *func, const char *sig, ...);
+
+    /**
+     * @return
+     */
+    Namespace GetGlobalNamespace();
+
+    /**
+     * @param name
+     * @return
+     */
+    Namespace BeginNameSpace(char *name);
 private:
     //把参数压栈
     int PushToLua();
@@ -110,7 +121,7 @@ private:
 };
 
 LuaBridge::LuaBridge(lua_State *VM)
-    :  L(VM), m_iTopIndex(0)
+    : L(VM), m_iTopIndex(0)
 {
     // initialize lua standard library functions
     luaopen_base(L);
@@ -152,7 +163,7 @@ void LuaBridge::RegisterCFunc(const char *func, lua_CFunction f)
     lua_register(L, func, f);
 }
 
-template <class Func>
+template<class Func>
 void LuaBridge::RegisterCFunc(const char *func, Func const fp)
 {
     RegisterCFunc(func, LuaCFunctionWrap<__COUNTER__>(fp));
@@ -194,8 +205,7 @@ R LuaBridge::SafeEndCall(const char *func, int nArg)
         return 0;
     }
     else {
-        try
-        {
+        try {
             R r = Stack<R>::get(L, -1, false);
             //恢复调用前的堆栈索引
             lua_settop(L, m_iTopIndex);
@@ -316,8 +326,7 @@ const char *LuaBridge::Call(const char *func, const char *sig, ...)
             }
                 break;
 
-            default:
-                break;
+            default:break;
             }
             index++;
         }
@@ -328,39 +337,31 @@ const char *LuaBridge::Call(const char *func, const char *sig, ...)
     return sresult;
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////
-/**
- * LuaRegisterCFunc:
- * int func(int a,int b,int c)
- * {
- *  ......
- *  return 0;
- * }
- * void func(int a,int b,int c)
- * {
- *  ......
- *  do someting
- * }
- *
- * LuaRegisterLuaFunc:
- * int func(lua_State *L)
- * {
- *    int para1 = lua_tonumber(L,1);
- *    int para2 = lua_tonumber(L,2);
- *    .....
- *    paran = lua_tonumber(L,n) or lua_tostring(L,n) ....;
- *
- *    .....
- *    lua_pushnumber(L,1);  //1 return
- *    lua_pushnumber(L,2);  //2 return
- *    ....
- *    lua_pushnumber(L,n);  //n return
- *    return n;
- * }
- */
+Namespace LuaBridge::BeginNameSpace(char *name)
+{
+    return GetGlobalNamespace().BeginNamespace(name);
+}
 
-#define LuaRegisterCFunc(luaBridge, funcname, func)                       \
-    luaBridge.RegisterCFunc(funcname,func)
+Namespace LuaBridge::GetGlobalNamespace()
+{
+    return Namespace::GetGlobalNamespace(L);
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+#define REGISTER_LUA_CFUNC(luaBridge, funcname, func)                       \
+    luaBridge.RegisterCFunc(funcname,func);
+
+#define BEGIN_CLASS(lua, ClassT, name) { \
+    Namespace nameSpace = (lua).GetGlobalNamespace(); \
+    Namespace::Class<ClassT> classt = nameSpace.beginClass<ClassT>(name);
+
+#define CLASS_ADD_CONSTRUCTOR(FT) \
+    classt.addConstructor<FT>();
+
+#define CLASS_ADD_FUNC(name, func) \
+    classt.addFunction("Say", func);
+#define END_CLASS  }
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 }
 
