@@ -63,7 +63,10 @@ public:
      * @param func func name 函数名
      * @param f
      */
-    void Register(const char *func, lua_CFunction f);
+    void RegisterCFunc(const char *func, lua_CFunction f);
+
+    template <class Func>
+    void RegisterCFunc(const char *func, Func const fp);
     /**
      * Call Lua function
      * @tparam R    返回类型
@@ -74,7 +77,7 @@ public:
      * Sample:	double f = lua.Call<double>("test0", 1.0, 3, "param");
      */
     template<typename R, typename ...Args>
-    R Call(const char *func, const Args... args);
+    R CallLuaFunc(const char *func, const Args... args);
     /**
      *
      * @param func 函数名
@@ -84,8 +87,8 @@ public:
      * @param ...
      * @return  返回 返回值如果为 NULL， 表示调用成功。否则返回错误信息
      */
-    // 例1︰ double f; const char* error_msg = lua.Call(const char* scriptName, "test01", "nnnn:f", 1,2,3,4,&f);
-    // 例2︰ const char* s; int len; const char* error_msg = lua.Call(const char* scriptName, "test01", "S:S", 11, "Hello\0World", &len, &s);
+    // 例1︰ double f; const char* error_msg = lua.CallLuaFunc(const char* scriptName, "test01", "nnnn:f", 1,2,3,4,&f);
+    // 例2︰ const char* s; int len; const char* error_msg = lua.CallLuaFunc(const char* scriptName, "test01", "S:S", 11, "Hello\0World", &len, &s);
     const char *Call(const char *func, const char *sig, ...);
 private:
     //把参数压栈
@@ -144,9 +147,15 @@ bool LuaBridge::LoadFile(const char *filePath)
     return 0;
 }
 
-void LuaBridge::Register(const char *func, lua_CFunction f)
+void LuaBridge::RegisterCFunc(const char *func, lua_CFunction f)
 {
     lua_register(L, func, f);
+}
+
+template <class Func>
+void LuaBridge::RegisterCFunc(const char *func, Func const fp)
+{
+    RegisterCFunc(func, LuaCFunctionWrap<__COUNTER__>(fp));
 }
 
 int LuaBridge::PushToLua()
@@ -211,7 +220,7 @@ void LuaBridge::SafeEndCall(const char *func, int nArg)
 }
 
 template<typename R, typename ...Args>
-R LuaBridge::Call(const char *func, const Args... args)
+R LuaBridge::CallLuaFunc(const char *func, const Args... args)
 {
     SafeBeginCall(func);
     PushToLua(args...);
@@ -351,9 +360,7 @@ const char *LuaBridge::Call(const char *func, const char *sig, ...)
  */
 
 #define LuaRegisterCFunc(luaBridge, funcname, func)                       \
-    luaBridge.Register(funcname, (LuaCFunctionWrap<__COUNTER__>(func)))
-#define LuaRegisterLuaFunc(luaBridge, funcname, func)                           \
-    luaBridge.Register(funcname, func)
+    luaBridge.RegisterCFunc(funcname,func)
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 }
 

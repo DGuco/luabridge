@@ -546,7 +546,6 @@ struct LuaCFunctionWrapI<FUNCID,R (*)(ParamList...)>
 {
     using DeclType = R (*)(ParamList...);
     typedef typename ArgTypeList<ParamList...>::template args<0>::type ParType;
-    static_assert(!std::is_same<ParType,lua_State*>::value,"Please use LuaRegisterLuaFunc register luaFunc");
     inline lua_CFunction operator()(DeclType f)
     {
         lua_function<DeclType,FUNCID>::fn = f;
@@ -560,7 +559,6 @@ struct LuaCFunctionWrapI<FUNCID,std::function<R(ParamList...)>>
     using DeclType = std::function<R(ParamList...)>;
 
     typedef typename ArgTypeList<ParamList...>::template args<0>::type ParType;
-    static_assert(!std::is_same<ParType,lua_State*>::value,"Please use LuaRegisterLuaFunc register luaFunc");
     inline lua_CFunction operator()(DeclType f)
     {
         lua_function<DeclType,FUNCID>::fn = f;

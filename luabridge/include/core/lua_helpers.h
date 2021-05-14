@@ -315,7 +315,7 @@ int LuaHelper::GetParamCount(lua_State *L)
 
 void LuaHelper::DefaultDebugLuaErrorInfo(const char *FunName, const char *Msg)
 {
-    printf("Call fun:[%s] failed,msg:[%s]\n", FunName, Msg);
+    printf("CallLuaFunc fun:[%s] failed,msg:[%s]\n", FunName, Msg);
 }
 
 void LuaHelper::DefaultDebugLuaErrorInfo(const char *Msg)

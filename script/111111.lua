@@ -12,7 +12,7 @@ end
 
 
 function x11111_test(x,y)
-    local addNum = LambdaAdd(x,y);
+    local addNum = LuaFnAdd(x,y);
     local subNum = Sub(x,y);
     print("addNum = "..addNum)
     print("subNum = "..subNum)
