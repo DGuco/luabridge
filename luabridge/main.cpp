@@ -77,9 +77,14 @@ int main(void)
     LuaBridge luaBridge(L);
     luaBridge.LoadFile("../script/111111.lua");
 
-    BEGIN_CLASS(luaBridge,OuterClass,"OuterClass")
+    BEGIN_NAMESPACE_CLASS("space",luaBridge,OuterClass,"OuterClass")
         CLASS_ADD_CONSTRUCTOR(void(*)(int))
         CLASS_ADD_FUNC("Say",&OuterClass::Say)
+    END_NAMESPACE_CLASS
+
+    BEGIN_CLASS(luaBridge,OuterClass,"OuterClass")
+            CLASS_ADD_CONSTRUCTOR(void(*)(int))
+            CLASS_ADD_FUNC("Say",&OuterClass::Say)
     END_CLASS
 
     REGISTER_LUA_CFUNC(luaBridge, "Add", Add)

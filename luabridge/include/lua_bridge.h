@@ -130,6 +130,7 @@ LuaBridge::LuaBridge(lua_State *VM)
     luaopen_math(L);
     luaopen_debug(L);
     luaopen_utf8(L);
+    luaopen_package(L);
 //    LuaException::EnableExceptions(L);
 }
 
@@ -144,7 +145,7 @@ bool LuaBridge::LoadFile(const std::string &filePath)
 {
     int ret = luaL_dofile(L, filePath.c_str());
     if (ret != 0) {
-        throw std::runtime_error("Lua loadfile failed,error:" + ret);
+        throw std::runtime_error("Lua loadfile:" + filePath + " failed, error:" + lua_tostring(L, -1));
     }
     return 0;
 }
@@ -153,7 +154,8 @@ bool LuaBridge::LoadFile(const char *filePath)
 {
     int ret = luaL_dofile(L, filePath);
     if (ret != 0) {
-        throw std::runtime_error("Lua loadfile failed,error:" + ret);
+
+        throw std::runtime_error("Lua loadfile:" + std::string(filePath) + " failed, error:" + lua_tostring(L, -1));
     }
     return 0;
 }
@@ -351,6 +353,11 @@ Namespace LuaBridge::GetGlobalNamespace()
 #define REGISTER_LUA_CFUNC(luaBridge, funcname, func)                       \
     luaBridge.RegisterCFunc(funcname,func);
 
+#define BEGIN_NAMESPACE_CLASS(spacename,lua, ClassT, name) { \
+    {\
+        Namespace nameSpace = (lua).BeginNameSpace(spacename); \
+        Namespace::Class<ClassT> classt = nameSpace.beginClass<ClassT>(name);
+
 #define BEGIN_CLASS(lua, ClassT, name) { \
     Namespace nameSpace = (lua).GetGlobalNamespace(); \
     Namespace::Class<ClassT> classt = nameSpace.beginClass<ClassT>(name);
@@ -360,7 +367,14 @@ Namespace LuaBridge::GetGlobalNamespace()
 
 #define CLASS_ADD_FUNC(name, func) \
     classt.addFunction("Say", func);
-#define END_CLASS  }
+#define END_CLASS  \
+        classt.endClass(); \
+    }
+
+#define END_NAMESPACE_CLASS  \
+        nameSpace = classt.endClass(); \
+        nameSpace.endNamespace(); } \
+     }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 }

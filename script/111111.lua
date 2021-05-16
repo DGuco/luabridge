@@ -19,6 +19,8 @@ function x11111_test(x,y)
     Say("Hello world");
     local testclass = OuterClass (10)
     testclass:Say("Hello cpp");
+    local spaceclass = space.OuterClass (10)
+    spaceclass:Say("Space Hello cpp");
     print("x11111_test done")
     return 1
 end
