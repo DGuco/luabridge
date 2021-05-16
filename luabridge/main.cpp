@@ -80,13 +80,11 @@ int main(void)
     BEGIN_NAMESPACE_CLASS("space",luaBridge,OuterClass,"OuterClass")
         CLASS_ADD_CONSTRUCTOR(void(*)(int))
         CLASS_ADD_FUNC("Say",&OuterClass::Say)
-        LuaHelper::DumpTable(L,-1,std::cout);
-        LuaHelper::DumpTable(L,-2,std::cout);
-        LuaHelper::DumpTable(L,-3,std::cout);
-        LuaHelper::DumpTable(L,-4,std::cout);
-        LuaHelper::DumpTable(L,-5,std::cout);
+        LuaHelper::DumpTable(L,-1,std::cout,2);
+        LuaHelper::DumpTable(L,-2,std::cout,2);
+        LuaHelper::DumpTable(L,-3,std::cout,2);
+        LuaHelper::DumpTable(L,-4,std::cout,2);
     END_NAMESPACE_CLASS
-
     BEGIN_CLASS(luaBridge,OuterClass,"OuterClass")
             CLASS_ADD_CONSTRUCTOR(void(*)(int))
             CLASS_ADD_FUNC("Say",&OuterClass::Say)
@@ -98,10 +96,10 @@ int main(void)
     REGISTER_LUA_CFUNC(luaBridge, "Say", Say)
     REGISTER_LUA_CFUNC(luaBridge, "LuaFnAdd", LuaFnAdd)
 
-    int ret = luaBridge.CallLuaFunc<int>("x11111_PrintG");
-    printf("ret = %d\n", ret);
-    printf("-------------------\n");
-    ret = luaBridge.CallLuaFunc<int>("x11111_callfailedtest", 1, 2, 200, 100, "Hello lua");
+    lua_getglobal(L, "_G");
+    LuaHelper::DumpTable(L,-1,std::cout,2);
+    lua_pop(L,-1);
+    int ret = luaBridge.CallLuaFunc<int>("x11111_callfailedtest", 1, 2, 200, 100, "Hello lua");
     printf("ret = %d\n", ret);
     printf("-------------------\n");
     ret = luaBridge.CallLuaFunc<int>("x11111_test", 1, 2);

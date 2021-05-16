@@ -111,11 +111,11 @@ public:
      * @param stream
      * @param level
      */
-    static void DumpTable(lua_State *L, int index, std::ostream &stream, unsigned int level = 0);
+    static void DumpTable(lua_State *L, int index, std::ostream &stream, unsigned int depth = 1,unsigned int level = 0);
 private:
     static void PutIndent(std::ostream &stream, unsigned int level);
-    static void DumpState(lua_State *L, std::ostream &stream);
-    static void DumpValue(lua_State *L, int index, std::ostream &stream, unsigned int level);
+    static void DumpState(lua_State *L, std::ostream &stream,unsigned int depth,unsigned int level);
+    static void DumpValue(lua_State *L, int index, std::ostream &stream, unsigned int depth,unsigned int level);
 };
 
 void LuaHelper::LuaStackInfo(lua_State *L)
@@ -379,7 +379,7 @@ void LuaHelper::PutIndent(std::ostream &stream, unsigned level)
 }
 
 
-void LuaHelper::DumpValue(lua_State *L, int index, std::ostream &stream, unsigned level = 0)
+void LuaHelper::DumpValue(lua_State *L, int index, std::ostream &stream,unsigned int depth, unsigned level)
 {
     const int type = lua_type(L, index);
     switch (type) {
@@ -411,7 +411,7 @@ void LuaHelper::DumpValue(lua_State *L, int index, std::ostream &stream, unsigne
             break;
 
         case LUA_TTABLE:
-            DumpTable(L, index, stream, level);
+            DumpTable(L, index, stream, depth,level);
             break;
 
         case LUA_TUSERDATA:stream << "userdata@" << lua_touserdata(L, index);
@@ -422,10 +422,10 @@ void LuaHelper::DumpValue(lua_State *L, int index, std::ostream &stream, unsigne
     }
 }
 
-void LuaHelper::DumpTable(lua_State *L, int index, std::ostream &stream, unsigned level)
+void LuaHelper::DumpTable(lua_State *L, int index, std::ostream &stream, unsigned depth,unsigned int level)
 {
     stream << "table@" << lua_topointer(L, index);
-    if (level > 0) {
+    if (level >= depth) {
         return;
     }
 
@@ -435,21 +435,29 @@ void LuaHelper::DumpTable(lua_State *L, int index, std::ostream &stream, unsigne
     while (lua_next(L, index)) {
         stream << "\n";
         PutIndent(stream, level + 1);
-        DumpValue(L, -2, stream, level + 1); // Key
+        DumpValue(L, -2, stream, depth,level + 1); // Key
         stream << ": ";
-        DumpValue(L, -1, stream, level + 1); // Value
+        DumpValue(L, -1, stream, depth,level + 1); // Value
         lua_pop(L, 1); // Value
     }
     PutIndent(stream, level);
-    stream << "\n}\n";
+    if (level == 0)
+    {
+        stream << "\n}\n";
+    }else
+    {
+        stream << "\n";
+        PutIndent(stream, level);
+        stream << "}";
+    }
 }
 
-void LuaHelper::DumpState(lua_State *L, std::ostream &stream = std::cerr)
+void LuaHelper::DumpState(lua_State *L, std::ostream &stream ,unsigned int depth,unsigned int level)
 {
     int top = lua_gettop(L);
     for (int i = 1; i <= top; ++i) {
         stream << "stack #" << i << ": ";
-        DumpValue(L, i, stream, 0);
+        DumpValue(L, i, stream,depth,level);
         stream << "\n";
     }
 }
