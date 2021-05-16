@@ -26,7 +26,8 @@
 * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ******************************************************************************/
 
-#pragma once
+#ifndef __LUA_FILE_H__
+#define __LUA_FILE_H__
 
 #include "core/lua_functions.h"
 #include "core/lua_helpers.h"
@@ -41,3 +42,5 @@
 #include "core/user_data.h"
 #include "core/security.h"
 #include "core/namespace.h"
+
+#endif

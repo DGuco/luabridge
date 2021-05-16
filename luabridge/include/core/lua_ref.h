@@ -29,7 +29,8 @@
 */
 //==============================================================================
 
-#pragma once
+#ifndef _LUA_REF_H__
+#define _LUA_REF_H__
 
 #include <iostream>
 #include <string>
@@ -1033,3 +1034,5 @@ T LuaRef_cast (LuaRef const& lr)
 }
 
 } // namespace luabridge
+
+#endif

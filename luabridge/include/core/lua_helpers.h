@@ -104,13 +104,18 @@ public:
         Wrapper for lua_pcall that throws.
     */
     static void Pcall(lua_State *L, int nargs = 0, int nresults = 0, int msgh = 0);
-
     /**
-     * print lua table
+     * 输出lua table 内容
      * @param L
-     * @param idx
+     * @param index
+     * @param stream
+     * @param level
      */
-    static bool PrintTable(lua_State *L, int idx);
+    static void DumpTable(lua_State *L, int index, std::ostream &stream, unsigned int level = 0);
+private:
+    static void PutIndent(std::ostream &stream, unsigned int level);
+    static void DumpState(lua_State *L, std::ostream &stream);
+    static void DumpValue(lua_State *L, int index, std::ostream &stream, unsigned int level);
 };
 
 void LuaHelper::LuaStackInfo(lua_State *L)
@@ -366,82 +371,87 @@ void LuaHelper::Pcall(lua_State *L, int nargs, int nresults, int msgh)
         throw (LuaException(L, code));
 }
 
-bool LuaHelper::PrintTable(lua_State *L, int idx)
+void LuaHelper::PutIndent(std::ostream &stream, unsigned level)
 {
-    try {
-        lua_pushnil(L);
-        while (lua_next(L, idx) != 0) {
-            char Msg[256] = {0};
-            std::string key;
-            std::string value;
-            int keyType = lua_type(L, -2);
-            if (keyType == LUA_TNUMBER) {
-                double value = lua_tonumber(L, -2);
-                key = std::to_string(value);
-            }
-            else if (keyType == LUA_TSTRING) {
-                const char *value = lua_tostring(L, -2);
-                key = value;
+    for (unsigned i = 0; i < level; ++i) {
+        stream << "  ";
+    }
+}
+
+
+void LuaHelper::DumpValue(lua_State *L, int index, std::ostream &stream, unsigned level = 0)
+{
+    const int type = lua_type(L, index);
+    switch (type) {
+        case LUA_TNIL:stream << "nil";
+            break;
+
+        case LUA_TBOOLEAN:stream << (lua_toboolean(L, index) ? "true" : "false");
+            break;
+
+        case LUA_TNUMBER:stream << lua_tonumber(L, index);
+            break;
+
+        case LUA_TSTRING:stream << '"' << lua_tostring(L, index) << '"';
+            break;
+
+        case LUA_TFUNCTION:
+            if (lua_iscfunction(L, index)) {
+                stream << "cfunction@" << lua_topointer(L, index);
             }
             else {
-                std::cout << "Invalid key type: " << keyType << std::endl;
-                return false;
+                stream << "function@" << lua_topointer(L, index);
             }
-            int valueType = lua_type(L, -1);
-            switch (valueType) {
-            case LUA_TNIL: {
-                value = "NIL";
-                break;
-            }
-            case LUA_TBOOLEAN: {
-                value = std::to_string(lua_toboolean(L, -1));
-                break;
-            }
-            case LUA_TNUMBER: {
-                value = std::to_string(lua_tonumber(L, -1));
-                break;
-            }
-            case LUA_TSTRING: {
-                value = lua_tostring(L, -1);
-                break;
-            }
-            case LUA_TTABLE: {
-                std::cout << "====sub table===" << std::endl;
-                int index = lua_gettop(L);
-                if (!LuaHelper::PrintTable(L, index)) {
-                    std::cout << "popTable error in  popTable,error occured" << std::endl;
-                    return false;
-                }
-                break;
-            }
-            default: {
-                std::cout << "Invalid value type: " << valueType << std::endl;
-                return false;
-            }
-            }
-            snprintf(Msg,256,"key = %s,value = %s\n",key.c_str(),value.c_str());
-            lua_pop(L, 1);
-        }
+            break;
+
+        case LUA_TTHREAD:stream << "thread@" << lua_tothread(L, index);
+            break;
+
+        case LUA_TLIGHTUSERDATA:stream << "lightuserdata@" << lua_touserdata(L, index);
+            break;
+
+        case LUA_TTABLE:
+            DumpTable(L, index, stream, level);
+            break;
+
+        case LUA_TUSERDATA:stream << "userdata@" << lua_touserdata(L, index);
+            break;
+
+        default:stream << lua_typename(L, type);;
+            break;
     }
-    catch (const char *s) {
-        std::string errMsg = s;
-        lua_pop(L, 1);
-        std::cout << errMsg << std::endl;
-        return false;
+}
+
+void LuaHelper::DumpTable(lua_State *L, int index, std::ostream &stream, unsigned level)
+{
+    stream << "table@" << lua_topointer(L, index);
+    if (level > 0) {
+        return;
     }
-    catch (std::exception &e) {
-        const char *errMsg = e.what();
-        lua_pop(L, 1);
-        std::cout << errMsg << std::endl;
-        return false;
+
+    index = lua_absindex(L, index);
+    stream << " {";
+    lua_pushnil(L); // Initial key
+    while (lua_next(L, index)) {
+        stream << "\n";
+        PutIndent(stream, level + 1);
+        DumpValue(L, -2, stream, level + 1); // Key
+        stream << ": ";
+        DumpValue(L, -1, stream, level + 1); // Value
+        lua_pop(L, 1); // Value
     }
-    catch (...) {
-        const char *errMsg = lua_tostring(L, -1);
-        lua_pop(L, 1);
-        std::cout << errMsg << std::endl;
-        return false;
+    PutIndent(stream, level);
+    stream << "\n}\n";
+}
+
+void LuaHelper::DumpState(lua_State *L, std::ostream &stream = std::cerr)
+{
+    int top = lua_gettop(L);
+    for (int i = 1; i <= top; ++i) {
+        stream << "stack #" << i << ": ";
+        DumpValue(L, i, stream, 0);
+        stream << "\n";
     }
-    return true;
 }
 
 #define  LUA_ASSERT(L, con, msg) LuaHelper::LuaAssert(L,con,__FILE__,__LINE__,msg)

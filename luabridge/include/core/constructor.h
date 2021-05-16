@@ -28,7 +28,8 @@
 */
 //==============================================================================
 
-#pragma once
+#ifndef _CONSTRUCTOR_H__
+#define _CONSTRUCTOR_H__
 
 #include "type_list.h"
 
@@ -471,3 +472,5 @@ struct Constructor<15, T, ParamList...>
     }
 };
 } // namespace luabridge
+
+#endif

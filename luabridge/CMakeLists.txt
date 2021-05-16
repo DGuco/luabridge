@@ -11,7 +11,6 @@ set(LUA_BRIDGE_HEADER_FILES
         include/core/func_traits.h
         include/core/classinfo.h
         include/core/constructor.h
-        include/core/dump.h
         include/core/lua_functions.h
         include/core/lua_exception.h
         include/core/lua_helpers.h

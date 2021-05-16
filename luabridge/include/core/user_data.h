@@ -28,7 +28,8 @@
 */
 //==============================================================================
 
-#pragma once
+#ifndef __USER_DATA_H__
+#define __USER_DATA_H__
 
 #include "lua_library.h"
 #include "classinfo.h"
@@ -736,3 +737,5 @@ struct StackOpSelector<const T &, true>
 };
 
 } // namespace luabridge
+
+#endif

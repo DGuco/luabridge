@@ -44,7 +44,8 @@
 */
 //==============================================================================
 
-#pragma once
+#ifndef _TYPE_LIST_H__
+#define _TYPE_LIST_H__
 
 #include <string>
 #include <typeinfo>
@@ -235,3 +236,5 @@ struct ArgTypeList
 //get参数的类型
 #define  LUA_PARAM_TYPE(n) typename ArgTypeList<ParamList...>::template args<n>::type
 } // namespace luabridge
+
+#endif

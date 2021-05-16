@@ -28,7 +28,8 @@
 */
 //==============================================================================
 
-#pragma once
+#ifndef _LUA_EXCEPTION_H__
+#define _LUA_EXCEPTION_H__
 
 #include <exception>
 #include <string>
@@ -131,3 +132,5 @@ static void enableExceptions (lua_State* L)
 }
 
 } // namespace luabridge
+
+#endif

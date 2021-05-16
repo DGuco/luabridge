@@ -28,7 +28,8 @@
 */
 //==============================================================================
 
-#pragma once
+#ifndef _TYPE_TRAITS_H__
+#define _TYPE_TRAITS_H__
 
 #include <string>
 
@@ -134,3 +135,5 @@ template <class T>
 struct Stack;
 
 } // namespace luabridge
+
+#endif

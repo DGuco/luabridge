@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _SECURITY_H__
+#define _SECURITY_H__
 
 namespace luabridge
 {
@@ -72,3 +73,5 @@ inline void setHideMetatables(bool shouldHide)
 }
 
 } // namespace luabridge
+
+#endif

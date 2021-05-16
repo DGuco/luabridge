@@ -27,7 +27,8 @@
 */
 //==============================================================================
 
-#pragma once
+#ifndef _CLASS_INFO_H__
+#define _CLASS_INFO_H__
 
 namespace luabridge {
 
@@ -169,3 +170,5 @@ public:
 };
 
 } // namespace luabridge
+
+#endif
