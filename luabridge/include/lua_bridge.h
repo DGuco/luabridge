@@ -351,15 +351,15 @@ Namespace LuaBridge::GetGlobalNamespace()
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 #define REGISTER_LUA_CFUNC(luaBridge, funcname, func)                       \
-    luaBridge.RegisterCFunc(funcname,func);
+    (luaBridge).RegisterCFunc(funcname,func);
 
-#define BEGIN_NAMESPACE_CLASS(spacename,lua, ClassT, name) { \
+#define BEGIN_NAMESPACE_CLASS(spacename,luaBridge, ClassT, name) { \
     {\
-        Namespace nameSpace = (lua).BeginNameSpace(spacename); \
+        Namespace nameSpace = (luaBridge).BeginNameSpace(spacename); \
         Namespace::Class<ClassT> classt = nameSpace.beginClass<ClassT>(name);
 
-#define BEGIN_CLASS(lua, ClassT, name) { \
-    Namespace nameSpace = (lua).GetGlobalNamespace(); \
+#define BEGIN_CLASS(luaBridge, ClassT, name) { \
+    Namespace nameSpace = (luaBridge).GetGlobalNamespace(); \
     Namespace::Class<ClassT> classt = nameSpace.beginClass<ClassT>(name);
 
 #define CLASS_ADD_CONSTRUCTOR(FT) \
