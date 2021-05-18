@@ -124,8 +124,8 @@ public:
     class ClassBase: public detail::Registrar
     {
     public:
-        explicit ClassBase(Namespace &parent)
-            : Registrar(parent)
+        explicit ClassBase(const char* name,Namespace &parent)
+            : className(name),Registrar(parent)
         {
         }
 
@@ -216,6 +216,9 @@ public:
             lua_insert(L, -2); // Stack 栈状态lua_gettop(L) == n + 5:ns=>co=>cl=>st=>vst
             LuaHelper::RawSetField(L, -5, name); // ns [name] = vst. Stack 栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
 
+            std::string type_name = std::string( "static ") + name;
+            lua_pushstring(L, type_name.c_str()); //Stack 栈状态lua_gettop(L) == n + 5:ns=>co=>cl=>st=>type_name
+            lua_rawsetp(L, -2, getTypeKey()); //st.typekey = type_name Stack 栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
 
             lua_pushcfunction(L,
                               &CFunc::IndexMetaMethod); //Stack 栈状态lua_gettop(L) == n + 5:ns=>co=>cl=>st=>IndexMetaMethod
@@ -249,11 +252,11 @@ public:
         /**
           lua_CFunction to construct a class object wrapped in a container.
         */
-        template<class MemFn,class C>
+        template<class MemFn, class C>
         static int ctorContainerProxy(lua_State *L)
         {
             typedef typename ContainerTraits<C>::Type T;
-            T *const p = FuncTraits<MemFn>::template callnew<T>(L,2);
+            T *const p = FuncTraits<MemFn>::template callnew<T>(L, 2);
             UserdataSharedHelper<C, false>::push(L, p);
             return 1;
         }
@@ -262,22 +265,36 @@ public:
         /**
           lua_CFunction to construct a class object in-place in the userdata.
         */
-        template<class MemFn,class T>
+        template<class MemFn, class T>
         static int ctorPlacementProxy(lua_State *L)
         {
             UserdataValue<T> *value = UserdataValue<T>::place(L);
-            FuncTraits<MemFn>::template callnew<T>(L,value->getObject(),2);
+            FuncTraits<MemFn>::template callnew<T>(L, value->getObject(), 2);
             value->commit();
             return 1;
         }
 
-        void assertStackState() const
+        void assertStackState(bool  luaerror = false) const
         {
             // Stack: const table (co), class table (cl), static table (st)
-            assert (lua_istable(L, -3));
+            lua_rawgetp(L, -1, getTypeKey()); // Stack: rt, registry type
+            std::string name = std::string(lua_tostring(L,-1));
+            lua_pop(L,1);
+            assert(name == std::string("static ") + className);
             assert (lua_istable(L, -2));
-            assert (lua_istable(L, -1));
+            lua_rawgetp(L, -2, getTypeKey()); // Stack: rt, registry type
+            name = std::string(lua_tostring(L,-1));
+            lua_pop(L,1);
+            assert(name == className);
+            assert (lua_istable(L, -3));
+            lua_rawgetp(L, -3, getTypeKey()); // Stack: rt, registry type
+            name = std::string(lua_tostring(L,-1));
+            lua_pop(L,1);
+            assert(name == std::string("const ") + className);
+
         }
+    private:
+        std::string className;
     };
 
     //============================================================================
@@ -355,7 +372,7 @@ public:
           }
          **/
         Class(char const *name, Namespace &parent)
-            : ClassBase(parent)
+            : ClassBase(name,parent)
         {
             //栈顶是否是表(_G)
             LUA_ASSERT_EX(L, lua_istable(L, -1), "lua_istable(L, -1)", false); //栈状态lua_gettop(L)== n + 1:ns
@@ -394,29 +411,42 @@ public:
                 //把st元表作一个副本压栈。
                 lua_pushvalue(L, -1); // 栈状态lua_gettop(L) == n + 5:ns=>co=>cl=>st=>st
                 //把static metadata表插入registry表
-                lua_rawsetp(L, LUA_REGISTRYINDEX, ClassInfo<T>::getStaticKey()); //stack栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
+                lua_rawsetp(L,
+                            LUA_REGISTRYINDEX,
+                            ClassInfo<T>::getStaticKey()); //stack栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
                 //把cl元表作一个副本压栈。
                 lua_pushvalue(L, -2); // stack 栈状态lua_gettop(L) == n + 5:ns=>co=>cl=>st=>cl
                 //把metadata表插入registry表
-                lua_rawsetp(L, LUA_REGISTRYINDEX, ClassInfo<T>::getClassKey()); //stack栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
+                lua_rawsetp(L,
+                            LUA_REGISTRYINDEX,
+                            ClassInfo<T>::getClassKey()); //stack栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
                 //把co元表作一个副本压栈。
                 lua_pushvalue(L, -3); // 栈状态lua_gettop(L) == n + 5:ns=>co=>cl=>st=>co
                 //把const metadata表插入registry表
-                lua_rawsetp(L, LUA_REGISTRYINDEX, ClassInfo<T>::getConstKey()); //stack栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
+                lua_rawsetp(L,
+                            LUA_REGISTRYINDEX,
+                            ClassInfo<T>::getConstKey()); //stack栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
 
                 //now stack栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
             }
             else { //表存在
-                LUA_ASSERT_EX (L, lua_istable(L, -1), "lua_istable(L, -1)", false); // Stack: 栈状态ua_gettop(L)== n + 2:ns=>st
+                LUA_ASSERT_EX (L,
+                               lua_istable(L, -1),
+                               "lua_istable(L, -1)",
+                               false); // Stack: 栈状态ua_gettop(L)== n + 2:ns=>st
                 ++m_stackSize;
 
                 // Map T back from its stored tables
-                lua_rawgetp(L, LUA_REGISTRYINDEX, ClassInfo<T>::getConstKey()); // Stack 栈状态ua_gettop(L)== n + 3:ns=>st=>co
+                lua_rawgetp(L,
+                            LUA_REGISTRYINDEX,
+                            ClassInfo<T>::getConstKey()); // Stack 栈状态ua_gettop(L)== n + 3:ns=>st=>co
                 //调整co的位置
                 lua_insert(L, -2); // Stack 栈状态ua_gettop(L)== n + 3:ns=>co=>st
                 ++m_stackSize;
 
-                lua_rawgetp(L, LUA_REGISTRYINDEX, ClassInfo<T>::getClassKey()); // Stack 栈状态ua_gettop(L)== n + 4:ns=>co=>st=>cl
+                lua_rawgetp(L,
+                            LUA_REGISTRYINDEX,
+                            ClassInfo<T>::getClassKey()); // Stack 栈状态ua_gettop(L)== n + 4:ns=>co=>st=>cl
                 //调整cl的位置
                 lua_insert(L, -2); // Stack 栈状态ua_gettop(L)== n + 4:ns=>co=>cl=>st
                 ++m_stackSize;
@@ -428,7 +458,7 @@ public:
           Derive a new class.
         */
         Class(char const *name, Namespace &parent, void const *const staticKey)
-            : ClassBase(parent)
+            : ClassBase(name,parent)
         {
             assert (lua_istable(L, -1)); // Stack: namespace table (ns)
 
@@ -735,7 +765,8 @@ public:
 
 #ifdef LUABRIDGE_CXX11
         template<class TG, class TS = TG>
-        Class<T> &addProperty(char const *name, std::function<TG(const T *)> get, std::function<void(T *, TS)> set = nullptr)
+        Class<T> &
+        addProperty(char const *name, std::function<TG(const T *)> get, std::function<void(T *, TS)> set = nullptr)
         {
             using GetType = decltype(get);
             new(lua_newuserdata(L, sizeof(get))) GetType(std::move(get)); // Stack: co, cl, st, function userdata (ud)
@@ -750,7 +781,8 @@ public:
 
             if (set != nullptr) {
                 using SetType = decltype(set);
-                new(lua_newuserdata(L, sizeof(set))) SetType(std::move(set)); // Stack: co, cl, st, function userdata (ud)
+                new(lua_newuserdata(L,
+                                    sizeof(set))) SetType(std::move(set)); // Stack: co, cl, st, function userdata (ud)
                 lua_newtable (L); // Stack: co, cl, st, ud, ud metatable (mt)
                 lua_pushcfunction (L, &CFunc::gcMetaMethodAny<SetType>); // Stack: co, cl, st, ud, mt, gc function
                 LuaHelper::RawSetField(L, -2, "__gc"); // Stack: co, cl, st, ud, mt
@@ -973,7 +1005,7 @@ public:
         {
             assertStackState(); // Stack: const table (co), class table (cl), static table (st)
 
-            lua_pushcclosure(L, &ctorContainerProxy<MemFn,C> , 0);
+            lua_pushcclosure(L, &ctorContainerProxy < MemFn, C > , 0);
             LuaHelper::RawSetField(L, -2, "__call");
 
             return *this;
@@ -984,7 +1016,7 @@ public:
         {
             assertStackState(); // Stack: const table (co), class table (cl), static table (st)
 
-            lua_pushcclosure(L, &ctorPlacementProxy<MemFn,T>, 0);
+            lua_pushcclosure(L, &ctorPlacementProxy < MemFn, T > , 0);
             LuaHelper::RawSetField(L, -2, "__call");
 
             return *this;
