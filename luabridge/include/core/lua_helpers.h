@@ -269,13 +269,13 @@ int LuaHelper::LuaAssert(lua_State *L, bool condition, const char *file, int lin
             }
         }
         else {
-            char Msg[128] = {0};
+            char Msg[256] = {0};
             std::string filename(file);
             unsigned long pos = filename.find("\/luabridge\/include");
             if (pos != std::string::npos) {
                 std::string lastName = filename.substr(pos);
                 snprintf(Msg,
-                         128,
+                         256,
                          "(%s:%d) assert fail: %s `%s' (%s)",
                          lastName.c_str(),
                          line,
@@ -285,23 +285,23 @@ int LuaHelper::LuaAssert(lua_State *L, bool condition, const char *file, int lin
             }
             else {
                 //filename.substr()
-                snprintf(Msg, 128, "(%s:%d) assert fail: %s `%s' (%s)", "?", line, ar.namewhat, ar.name, err_msg);
+                snprintf(Msg, 256, "(%s:%d) assert fail: %s `%s' (%s)", "?", line, ar.namewhat, ar.name, err_msg);
             }
             throw std::logic_error(Msg);
             return 0;
         }
 #else
-        char Msg[128] = {0};
+        char Msg[256] = {0};
         std::string filename(file);
         unsigned long pos = filename.find("\/luabridge\/include");
         if (pos != std::string::npos)
         {
             std::string lastName = filename.substr(pos);
-            snprintf(Msg,128,"(%s:%d) assert fail: %s `%s' (%s)",lastName.c_str(),line,ar.namewhat, ar.name, err_msg);
+            snprintf(Msg,256,"(%s:%d) assert fail: %s `%s' (%s)",lastName.c_str(),line,ar.namewhat, ar.name, err_msg);
         }else
         {
             //filename.substr()
-            snprintf(Msg,128,"(%s:%d) assert fail: %s `%s' (%s)","?",line,ar.namewhat, ar.name, err_msg);
+            snprintf(Msg,256,"(%s:%d) assert fail: %s `%s' (%s)","?",line,ar.namewhat, ar.name, err_msg);
         }
         throw std::logic_error(Msg);
         return 0;
@@ -462,8 +462,8 @@ void LuaHelper::DumpState(lua_State *L, std::ostream &stream ,unsigned int depth
     }
 }
 
-#define  LUA_ASSERT(L, con, msg) LuaHelper::LuaAssert(L,con,__FILE__,__LINE__,msg)
-#define  LUA_ASSERT_EX(L, con, msg, luaerror) LuaHelper::LuaAssert(L,con,__FILE__,__LINE__,msg,luaerror)
+#define  LUA_ASSERT(L, con, msg) LuaHelper::LuaAssert(L,con,__FILE__,__LINE__,msg);
+#define  LUA_ASSERT_EX(L, con, msg, luaerror) LuaHelper::LuaAssert(L,con,__FILE__,__LINE__,msg,luaerror);
 
 } // namespace luabridge
 
