@@ -64,8 +64,7 @@ public:
      * @param luaerror throw luaerror or not
      * @return never return when assert failed
      */
-    static int
-    LuaAssert(lua_State *L, bool condition, const char *file, int line, const char *err_msg, bool luaerror = false);
+    static int LuaAssert(lua_State *L, bool condition, const char *file, int line, const char *err_msg, bool luaerror = true);
 
     /**
      * param count

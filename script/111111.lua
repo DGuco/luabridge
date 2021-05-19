@@ -16,7 +16,7 @@ function x11111_test(x,y)
     local subNum = Sub(x,y);
     print("addNum = "..addNum)
     print("subNum = "..subNum)
-    Say("Hello world");
+    Say("Hello world11111");
     local testclass = OuterClass (10)
     testclass:Say("Hello cpp");
     local spaceclass = space.OuterClass (10)

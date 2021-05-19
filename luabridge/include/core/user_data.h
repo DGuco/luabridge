@@ -34,6 +34,7 @@
 #include "lua_library.h"
 #include "classinfo.h"
 #include "type_traits.h"
+#include "lua_helpers.h"
 #include <cassert>
 #include <stdexcept>
 
@@ -255,19 +256,16 @@ private:
 public:
     /**
       Push a T via placement new.
-
       The caller is responsible for calling placement new using the
       returned uninitialized storage.
     */
-    static UserdataValue<T> *place(lua_State *const L)
+    static UserdataValue<T> *Place(lua_State *const L)
     {
-        UserdataValue<T> *const ud = new(
-            lua_newuserdata(L, sizeof(UserdataValue<T>))) UserdataValue<T>();
+        UserdataValue<T> *const ud = new(lua_newuserdata(L, sizeof(UserdataValue<T>))) UserdataValue<T>();
         lua_rawgetp(L, LUA_REGISTRYINDEX, ClassInfo<T>::getClassKey());
         if (!lua_istable(L, -1)) {
-            throw std::logic_error("The class is not registered in LuaBridge");
+            LUA_ASSERT(L, false,"The class is not registered in LuaBridge")
         }
-        int top = lua_gettop(L);
         lua_setmetatable(L, -2);
         return ud;
     }
@@ -278,7 +276,7 @@ public:
     template<class U>
     static inline void push(lua_State *const L, U const &u)
     {
-        UserdataValue<T> *ud = place(L);
+        UserdataValue<T> *ud = Place(L);
         new(ud->getObject()) U(u);
         ud->commit();
     }

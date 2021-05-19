@@ -136,7 +136,7 @@ public:
         */
         void createConstTable(const char *name, bool trueConst = true)
         {
-            std::string type_name = std::string(trueConst ? "const " : "") + name;
+            std::string type_name = std::string(trueConst ? "const_" : "") + name;
 
             // Stack: namespace table (ns) //栈状态lua_gettop(L) == n + 1:栈状态:ns
             lua_newtable(L); // Stack: ns, const table (co)   栈状态lua_gettop(L) == n + 2:ns=>co
@@ -216,7 +216,7 @@ public:
             lua_insert(L, -2); // Stack 栈状态lua_gettop(L) == n + 5:ns=>co=>cl=>st=>vst
             LuaHelper::RawSetField(L, -5, name); // ns [name] = vst. Stack 栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
 
-            std::string type_name = std::string( "static ") + name;
+            std::string type_name = std::string( "static_") + name;
             lua_pushstring(L, type_name.c_str()); //Stack 栈状态lua_gettop(L) == n + 5:ns=>co=>cl=>st=>type_name
             lua_rawsetp(L, -2, getTypeKey()); //st.typekey = type_name Stack 栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
 
@@ -263,12 +263,12 @@ public:
 
         //--------------------------------------------------------------------------
         /**
-          lua_CFunction to construct a class object in-place in the userdata.
+          lua_CFunction to construct a class object in-Place in the userdata.
         */
         template<class MemFn, class T>
-        static int ctorPlacementProxy(lua_State *L)
+        static int CtorPlacementProxy(lua_State *L)
         {
-            UserdataValue<T> *value = UserdataValue<T>::place(L);
+            UserdataValue<T> *value = UserdataValue<T>::Place(L);
             FuncTraits<MemFn>::template callnew<T>(L, value->getObject(), 2);
             value->commit();
             return 1;
@@ -281,7 +281,7 @@ public:
             lua_rawgetp(L, -1, getTypeKey()); // Stack: rt, registry type
             std::string name = std::string(lua_tostring(L,-1));
             lua_pop(L,1);
-            std::string rightName = std::string("static ") + className;
+            std::string rightName = std::string("static_") + className;
             LUA_ASSERT_EX(L,name == rightName,(std::string("table type name wrong,rightName = ") + rightName + std::string(",curname = ") + name).c_str(),luaerror);
             assert (lua_istable(L, -2));
             lua_rawgetp(L, -2, getTypeKey()); // Stack: rt, registry type
@@ -293,7 +293,7 @@ public:
             lua_rawgetp(L, -3, getTypeKey()); // Stack: rt, registry type
             name = std::string(lua_tostring(L,-1));
             lua_pop(L,1);
-            rightName =  std::string("const ") + className;
+            rightName =  std::string("const_") + className;
             LUA_ASSERT_EX(L,name == rightName,(std::string("table type name wrong,rightName = ") + rightName + std::string(",curname = ") + name).c_str(),luaerror);
         }
     private:
@@ -334,7 +334,6 @@ public:
               __index = &CFunc::IndexMetaMethod,
               __newindex = &CFunc::newindexStaticMetaMethod,
               __gc = &CFunc::gcMetaMethod<T>,
-              __call = class Constructor(class Constructor 会被注册在这个表里),
               propgetKey = {table}(通过addProperty注册普通成员变量的get方法会注册在这里),
               classKey = cl,
               func1_name = func1,(普通成员函数1 会被注册在这个表里),
@@ -357,6 +356,7 @@ public:
           st(static table) = {
               __index = &CFunc::IndexMetaMethod,
               __newindex = &CFunc::newindexStaticMetaMethod,
+              __call = class Constructor(class Constructor 会被注册在这个表里),
               propgetKey = {}(table)(通过addStaticProperty注册静态成员变量的get方法会注册在这里),
               propsetKey = {}(table)(通过addStaticProperty注册静态成员变量的set方法会注册在这里),
               classKey = cl,
@@ -1006,7 +1006,7 @@ public:
         {
             AssertStackState(); // Stack: const table (co), class table (cl), static table (st)
 
-            lua_pushcclosure(L, &ctorPlacementProxy < MemFn, T > , 0);
+            lua_pushcclosure(L, &CtorPlacementProxy < MemFn, T > , 0);
             LuaHelper::RawSetField(L, -2, "__call");
 
             return *this;
