@@ -360,6 +360,10 @@ namespace luabridge {
 
 #define CLASS_ADD_FUNC(name, func)                                       \
         classt.addFunction("Say", func);
+
+#define CLASS_ADD_STATIC_PROPERTY(name,data)                             \
+         classt.addStaticProperty(name, data,true);
+
 #define END_CLASS                                                        \
         classt.endClass();                                               \
     }

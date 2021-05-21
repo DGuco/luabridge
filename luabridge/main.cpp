@@ -63,7 +63,11 @@ struct OuterClass
     {
         printf("*****OuterClass::Say: %s******\n", world);
     }
+public:
+    static  int data;
 };
+
+int OuterClass::data = 0;
 
 std::function<int(int, int)> func = [](int a, int b) -> int
 {
@@ -71,7 +75,7 @@ std::function<int(int, int)> func = [](int a, int b) -> int
     return a + b;
 };
 
-int main(void)
+int main()
 {
     lua_State *L = luaL_newstate();
     LuaBridge luaBridge(L);
@@ -80,14 +84,16 @@ int main(void)
     BEGIN_NAMESPACE_CLASS("space",luaBridge,OuterClass,"OuterClass")
         CLASS_ADD_CONSTRUCTOR(void(*)(int))
         CLASS_ADD_FUNC("Say",&OuterClass::Say)
-        LuaHelper::DumpTable(L,-1,std::cout,2);
-        LuaHelper::DumpTable(L,-2,std::cout,2);
-        LuaHelper::DumpTable(L,-3,std::cout,2);
-        LuaHelper::DumpTable(L,-4,std::cout,2);
     END_NAMESPACE_CLASS
+
     BEGIN_CLASS(luaBridge,OuterClass,"OuterClass")
             CLASS_ADD_CONSTRUCTOR(void(*)(int))
             CLASS_ADD_FUNC("Say",&OuterClass::Say)
+            CLASS_ADD_STATIC_PROPERTY("data",&OuterClass::data)
+            LuaHelper::DumpTable(L,-1,std::cout,2);
+            LuaHelper::DumpTable(L,-2,std::cout,2);
+            LuaHelper::DumpTable(L,-3,std::cout,2);
+            LuaHelper::DumpTable(L,-4,std::cout,2);
     END_CLASS
 
     REGISTER_LUA_CFUNC(luaBridge, "Add", Add)

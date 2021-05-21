@@ -99,7 +99,7 @@ protected:
         }
     }
 
-    void assertIsActive() const
+    void AssertIsActive() const
     {
         if (m_stackSize == 0) {
             throw std::logic_error("Unable to continue registration");
@@ -205,7 +205,7 @@ public:
         /**
           Create the static table.
         */
-        void createStaticTable(char const *name)
+        void CreateStaticTable(char const *name)
         {
             // Stack: namespace table (ns), const table (co), class table (cl)
             // Stack 栈状态lua_gettop(L) == n + 3:ns=>co=>cl
@@ -406,7 +406,7 @@ public:
                 ++m_stackSize;
 
                 //create类的static metadata表 and set st.__metatable = st
-                createStaticTable(name); // Stack: ns, co, cl, st 栈状态:ns=>co=>cl=>st
+                CreateStaticTable(name); // Stack: ns, co, cl, st 栈状态:ns=>co=>cl=>st
                 //now 栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
                 ++m_stackSize;
 
@@ -462,7 +462,7 @@ public:
             LuaHelper::RawSetField(L, -2, "__gc"); // Stack: ns, co, cl
             ++m_stackSize;
 
-            createStaticTable(name); // Stack: ns, co, cl, st
+            CreateStaticTable(name); // Stack: ns, co, cl, st
             ++m_stackSize;
 
             lua_rawgetp(L, LUA_REGISTRYINDEX, staticKey); // Stack: ns, co, cl, st, parent st (pst) | nil
@@ -1100,7 +1100,7 @@ public:
     */
     Namespace BeginNamespace(char const *name)
     {
-        assertIsActive();
+        AssertIsActive();
         return Namespace(name, *this);
     }
 
@@ -1266,7 +1266,7 @@ public:
     template<class T>
     Class<T> beginClass(char const *name)
     {
-        assertIsActive();
+        AssertIsActive();
         return Class<T>(name, *this);
     }
 
@@ -1280,7 +1280,7 @@ public:
     template<class Derived, class Base>
     Class<Derived> deriveClass(char const *name)
     {
-        assertIsActive();
+        AssertIsActive();
         return Class<Derived>(name, *this, ClassInfo<Base>::getStaticKey());
     }
 };
