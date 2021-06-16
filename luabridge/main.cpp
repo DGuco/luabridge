@@ -111,10 +111,10 @@ int main()
             CLASS_ADD_CONSTRUCTOR(void(*)(int))
             CLASS_ADD_FUNC("Say",&OuterClass::Say)
             CLASS_ADD_STATIC_PROPERTY("data",&OuterClass::data)
-//            LuaHelper::DumpTable(L,-1,std::cout,2);
-//            LuaHelper::DumpTable(L,-2,std::cout,2);
-//            LuaHelper::DumpTable(L,-3,std::cout,2);
-//            LuaHelper::DumpTable(L,-4,std::cout,2);
+            LuaHelper::DumpTable(L,-1,std::cout,2);
+            LuaHelper::DumpTable(L,-2,std::cout,2);
+            LuaHelper::DumpTable(L,-3,std::cout,2);
+            LuaHelper::DumpTable(L,-4,std::cout,2);
     END_CLASS
 
     BEGIN_CLASS(luaBridge,OuterClass1,"OuterClass1")
