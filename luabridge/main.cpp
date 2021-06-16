@@ -67,6 +67,27 @@ public:
     static  int data;
 };
 
+
+struct OuterClass1
+{
+    OuterClass1(int a)
+    {
+        printf("OuterClass1,a = %d\n", a);
+    }
+
+    ~OuterClass1()
+    {
+        printf("~OuterClass1\n");
+    }
+
+    void Say(char *world)
+    {
+        printf("*****OuterClass1::Say: %s******\n", world);
+    }
+public:
+    static  int data;
+};
+
 int OuterClass::data = 0;
 
 std::function<int(int, int)> func = [](int a, int b) -> int
@@ -94,6 +115,11 @@ int main()
             LuaHelper::DumpTable(L,-2,std::cout,2);
             LuaHelper::DumpTable(L,-3,std::cout,2);
             LuaHelper::DumpTable(L,-4,std::cout,2);
+    END_CLASS
+
+    BEGIN_CLASS(luaBridge,OuterClass1,"OuterClass1")
+        CLASS_ADD_CONSTRUCTOR(void(*)(int))
+        CLASS_ADD_FUNC("Say",&OuterClass1::Say)
     END_CLASS
 
     REGISTER_LUA_CFUNC(luaBridge, "Add", Add)

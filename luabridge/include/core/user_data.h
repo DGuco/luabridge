@@ -110,7 +110,7 @@ private:
             return throwBadArg(L, index);
         }
 
-        lua_rawgetp(L, -1, getConstKey()); // Stack: ot | nil, const table (co) | nil
+        lua_rawgetp(L, -1, GetConstKey()); // Stack: ot | nil, const table (co) | nil
         assert (lua_istable(L, -1) || lua_isnil(L, -1));
 
         // If const table is NOT present, object is const. Use non-const registry table
@@ -137,7 +137,7 @@ private:
             }
 
             // Replace current metatable with it's base class.
-            lua_rawgetp(L, -1, getParentKey()); // Stack: rt, ot, parent ot (pot) | nil
+            lua_rawgetp(L, -1, GetParentKey()); // Stack: rt, ot, parent ot (pot) | nil
 
             if (lua_isnil(L, -1)) // Stack: rt, ot, nil
             {
@@ -162,7 +162,7 @@ private:
             expected = "unregistered class";
         }
         else {
-            lua_rawgetp(L, -1, getTypeKey()); // Stack: rt, registry type
+            lua_rawgetp(L, -1, GetTypeKey()); // Stack: rt, registry type
             expected = lua_tostring(L, -1);
         }
 
@@ -171,7 +171,7 @@ private:
             lua_getmetatable(L, index); // Stack: ..., ot | nil
             if (lua_istable(L, -1)) // Stack: ..., ot
             {
-                lua_rawgetp(L, -1, getTypeKey()); // Stack: ..., ot, object type | nil
+                lua_rawgetp(L, -1, GetTypeKey()); // Stack: ..., ot, object type | nil
                 if (lua_isstring(L, -1)) {
                     got = lua_tostring(L, -1);
                 }
@@ -198,7 +198,7 @@ public:
     template<class T>
     static inline Userdata *getExact(lua_State *L, int index)
     {
-        return getExactClass(L, index, ClassInfo<T>::getClassKey());
+        return getExactClass(L, index, ClassInfo<T>::GetClassKey());
     }
 
     //--------------------------------------------------------------------------
@@ -215,8 +215,8 @@ public:
             return 0;
 
         return static_cast <T *> (getClass(
-            L, index, ClassInfo<T>::getConstKey(),
-            ClassInfo<T>::getClassKey(),
+            L, index, ClassInfo<T>::GetConstKey(),
+            ClassInfo<T>::GetClassKey(),
             canBeConst)->getPointer());
     }
 };
@@ -262,7 +262,7 @@ public:
     static UserdataValue<T> *Place(lua_State *const L)
     {
         UserdataValue<T> *const ud = new(lua_newuserdata(L, sizeof(UserdataValue<T>))) UserdataValue<T>();
-        lua_rawgetp(L, LUA_REGISTRYINDEX, ClassInfo<T>::getClassKey());
+        lua_rawgetp(L, LUA_REGISTRYINDEX, ClassInfo<T>::GetClassKey());
         if (!lua_istable(L, -1)) {
             LUA_ASSERT(L, false,"The class is not registered in LuaBridge")
         }
@@ -339,7 +339,7 @@ public:
     static void push(lua_State *const L, T *const p)
     {
         if (p)
-            push(L, p, ClassInfo<T>::getClassKey());
+            push(L, p, ClassInfo<T>::GetClassKey());
         else
             lua_pushnil(L);
     }
@@ -350,7 +350,7 @@ public:
     static void push(lua_State *const L, T const *const p)
     {
         if (p)
-            push(L, p, ClassInfo<T>::getConstKey());
+            push(L, p, ClassInfo<T>::GetConstKey());
         else
             lua_pushnil(L);
     }
@@ -420,7 +420,7 @@ struct UserdataSharedHelper
     {
         if (ContainerTraits<C>::get(c) != 0) {
             new(lua_newuserdata(L, sizeof(UserdataShared<C>))) UserdataShared<C>(c);
-            lua_rawgetp(L, LUA_REGISTRYINDEX, ClassInfo<T>::getClassKey());
+            lua_rawgetp(L, LUA_REGISTRYINDEX, ClassInfo<T>::GetClassKey());
             // If this goes off it means the class T is unregistered!
             assert (lua_istable(L, -1));
             lua_setmetatable(L, -2);
@@ -434,7 +434,7 @@ struct UserdataSharedHelper
     {
         if (t) {
             new(lua_newuserdata(L, sizeof(UserdataShared<C>))) UserdataShared<C>(t);
-            lua_rawgetp(L, LUA_REGISTRYINDEX, ClassInfo<T>::getClassKey());
+            lua_rawgetp(L, LUA_REGISTRYINDEX, ClassInfo<T>::GetClassKey());
             // If this goes off it means the class T is unregistered!
             assert (lua_istable(L, -1));
             lua_setmetatable(L, -2);
@@ -456,7 +456,7 @@ struct UserdataSharedHelper<C, true>
     {
         if (ContainerTraits<C>::get(c) != 0) {
             new(lua_newuserdata(L, sizeof(UserdataShared<C>))) UserdataShared<C>(c);
-            lua_rawgetp(L, LUA_REGISTRYINDEX, ClassInfo<T>::getConstKey());
+            lua_rawgetp(L, LUA_REGISTRYINDEX, ClassInfo<T>::GetConstKey());
             // If this goes off it means the class T is unregistered!
             assert (lua_istable(L, -1));
             lua_setmetatable(L, -2);
@@ -470,7 +470,7 @@ struct UserdataSharedHelper<C, true>
     {
         if (t) {
             new(lua_newuserdata(L, sizeof(UserdataShared<C>))) UserdataShared<C>(t);
-            lua_rawgetp(L, LUA_REGISTRYINDEX, ClassInfo<T>::getConstKey());
+            lua_rawgetp(L, LUA_REGISTRYINDEX, ClassInfo<T>::GetConstKey());
             // If this goes off it means the class T is unregistered!
             assert (lua_istable(L, -1));
             lua_setmetatable(L, -2);

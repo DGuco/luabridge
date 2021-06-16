@@ -43,23 +43,23 @@ namespace luabridge
 //
 struct CFunc
 {
-    static void addGetter(lua_State *L, const char *name, int tableIndex)
+    static void AddGetter(lua_State *L, const char *name, int tableIndex)
     {
         assert (lua_istable(L, tableIndex));
         assert (lua_iscfunction(L, -1)); // Stack: getter
 
-        lua_rawgetp(L, tableIndex, getPropgetKey()); // Stack: getter, propget table (pg)
+        lua_rawgetp(L, tableIndex, GetPropgetKey()); // Stack: getter, propget table (pg)
         lua_pushvalue(L, -2); // Stack: getter, pg, getter
         LuaHelper::RawSetField(L, -2, name); // Stack: getter, pg
         lua_pop (L, 2); // Stack: -
     }
 
-    static void addSetter(lua_State *L, const char *name, int tableIndex)
+    static void AddSetter(lua_State *L, const char *name, int tableIndex)
     {
         assert (lua_istable(L, tableIndex));
         assert (lua_iscfunction(L, -1)); // Stack: setter
 
-        lua_rawgetp(L, tableIndex, getPropsetKey()); // Stack: setter, propset table (ps)
+        lua_rawgetp(L, tableIndex, GetPropsetKey()); // Stack: setter, propset table (ps)
         lua_pushvalue(L, -2); // Stack: setter, ps, setter
         LuaHelper::RawSetField(L, -2, name); // Stack: setter, ps
         lua_pop (L, 2); // Stack: -
@@ -99,7 +99,7 @@ struct CFunc
             LUA_ASSERT (L,lua_isnil(L, -1),"lua_istable(L, 1)");
             lua_pop (L, 1); // 栈状态lua_gettop(L) == 3:tu=>field name=>mt
 
-            lua_rawgetp(L, -1, getPropgetKey()); //pg=mg['getkey']  栈状态lua_gettop(L) == 4:tu=>field name=>mt=>pg
+            lua_rawgetp(L, -1, GetPropgetKey()); //pg=mg['getkey']  栈状态lua_gettop(L) == 4:tu=>field name=>mt=>pg
             LUA_ASSERT (L,lua_istable(L, -1),"lua_istable(L, 1)");
 
             lua_pushvalue(L, 2); //栈状态lua_gettop(L) == 5:tu=>field name=>mt=>pg=>field name
@@ -133,7 +133,7 @@ struct CFunc
             // Repeat the lookup in the parent metafield,
             // or return nil if the field doesn't exist.
             //尝试获取父类的metatable
-            lua_rawgetp(L, -1, getParentKey()); //pmt = mt['parentkey'] 栈状态lua_gettop(L) == 4:tu=>field name=>mt=>pmt|nil
+            lua_rawgetp(L, -1, GetParentKey()); //pmt = mt['parentkey'] 栈状态lua_gettop(L) == 4:tu=>field name=>mt=>pmt|nil
 
             //没有找到父类的metatable
             if (lua_isnil (L, -1)) // 栈状态lua_gettop(L) == 4:tu=>field name=>mt=>nil
@@ -179,7 +179,7 @@ struct CFunc
         assert (lua_istable(L, -1));
 
         for (;;) {
-            lua_rawgetp(L, -1, getPropsetKey()); // Stack: mt, propset table (ps) | nil
+            lua_rawgetp(L, -1, GetPropsetKey()); // Stack: mt, propset table (ps) | nil
 
             if (lua_isnil (L, -1)) // Stack: mt, nil
             {
@@ -207,7 +207,7 @@ struct CFunc
             assert (lua_isnil(L, -1)); // Stack: mt, nil
             lua_pop (L, 1); // Stack: mt
 
-            lua_rawgetp(L, -1, getParentKey()); // Stack: mt, parent mt | nil
+            lua_rawgetp(L, -1, GetParentKey()); // Stack: mt, parent mt | nil
 
             if (lua_isnil (L, -1)) // Stack: mt, nil
             {

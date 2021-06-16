@@ -143,7 +143,7 @@ public:
             lua_pushvalue(L, -1); // Stack: ns, co, co 栈状态lua_gettop(L) == n + 3:ns=>co=>co
             lua_setmetatable(L, -2); // co.__metatable = co. 栈状态lua_gettop(L) == n + 2:ns=>co
             lua_pushstring(L, type_name.c_str()); // const table name 栈状态lua_gettop(L)== n + 3:ns=>co=>type_name
-            lua_rawsetp(L, -2, getTypeKey()); // co [typeKey] = type_name. 栈状态lua_gettop(L)== n + 2:ns=>co
+            lua_rawsetp(L, -2, GetTypeKey()); // co [typeKey] = type_name. 栈状态lua_gettop(L)== n + 2:ns=>co
 
             /**
              *https://zilongshanren.com/post/bind-a-simple-cpp-class-in-lua/
@@ -167,7 +167,7 @@ public:
             LuaHelper::RawSetField(L, -2, "__newindex");
 
             lua_newtable(L); //propget table(gt) 栈状态lua_gettop(L)== n + 3:ns=>co=>gt
-            lua_rawsetp(L, -2, getPropgetKey());//co[progetkey] = gt 栈状态lua_gettop(L)== n + 2:ns=>co
+            lua_rawsetp(L, -2, GetPropgetKey());//co[progetkey] = gt 栈状态lua_gettop(L)== n + 2:ns=>co
 
             if (Security::hideMetatables()) {
                 lua_pushnil(L);  //栈状态lua_gettop(L)== n + 3:ns=>co=>nil
@@ -191,13 +191,13 @@ public:
             createConstTable(name, false); // Stack 栈状态lua_gettop(L) == n + 3:ns=>co=>cl
 
             lua_newtable(L); // propset table (ps)  Stack 栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>ps
-            lua_rawsetp(L, -2, getPropsetKey()); // cl [propsetKey] = ps. Stack 栈状态lua_gettop(L) == n + 3:ns=>co=>cl
+            lua_rawsetp(L, -2, GetPropsetKey()); // cl [propsetKey] = ps. Stack 栈状态lua_gettop(L) == n + 3:ns=>co=>cl
 
             lua_pushvalue(L, -2); // Stack 栈状态lua_gettop(L) == n + 3:ns=>co=>cl=>co
-            lua_rawsetp(L, -2, getConstKey()); // cl [constKey] = co. Stack 栈状态lua_gettop(L) == n + 3:ns=>co=>cl=>co
+            lua_rawsetp(L, -2, GetConstKey()); // cl [constKey] = co. Stack 栈状态lua_gettop(L) == n + 3:ns=>co=>cl=>co
 
             lua_pushvalue(L, -1); // Stack 栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>cl
-            lua_rawsetp(L, -3, getClassKey()); // co [classKey] = cl.Stack 栈状态lua_gettop(L) == n + 3:ns=>co=>cl
+            lua_rawsetp(L, -3, GetClassKey()); // co [classKey] = cl.Stack 栈状态lua_gettop(L) == n + 3:ns=>co=>cl
             //now 栈状态lua_gettop(L)== n + 3:ns=>co=>cl
         }
 
@@ -218,7 +218,7 @@ public:
 
             std::string type_name = std::string( "static_") + name;
             lua_pushstring(L, type_name.c_str()); //Stack 栈状态lua_gettop(L) == n + 5:ns=>co=>cl=>st=>type_name
-            lua_rawsetp(L, -2, getTypeKey()); //st.typekey = type_name Stack 栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
+            lua_rawsetp(L, -2, GetTypeKey()); //st.typekey = type_name Stack 栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
 
             lua_pushcfunction(L,
                               &CFunc::IndexMetaMethod); //Stack 栈状态lua_gettop(L) == n + 5:ns=>co=>cl=>st=>IndexMetaMethod
@@ -231,13 +231,13 @@ public:
             LuaHelper::RawSetField(L, -2, "__newindex");
 
             lua_newtable(L); // proget table (pg) Stack 栈状态lua_gettop(L) == n + 5:ns=>co=>cl=>st=>pg
-            lua_rawsetp(L, -2, getPropgetKey()); // st [propgetKey] = pg. Stack 栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
+            lua_rawsetp(L, -2, GetPropgetKey()); // st [propgetKey] = pg. Stack 栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
 
             lua_newtable(L); // Stack: ns, co, cl, st, propset table (ps) Stack 栈状态lua_gettop(L) == n + 5:ns=>co=>cl=>st=>ps
-            lua_rawsetp(L, -2, getPropsetKey()); // st [propsetKey] = pg. Stack 栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
+            lua_rawsetp(L, -2, GetPropsetKey()); // st [propsetKey] = pg. Stack 栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
 
             lua_pushvalue(L, -2); //Stack 栈状态lua_gettop(L) == n + 5:ns=>co=>cl=>st=>cl
-            lua_rawsetp(L, -2, getClassKey()); // st [classKey] = cl.  Stack 栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
+            lua_rawsetp(L, -2, GetClassKey()); // st [classKey] = cl.  Stack 栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
 
             if (Security::hideMetatables()) {
                 lua_pushnil(L); // Stack 栈状态lua_gettop(L) == n + 5:ns=>co=>cl=>st=>nil
@@ -278,19 +278,19 @@ public:
         void AssertStackState(bool luaerror = false) const
         {
             // Stack: const table (co), class table (cl), static table (st)
-            lua_rawgetp(L, -1, getTypeKey()); // Stack: rt, registry type
+            lua_rawgetp(L, -1, GetTypeKey()); // Stack: rt, registry type
             std::string name = std::string(lua_tostring(L,-1));
             lua_pop(L,1);
             std::string rightName = std::string("static_") + className;
             LUA_ASSERT_EX(L,name == rightName,(std::string("table type name wrong,rightName = ") + rightName + std::string(",curname = ") + name).c_str(),luaerror);
             assert (lua_istable(L, -2));
-            lua_rawgetp(L, -2, getTypeKey()); // Stack: rt, registry type
+            lua_rawgetp(L, -2, GetTypeKey()); // Stack: rt, registry type
             name = std::string(lua_tostring(L,-1));
             lua_pop(L,1);
             rightName =  className;
             LUA_ASSERT_EX(L,name == rightName,(std::string("table type name wrong,rightName = ") + rightName + std::string(",curname = ") + name).c_str(),luaerror);
             assert (lua_istable(L, -3));
-            lua_rawgetp(L, -3, getTypeKey()); // Stack: rt, registry type
+            lua_rawgetp(L, -3, GetTypeKey()); // Stack: rt, registry type
             name = std::string(lua_tostring(L,-1));
             lua_pop(L,1);
             rightName =  std::string("const_") + className;
@@ -414,15 +414,15 @@ public:
                 //把st元表作一个副本压栈。
                 lua_pushvalue(L, -1); // 栈状态lua_gettop(L) == n + 5:ns=>co=>cl=>st=>st
                 //把static metadata表插入registry表
-                lua_rawsetp(L,LUA_REGISTRYINDEX,ClassInfo<T>::getStaticKey()); //stack栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
+                lua_rawsetp(L,LUA_REGISTRYINDEX, ClassInfo<T>::GetStaticKey()); //stack栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
                 //把cl元表作一个副本压栈。
                 lua_pushvalue(L, -2); // stack 栈状态lua_gettop(L) == n + 5:ns=>co=>cl=>st=>cl
                 //把metadata表插入registry表
-                lua_rawsetp(L,LUA_REGISTRYINDEX,ClassInfo<T>::getClassKey()); //stack栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
+                lua_rawsetp(L,LUA_REGISTRYINDEX, ClassInfo<T>::GetClassKey()); //stack栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
                 //把co元表作一个副本压栈。
                 lua_pushvalue(L, -3); // 栈状态lua_gettop(L) == n + 5:ns=>co=>cl=>st=>co
                 //把const metadata表插入registry表
-                lua_rawsetp(L,LUA_REGISTRYINDEX,ClassInfo<T>::getConstKey()); //stack栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
+                lua_rawsetp(L,LUA_REGISTRYINDEX, ClassInfo<T>::GetConstKey()); //stack栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
 
                 //now stack栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
             }
@@ -431,12 +431,12 @@ public:
                 ++m_stackSize;
 
                 // Map T back from its stored tables
-                lua_rawgetp(L,LUA_REGISTRYINDEX,ClassInfo<T>::getConstKey()); // Stack 栈状态ua_gettop(L)== n + 3:ns=>st=>co
+                lua_rawgetp(L,LUA_REGISTRYINDEX, ClassInfo<T>::GetConstKey()); // Stack 栈状态ua_gettop(L)== n + 3:ns=>st=>co
                 //调整co的位置
                 lua_insert(L, -2); // Stack 栈状态ua_gettop(L)== n + 3:ns=>co=>st
                 ++m_stackSize;
 
-                lua_rawgetp(L,LUA_REGISTRYINDEX,ClassInfo<T>::getClassKey()); // Stack 栈状态ua_gettop(L)== n + 4:ns=>co=>st=>cl
+                lua_rawgetp(L,LUA_REGISTRYINDEX, ClassInfo<T>::GetClassKey()); // Stack 栈状态ua_gettop(L)== n + 4:ns=>co=>st=>cl
                 //调整cl的位置
                 lua_insert(L, -2); // Stack 栈状态ua_gettop(L)== n + 4:ns=>co=>cl=>st
                 ++m_stackSize;
@@ -474,22 +474,22 @@ public:
 
             assert (lua_istable(L, -1)); // Stack: ns, co, cl, st, pst
 
-            lua_rawgetp(L, -1, getClassKey()); // Stack: ns, co, cl, st, pst, parent cl (pcl)
+            lua_rawgetp(L, -1, GetClassKey()); // Stack: ns, co, cl, st, pst, parent cl (pcl)
             assert (lua_istable(L, -1));
 
-            lua_rawgetp(L, -1, getConstKey()); // Stack: ns, co, cl, st, pst, pcl, parent co (pco)
+            lua_rawgetp(L, -1, GetConstKey()); // Stack: ns, co, cl, st, pst, pcl, parent co (pco)
             assert (lua_istable(L, -1));
 
-            lua_rawsetp(L, -6, getParentKey()); // co [parentKey] = pco. Stack: ns, co, cl, st, pst, pcl
-            lua_rawsetp(L, -4, getParentKey()); // cl [parentKey] = pcl. Stack: ns, co, cl, st, pst
-            lua_rawsetp(L, -2, getParentKey()); // st [parentKey] = pst. Stack: ns, co, cl, st
+            lua_rawsetp(L, -6, GetParentKey()); // co [parentKey] = pco. Stack: ns, co, cl, st, pst, pcl
+            lua_rawsetp(L, -4, GetParentKey()); // cl [parentKey] = pcl. Stack: ns, co, cl, st, pst
+            lua_rawsetp(L, -2, GetParentKey()); // st [parentKey] = pst. Stack: ns, co, cl, st
 
             lua_pushvalue(L, -1); // Stack: ns, co, cl, st, st
-            lua_rawsetp(L, LUA_REGISTRYINDEX, ClassInfo<T>::getStaticKey()); // Stack: ns, co, cl, st
+            lua_rawsetp(L, LUA_REGISTRYINDEX, ClassInfo<T>::GetStaticKey()); // Stack: ns, co, cl, st
             lua_pushvalue(L, -2); // Stack: ns, co, cl, st, cl
-            lua_rawsetp(L, LUA_REGISTRYINDEX, ClassInfo<T>::getClassKey()); // Stack: ns, co, cl, st
+            lua_rawsetp(L, LUA_REGISTRYINDEX, ClassInfo<T>::GetClassKey()); // Stack: ns, co, cl, st
             lua_pushvalue(L, -3); // Stack: ns, co, cl, st, co
-            lua_rawsetp(L, LUA_REGISTRYINDEX, ClassInfo<T>::getConstKey()); // Stack: ns, co, cl, st
+            lua_rawsetp(L, LUA_REGISTRYINDEX, ClassInfo<T>::GetConstKey()); // Stack: ns, co, cl, st
         }
 
         //--------------------------------------------------------------------------
@@ -525,7 +525,7 @@ public:
 
             lua_pushlightuserdata(L, pu); // Stack: co, cl, st, pointer
             lua_pushcclosure(L, &CFunc::getVariable<U>, 1); // Stack: co, cl, st, getter
-            CFunc::addGetter(L, name, -2); // Stack: co, cl, st
+            CFunc::AddGetter(L, name, -2); // Stack: co, cl, st
 
             if (isWritable) {
                 lua_pushlightuserdata(L, pu); // Stack: co, cl, st, ps, pointer
@@ -535,7 +535,7 @@ public:
                 lua_pushstring(L, name); // Stack: co, cl, st, name
                 lua_pushcclosure(L, &CFunc::readOnlyError, 1); // Stack: co, cl, st, error_fn
             }
-            CFunc::addSetter(L, name, -2); // Stack: co, cl, st
+            CFunc::AddSetter(L, name, -2); // Stack: co, cl, st
 
             return *this;
         }
@@ -553,7 +553,7 @@ public:
 
             lua_pushlightuserdata(L, reinterpret_cast <void *> (get)); // Stack: co, cl, st, function ptr
             lua_pushcclosure(L, &CFunc::Call<U (*)()>::f, 1); // Stack: co, cl, st, getter
-            CFunc::addGetter(L, name, -2); // Stack: co, cl, st
+            CFunc::AddGetter(L, name, -2); // Stack: co, cl, st
 
             if (set != 0) {
                 lua_pushlightuserdata(L, reinterpret_cast <void *> (set)); // Stack: co, cl, st, function ptr
@@ -563,7 +563,7 @@ public:
                 lua_pushstring(L, name); // Stack: co, cl, st, ps, name
                 lua_pushcclosure(L, &CFunc::readOnlyError, 1); // Stack: co, cl, st, error_fn
             }
-            CFunc::addSetter(L, name, -2); // Stack: co, cl, st
+            CFunc::AddSetter(L, name, -2); // Stack: co, cl, st
 
             return *this;
         }
@@ -630,13 +630,13 @@ public:
             new(lua_newuserdata(L, sizeof(mp_t))) mp_t(mp); // Stack: co, cl, st, field ptr
             lua_pushcclosure(L, &CFunc::getProperty<T, U>, 1); // Stack: co, cl, st, getter
             lua_pushvalue(L, -1); // Stack: co, cl, st, getter, getter
-            CFunc::addGetter(L, name, -5); // Stack: co, cl, st, getter
-            CFunc::addGetter(L, name, -3); // Stack: co, cl, st
+            CFunc::AddGetter(L, name, -5); // Stack: co, cl, st, getter
+            CFunc::AddGetter(L, name, -3); // Stack: co, cl, st
 
             if (isWritable) {
                 new(lua_newuserdata(L, sizeof(mp_t))) mp_t(mp); // Stack: co, cl, st, field ptr
                 lua_pushcclosure(L, &CFunc::setProperty<T, U>, 1); // Stack: co, cl, st, setter
-                CFunc::addSetter(L, name, -3); // Stack: co, cl, st
+                CFunc::AddSetter(L, name, -3); // Stack: co, cl, st
             }
 
             return *this;
@@ -655,14 +655,14 @@ public:
             new(lua_newuserdata(L, sizeof(get_t))) get_t(get); // Stack: co, cl, st, funcion ptr
             lua_pushcclosure(L, &CFunc::CallConstMember<get_t>::f, 1); // Stack: co, cl, st, getter
             lua_pushvalue(L, -1); // Stack: co, cl, st, getter, getter
-            CFunc::addGetter(L, name, -5); // Stack: co, cl, st, getter
-            CFunc::addGetter(L, name, -3); // Stack: co, cl, st
+            CFunc::AddGetter(L, name, -5); // Stack: co, cl, st, getter
+            CFunc::AddGetter(L, name, -3); // Stack: co, cl, st
 
             if (set != 0) {
                 typedef void (T::* set_t)(TS);
                 new(lua_newuserdata(L, sizeof(set_t))) set_t(set); // Stack: co, cl, st, function ptr
                 lua_pushcclosure(L, &CFunc::CallMember<set_t>::f, 1); // Stack: co, cl, st, setter
-                CFunc::addSetter(L, name, -3); // Stack: co, cl, st
+                CFunc::AddSetter(L, name, -3); // Stack: co, cl, st
             }
 
             return *this;
@@ -681,14 +681,14 @@ public:
             new(lua_newuserdata(L, sizeof(get_t))) get_t(get); // Stack: co, cl, st, funcion ptr
             lua_pushcclosure(L, &CFunc::CallConstMember<get_t>::f, 1); // Stack: co, cl, st, getter
             lua_pushvalue(L, -1); // Stack: co, cl, st, getter, getter
-            CFunc::addGetter(L, name, -5); // Stack: co, cl, st, getter
-            CFunc::addGetter(L, name, -3); // Stack: co, cl, st
+            CFunc::AddGetter(L, name, -5); // Stack: co, cl, st, getter
+            CFunc::AddGetter(L, name, -3); // Stack: co, cl, st
 
             if (set != 0) {
                 typedef void (T::* set_t)(TS, lua_State *);
                 new(lua_newuserdata(L, sizeof(set_t))) set_t(set); // Stack: co, cl, st, function ptr
                 lua_pushcclosure(L, &CFunc::CallMember<set_t>::f, 1); // Stack: co, cl, st, setter
-                CFunc::addSetter(L, name, -3); // Stack: co, cl, st
+                CFunc::AddSetter(L, name, -3); // Stack: co, cl, st
             }
 
             return *this;
@@ -713,13 +713,13 @@ public:
             lua_pushlightuserdata(L, reinterpret_cast <void *> (get)); // Stack: co, cl, st, function ptr
             lua_pushcclosure(L, &CFunc::Call<TG (*)(const T *)>::f, 1); // Stack: co, cl, st, getter
             lua_pushvalue(L, -1); // Stack: co, cl, st,, getter, getter
-            CFunc::addGetter(L, name, -5); // Stack: co, cl, st, getter
-            CFunc::addGetter(L, name, -3); // Stack: co, cl, st
+            CFunc::AddGetter(L, name, -5); // Stack: co, cl, st, getter
+            CFunc::AddGetter(L, name, -3); // Stack: co, cl, st
 
             if (set != 0) {
                 lua_pushlightuserdata(L, reinterpret_cast <void *> (set)); // Stack: co, cl, st, function ptr
                 lua_pushcclosure(L, &CFunc::Call<void (*)(T *, TS)>::f, 1); // Stack: co, cl, st, setter
-                CFunc::addSetter(L, name, -3); // Stack: co, cl, st
+                CFunc::AddSetter(L, name, -3); // Stack: co, cl, st
             }
 
             return *this;
@@ -742,12 +742,12 @@ public:
 
             lua_pushcfunction(L, get);
             lua_pushvalue(L, -1); // Stack: co, cl, st,, getter, getter
-            CFunc::addGetter(L, name, -5); // Stack: co, cl, st,, getter
-            CFunc::addGetter(L, name, -3); // Stack: co, cl, st,
+            CFunc::AddGetter(L, name, -5); // Stack: co, cl, st,, getter
+            CFunc::AddGetter(L, name, -3); // Stack: co, cl, st,
 
             if (set != 0) {
                 lua_pushcfunction(L, set);
-                CFunc::addSetter(L, name, -3); // Stack: co, cl, st,
+                CFunc::AddSetter(L, name, -3); // Stack: co, cl, st,
             }
 
             return *this;
@@ -766,8 +766,8 @@ public:
             lua_setmetatable(L, -2); // Stack: co, cl, st, ud
             lua_pushcclosure(L, &CFunc::CallProxyFunctor<GetType>::f, 1); // Stack: co, cl, st, getter
             lua_pushvalue(L, -1); // Stack: co, cl, st, getter, getter
-            CFunc::addGetter(L, name, -4); // Stack: co, cl, st, getter
-            CFunc::addGetter(L, name, -4); // Stack: co, cl, st
+            CFunc::AddGetter(L, name, -4); // Stack: co, cl, st, getter
+            CFunc::AddGetter(L, name, -4); // Stack: co, cl, st
 
             if (set != nullptr) {
                 using SetType = decltype(set);
@@ -778,7 +778,7 @@ public:
                 LuaHelper::RawSetField(L, -2, "__gc"); // Stack: co, cl, st, ud, mt
                 lua_setmetatable(L, -2); // Stack: co, cl, st, ud
                 lua_pushcclosure(L, &CFunc::CallProxyFunctor<SetType>::f, 1); // Stack: co, cl, st, setter
-                CFunc::addSetter(L, name, -3); // Stack: co, cl, st
+                CFunc::AddSetter(L, name, -3); // Stack: co, cl, st
             }
 
             return *this;
@@ -1057,10 +1057,10 @@ private:
             LuaHelper::RawSetField(L, -2, "__newindex"); // Stack: pns, ns
 
             lua_newtable(L); // Stack: pns, ns, propget table (pg)
-            lua_rawsetp(L, -2, getPropgetKey()); // ns [propgetKey] = pg. Stack: pns, ns
+            lua_rawsetp(L, -2, GetPropgetKey()); // ns [propgetKey] = pg. Stack: pns, ns
 
             lua_newtable(L); // Stack: pns, ns, propset table (ps)
-            lua_rawsetp(L, -2, getPropsetKey()); // ns [propsetKey] = ps. Stack: pns, ns
+            lua_rawsetp(L, -2, GetPropsetKey()); // ns [propsetKey] = ps. Stack: pns, ns
 
             // pns [name] = ns
             lua_pushvalue(L, -1); // Stack: pns, ns, ns
@@ -1147,7 +1147,7 @@ public:
 
         lua_pushlightuserdata(L, pt); // Stack: ns, pointer
         lua_pushcclosure(L, &CFunc::getVariable<T>, 1); // Stack: ns, getter
-        CFunc::addGetter(L, name, -2); // Stack: ns
+        CFunc::AddGetter(L, name, -2); // Stack: ns
 
         if (isWritable) {
             lua_pushlightuserdata(L, pt); // Stack: ns, pointer
@@ -1157,7 +1157,7 @@ public:
             lua_pushstring(L, name); // Stack: ns, ps, name
             lua_pushcclosure(L, &CFunc::readOnlyError, 1); // Stack: ns, error_fn
         }
-        CFunc::addSetter(L, name, -2); // Stack: ns
+        CFunc::AddSetter(L, name, -2); // Stack: ns
 
         return *this;
     }
@@ -1179,7 +1179,7 @@ public:
 
         lua_pushlightuserdata(L, reinterpret_cast <void *> (get)); // Stack: ns, function ptr
         lua_pushcclosure(L, &CFunc::Call<TG (*)()>::f, 1); // Stack: ns, getter
-        CFunc::addGetter(L, name, -2);
+        CFunc::AddGetter(L, name, -2);
 
         if (set != 0) {
             lua_pushlightuserdata(L, reinterpret_cast <void *> (set)); // Stack: ns, function ptr
@@ -1189,7 +1189,7 @@ public:
             lua_pushstring(L, name);
             lua_pushcclosure(L, &CFunc::readOnlyError, 1);
         }
-        CFunc::addSetter(L, name, -2);
+        CFunc::AddSetter(L, name, -2);
 
         return *this;
     }
@@ -1207,15 +1207,15 @@ public:
 
         assert (lua_istable(L, -1)); // Stack: namespace table (ns)
         lua_pushcfunction(L, get); // Stack: ns, getter
-        CFunc::addGetter(L, name, -2); // Stack: ns
+        CFunc::AddGetter(L, name, -2); // Stack: ns
         if (set != 0) {
             lua_pushcfunction(L, set); // Stack: ns, setter
-            CFunc::addSetter(L, name, -2); // Stack: ns
+            CFunc::AddSetter(L, name, -2); // Stack: ns
         }
         else {
             lua_pushstring(L, name); // Stack: ns, name
             lua_pushcclosure(L, &CFunc::readOnlyError, 1); // Stack: ns, name, readOnlyError
-            CFunc::addSetter(L, name, -2); // Stack: ns
+            CFunc::AddSetter(L, name, -2); // Stack: ns
         }
 
         return *this;
@@ -1281,7 +1281,7 @@ public:
     Class<Derived> deriveClass(char const *name)
     {
         AssertIsActive();
-        return Class<Derived>(name, *this, ClassInfo<Base>::getStaticKey());
+        return Class<Derived>(name, *this, ClassInfo<Base>::GetStaticKey());
     }
 };
 

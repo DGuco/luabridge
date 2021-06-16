@@ -22,9 +22,9 @@ set(LUA_BRIDGE_HEADER_FILES
         include/core/user_data.h
         include/core/lua_library.h
         include/core/lua_stack.h
+        include/core/caller.h
         include/lua_file.h
-        include/lua_bridge.h
-        )
+        include/lua_bridge.h)
 
 set(SOURCE_FILES
         main.cpp)

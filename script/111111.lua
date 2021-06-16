@@ -18,7 +18,9 @@ function x11111_test(x,y)
     print("subNum = "..subNum)
     Say("Hello world11111");
     local testclass = OuterClass (10)
+    local testclass1 = OuterClass1 (10)
     testclass:Say("Hello cpp");
+    testclass1:Say("Hello cpp");
     local spaceclass = space.OuterClass (10)
     spaceclass:Say("Space Hello cpp");
     print("x11111_test done")

@@ -35,7 +35,7 @@ namespace luabridge {
 /**
  * A unique key for a type name in a metatable.
  */
-inline const void* getTypeKey ()
+inline const void* GetTypeKey ()
 {
 #ifdef _NDEBUG
   static char value;
@@ -48,7 +48,7 @@ inline const void* getTypeKey ()
 /**
  * The key of a const table in another metatable.
  */
-inline const void* getConstKey ()
+inline const void* GetConstKey ()
 {
 #ifdef _NDEBUG
   static char value;
@@ -61,7 +61,7 @@ inline const void* getConstKey ()
 /**
  * The key of a class table in another metatable.
  */
-inline const void* getClassKey ()
+inline const void* GetClassKey ()
 {
 #ifdef _NDEBUG
   static char value;
@@ -74,7 +74,7 @@ inline const void* getClassKey ()
 /**
  * The key of a propget table in another metatable.
  */
-inline const void* getPropgetKey ()
+inline const void* GetPropgetKey ()
 {
 #ifdef _NDEBUG
   static char value;
@@ -87,7 +87,7 @@ inline const void* getPropgetKey ()
 /**
  * The key of a propset table in another metatable.
  */
-inline const void* getPropsetKey ()
+inline const void* GetPropsetKey ()
 {
 #ifdef _NDEBUG
   static char value;
@@ -100,7 +100,7 @@ inline const void* getPropsetKey ()
 /**
  * The key of a static table in another metatable.
  */
-inline const void* getStaticKey ()
+inline const void* GetStaticKey ()
 {
 #ifdef _NDEBUG
   static char value;
@@ -113,7 +113,7 @@ inline const void* getStaticKey ()
 /**
  * The key of a parent table in another metatable.
  */
-inline const void* getParentKey ()
+inline const void* GetParentKey ()
 {
 #ifdef _NDEBUG
   static char value;
@@ -139,7 +139,7 @@ public:
       The static table holds the static data members, static properties, and
       static member functions for a class.
   */
-  static void const* getStaticKey ()
+  static void const* GetStaticKey ()
   {
     static char value;
     return &value;
@@ -151,7 +151,7 @@ public:
       of a class. Read-only data and properties, and const member functions are
       also placed here (to save a lookup in the const table).
   */
-  static void const* getClassKey ()
+  static void const* GetClassKey ()
   {
     static char value;
     return &value;
@@ -162,7 +162,7 @@ public:
       The const table holds read-only data members and properties, and const
       member functions of a class.
   */
-  static void const* getConstKey ()
+  static void const* GetConstKey ()
   {
     static char value;
     return &value;
