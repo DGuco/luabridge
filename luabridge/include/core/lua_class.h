@@ -28,12 +28,12 @@
 #ifndef LBRIDGE_LUA_CLASS_H
 #define LBRIDGE_LUA_CLASS_H
 
-#include "luavm.h"
+#include "lua_vm.h"
 #include <functional>
 #include <stdexcept>
 #include <string>
 #include <cassert>
-#include "luavm.h"
+#include "lua_vm.h"
 #include "security.h"
 #include "type_traits.h"
 #include "lua_functions.h"

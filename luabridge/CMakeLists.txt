@@ -16,7 +16,7 @@ set(LUA_BRIDGE_HEADER_FILES
         include/core/lua_helpers.h
         include/core/lua_ref.h
         include/core/namespace.h
-        include/core/luavm.h
+        include/core/lua_vm.h
         include/core/security.h
         include/core/type_list.h
         include/core/type_traits.h

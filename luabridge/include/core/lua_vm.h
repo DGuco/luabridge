@@ -26,8 +26,8 @@
 */
 //==============================================================================
 
-#ifndef LBRIDGE_LUAVM_H
-#define LBRIDGE_LUAVM_H
+#ifndef LBRIDGE_LUA_VM_H
+#define LBRIDGE_LUA_VM_H
 
 #include "lua_library.h"
 
@@ -96,4 +96,4 @@ public:
 };
 
 }
-#endif //LBRIDGE_LUAVM_H
+#endif //LBRIDGE_LUA_VM_H
