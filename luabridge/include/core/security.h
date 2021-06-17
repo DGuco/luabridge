@@ -39,15 +39,15 @@ private:
     }
 };
 
-//------------------------------------------------------------------------------
-/**
-Push an object onto the Lua stack.
-*/
-template<class T>
-inline void push(lua_State *L, T t)
-{
-    Stack<T>::push(L, t);
-}
+////------------------------------------------------------------------------------
+///**
+//Push an object onto the Lua stack.
+//*/
+//template<class T>
+//inline void push(lua_State *L, T t)
+//{
+//    Stack<T>::push(L, t);
+//}
 
 //------------------------------------------------------------------------------
 /**

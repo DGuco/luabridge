@@ -126,11 +126,11 @@ int main()
 //        LuaHelper::DumpTable(L,-4,std::cout,2);
     END_CLASS
 
-    REGISTER_LUA_CFUNC(luaBridge, "Add", Add)
-    REGISTER_LUA_CFUNC(luaBridge, "LambdaAdd", func)
-    REGISTER_LUA_CFUNC(luaBridge, "Sub", Sub)
-    REGISTER_LUA_CFUNC(luaBridge, "Say", Say)
-    REGISTER_LUA_CFUNC(luaBridge, "LuaFnAdd", LuaFnAdd)
+    REGISTER_GLOBAL_FUNC(luaBridge, "Add", Add)
+    REGISTER_GLOBAL_FUNC(luaBridge, "LambdaAdd", func)
+    REGISTER_GLOBAL_FUNC(luaBridge, "Sub", Sub)
+    REGISTER_GLOBAL_FUNC(luaBridge, "Say", Say)
+    REGISTER_GLOBAL_FUNC(luaBridge, "LuaFnAdd", LuaFnAdd)
 
     lua_getglobal(L, "_G");
     LuaHelper::DumpTable(L,-1,std::cout,2);

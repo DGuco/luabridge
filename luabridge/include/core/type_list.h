@@ -50,7 +50,6 @@
 #include <string>
 #include <typeinfo>
 #include "lua_library.h"
-#include "lua_stack.h"
 
 namespace luabridge
 {

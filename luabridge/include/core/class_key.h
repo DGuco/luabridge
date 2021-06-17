@@ -168,7 +168,6 @@ public:
     return &value;
   }
 };
-
 } // namespace luabridge
 
 #endif

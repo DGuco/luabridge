@@ -32,7 +32,7 @@
 #define __USER_DATA_H__
 
 #include "lua_library.h"
-#include "classinfo.h"
+#include "class_key.h"
 #include "type_traits.h"
 #include "lua_helpers.h"
 #include <cassert>

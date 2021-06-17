@@ -40,6 +40,10 @@ namespace luabridge {
     class LuaBridge {
     public:
         /**
+         *
+         */
+        LuaBridge();
+        /**
          * Construce
          * @param VM
          */
@@ -105,6 +109,9 @@ namespace luabridge {
         Namespace BeginNameSpace(char *name);
 
     private:
+        //InitLuaLibrary
+        void InitLuaLibrary();
+
         //把参数压栈
         int PushToLua();
 
@@ -123,30 +130,42 @@ namespace luabridge {
         inline void SafeEndCall(const char *func, int nArg);
 
     private:
-        lua_State *const L;
+        LuaVm *m_pLuaVm;
         int m_iTopIndex;
     };
 
-    LuaBridge::LuaBridge(lua_State *VM)
-            : L(VM), m_iTopIndex(0) {
+    LuaBridge::LuaBridge() :  m_iTopIndex(0) {
+        lua_State *pState = luaL_newstate();
+        if (pState == NULL)
+        {
+            throw  std::runtime_error("LuaBridge constructor luaL_newstate() failed");
+        }
+        m_pLuaVm = new LuaVm(pState);
         // initialize lua standard library functions
-        luaopen_base(L);
-        luaopen_table(L);
-        luaopen_string(L);
-        luaopen_math(L);
-        luaopen_debug(L);
-        luaopen_utf8(L);
-        luaopen_package(L);
-//    LuaException::EnableExceptions(L);
+        InitLuaLibrary();
+        LuaException::EnableExceptions(m_pLuaVm->LuaState());
+    }
+
+    LuaBridge::LuaBridge(lua_State *VM) :  m_iTopIndex(0) {
+        if (VM == NULL)
+        {
+            throw  std::runtime_error("LuaBridge constructor failed");
+        }
+        m_pLuaVm = new LuaVm(VM);
+        // initialize lua standard library functions
+        InitLuaLibrary();
+        LuaException::EnableExceptions(m_pLuaVm->LuaState());
     }
 
     LuaBridge::~LuaBridge() {
+        lua_State * L = m_pLuaVm->LuaState();
         if (NULL != L) {
             lua_close(L);
         }
     }
 
     bool LuaBridge::LoadFile(const std::string &filePath) {
+        lua_State * L = m_pLuaVm->LuaState();
         int ret = luaL_dofile(L, filePath.c_str());
         if (ret != 0) {
             throw std::runtime_error("Lua loadfile:" + filePath + " failed, error:" + lua_tostring(L, -1));
@@ -155,6 +174,7 @@ namespace luabridge {
     }
 
     bool LuaBridge::LoadFile(const char *filePath) {
+        lua_State * L = m_pLuaVm->LuaState();
         int ret = luaL_dofile(L, filePath);
         if (ret != 0) {
 
@@ -164,6 +184,7 @@ namespace luabridge {
     }
 
     void LuaBridge::RegisterCFunc(const char *func, lua_CFunction f) {
+        lua_State * L = m_pLuaVm->LuaState();
         lua_register(L, func, f);
     }
 
@@ -172,23 +193,39 @@ namespace luabridge {
         RegisterCFunc(func, LuaCFunctionWrap<__COUNTER__>(fp));
     }
 
+    void LuaBridge::InitLuaLibrary()
+    {
+        lua_State * L = m_pLuaVm->LuaState();
+        // initialize lua standard library functions
+        luaopen_base(L);
+        luaopen_table(L);
+        luaopen_string(L);
+        luaopen_math(L);
+        luaopen_debug(L);
+        luaopen_utf8(L);
+        luaopen_package(L);
+    }
+
     int LuaBridge::PushToLua() {
         return 0;
     }
 
     template<typename T>
     int LuaBridge::PushToLua(const T &t) {
+        lua_State * L = m_pLuaVm->LuaState();
         Stack<T>::push(L, t);
         return 1;
     }
 
     template<typename First, typename... Rest>
     int LuaBridge::PushToLua(const First &first, const Rest &...rest) {
+        lua_State * L = m_pLuaVm->LuaState();
         Stack<First>::push(L, first);
         return PushToLua(rest...);
     }
 
     void LuaBridge::SafeBeginCall(const char *func) {
+        lua_State * L = m_pLuaVm->LuaState();
         //记录调用前的堆栈索引
         m_iTopIndex = lua_gettop(L);
         lua_getglobal(L, func);
@@ -196,6 +233,7 @@ namespace luabridge {
 
     template<typename R, int __>
     R LuaBridge::SafeEndCall(const char *func, int nArg) {
+        lua_State * L = m_pLuaVm->LuaState();
         if (lua_pcall(L, nArg, 1, 0) != LUA_OK) {
             LuaHelper::DefaultDebugLuaErrorInfo(func, lua_tostring(L, -1));
             //恢复调用前的堆栈索引
@@ -219,6 +257,7 @@ namespace luabridge {
 
     template<int __>
     void LuaBridge::SafeEndCall(const char *func, int nArg) {
+        lua_State * L = m_pLuaVm->LuaState();
         if (lua_pcall(L, nArg, 0, 0) != 0) {
             LuaHelper::DefaultDebugLuaErrorInfo(func, lua_tostring(L, -1));
         }
@@ -233,6 +272,7 @@ namespace luabridge {
     }
 
     const char *LuaBridge::Call(const char *func, const char *sig, ...) {
+        lua_State * L = m_pLuaVm->LuaState();
         va_list vl;
         va_start(vl, sig);
 
@@ -333,27 +373,27 @@ namespace luabridge {
     }
 
     Namespace LuaBridge::BeginNameSpace(char *name) {
-        return GetGlobalNamespace().BeginNamespace(name);
+        return GetGlobalNamespace().BeginNamespace(name,m_pLuaVm);
     }
 
     Namespace LuaBridge::GetGlobalNamespace() {
-        return Namespace::GetGlobalNamespace(L);
+        return Namespace::GetGlobalNamespace(m_pLuaVm);
     }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
-#define REGISTER_LUA_CFUNC(luaBridge, funcname, func)                    \
+#define REGISTER_GLOBAL_FUNC(luaBridge, funcname, func)                    \
     (luaBridge).RegisterCFunc(funcname,func);
 
 #define BEGIN_NAMESPACE_CLASS(spacename, luaBridge, ClassT, name)        \
     {                                                                    \
         {                                                                \
             Namespace nameSpace = (luaBridge).BeginNameSpace(spacename); \
-            Namespace::Class<ClassT> classt = nameSpace.beginClass<ClassT>(name);
+            Class<ClassT> classt = nameSpace.beginClass<ClassT>(name);
 
 #define BEGIN_CLASS(luaBridge, ClassT, name)                             \
     {                                                                    \
         Namespace nameSpace = (luaBridge).GetGlobalNamespace();          \
-        Namespace::Class<ClassT> classt = nameSpace.beginClass<ClassT>(name);
+        Class<ClassT> classt = nameSpace.beginClass<ClassT>(name);
 
 #define CLASS_ADD_CONSTRUCTOR(FT)                                        \
         classt.addConstructor<FT>();
@@ -369,7 +409,7 @@ namespace luabridge {
     }
 
 #define END_NAMESPACE_CLASS                                              \
-            nameSpace = classt.endClass();                               \
+            classt.endClass();                               \
             nameSpace.endNamespace();                                    \
         }                                                                \
     }

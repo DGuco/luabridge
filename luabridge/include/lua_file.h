@@ -36,11 +36,14 @@
 #include "core/type_list.h"
 #include "core/func_traits.h"
 #include "core/constructor.h"
-#include "core/classinfo.h"
+#include "core/class_key.h"
 #include "core/lua_exception.h"
 #include "core/lua_ref.h"
 #include "core/user_data.h"
 #include "core/security.h"
 #include "core/namespace.h"
+#include "core/luavm.h"
+#include "core/caller.h"
+#include "core/lua_class.h"
 
 #endif
