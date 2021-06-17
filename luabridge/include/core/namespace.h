@@ -1090,7 +1090,7 @@ public:
     */
     static Namespace GetGlobalNamespace(lua_State *L)
     {
-        enableExceptions(L);
+        EnableExceptions(L);
         return Namespace(L);
     }
 

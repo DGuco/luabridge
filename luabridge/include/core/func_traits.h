@@ -57,8 +57,12 @@ struct FuncTraits
     };
 };
 
-/* Ordinary function pointers. */
 
+/**
+ * 普通c函数R(...)
+ * @tparam R
+ * @tparam ParamList
+ */
 template<class R, class... ParamList>
 struct FuncTraits<R (*)(ParamList...)>
 {
@@ -88,7 +92,11 @@ struct FuncTraits<R (*)(ParamList...)>
     }
 };
 
-/* Non-const member function pointers. */
+/**
+ * Non-const member function
+ * @tparam R
+ * @tparam ParamList
+ */
 template<class T, class R, class... ParamList>
 struct FuncTraits<R (T::*)(ParamList...)>
 {
@@ -108,8 +116,11 @@ struct FuncTraits<R (T::*)(ParamList...)>
     }
 };
 
-/* Const member function pointers. */
-
+/**
+ * Const member function
+ * @tparam R
+ * @tparam ParamList
+ */
 template<class T, class R,class... ParamList>
 struct FuncTraits<R (T::*)(ParamList...) const>
 {
@@ -129,8 +140,12 @@ struct FuncTraits<R (T::*)(ParamList...) const>
     }
 };
 
-/* std::function */
 
+/**
+ * std::function
+ * @tparam R
+ * @tparam ParamList
+ */
 template<class R, class... ParamList>
 struct FuncTraits<std::function<R(ParamList...)>>
 {

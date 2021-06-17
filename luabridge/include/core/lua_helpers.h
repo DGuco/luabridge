@@ -236,6 +236,7 @@ int LuaHelper::LuaAssert(lua_State *L, bool condition, const char *file, int lin
             ar.namewhat = "?";
         }
         /*
+         * https://blog.csdn.net/weixin_33682719/article/details/92861195
          *@param check:
          * lua_toxxx和luaL_checkxxx的区别，这两个函数都是从lua栈上获取一个值，但是在检查到类型不符时候，lua_toxxx只是返回null或者默认值；
          * 而luaL_check则是会抛出一个异常，下面的代码不会再继续执行；这里就需要注意了，lua里面使用的异常并不是c++的异常，只是使用了c的setjump和longjump来实现到恢复点的跳转，

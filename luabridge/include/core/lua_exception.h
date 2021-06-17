@@ -50,7 +50,7 @@ public:
   LuaException (lua_State* L, int /*code*/)
     : m_L (L)
   {
-    whatFromStack ();
+      WhatFromStack();
   }
 
   //----------------------------------------------------------------------------
@@ -61,7 +61,7 @@ public:
                 long)
     : m_L (L)
   {
-    whatFromStack ();
+      WhatFromStack();
   }
 
   //----------------------------------------------------------------------------
@@ -97,11 +97,11 @@ public:
   */
   static void EnableExceptions(lua_State *L)
   {
-    lua_atpanic (L, throwAtPanic);
+      lua_atpanic(L, ThrowAtPanic);
   }
 
 protected:
-  void whatFromStack ()
+  void WhatFromStack ()
   {
     if (lua_gettop (m_L) > 0)
     {
@@ -116,7 +116,7 @@ protected:
   }
 
 private:
-  static int throwAtPanic (lua_State* L)
+  static int ThrowAtPanic (lua_State* L)
   {
     throw LuaException (L, -1);
   }
@@ -126,7 +126,7 @@ private:
 /**
     Initializes error handling. Subsequent Lua errors are translated to C++ exceptions.
 */
-static void enableExceptions (lua_State* L)
+static void EnableExceptions (lua_State* L)
 {
   LuaException::EnableExceptions(L);
 }
