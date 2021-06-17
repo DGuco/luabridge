@@ -110,15 +110,6 @@ private:
         m_pLuaVm->AddStackSize(1);
     }
 
-    //----------------------------------------------------------------------------
-    /**
-        Close the class and continue the namespace registrations.
-    */
-//    explicit Namespace(ClassBase &child)
-//        : LuaVm(child)
-//    {
-//    }
-
 public:
     //----------------------------------------------------------------------------
     /**
@@ -135,8 +126,8 @@ public:
     */
     Namespace BeginNamespace(char const *name,LuaVm *luaVm)
     {
-        LuaVm::AssertIsActive(m_pLuaVm);
-        return Namespace(name, luaVm);
+        m_pLuaVm->AssertIsActive();
+        return Namespace(name, m_pLuaVm);
     }
 
     //----------------------------------------------------------------------------
@@ -155,7 +146,7 @@ public:
         m_pLuaVm->AddStackSize(-1);
         lua_State *L = m_pLuaVm->LuaState();
         lua_pop(L, 1);
-        return Namespace(*this);
+        return Namespace(m_pLuaVm);
     }
 
     //----------------------------------------------------------------------------
@@ -310,7 +301,7 @@ public:
     template<class T>
     Class<T> beginClass(char const *name)
     {
-        LuaVm::AssertIsActive(m_pLuaVm);
+        m_pLuaVm->AssertIsActive();
         return Class<T>(name, m_pLuaVm);
     }
 
@@ -324,10 +315,8 @@ public:
     template<class Derived, class Base>
     Class<Derived> deriveClass(char const *name)
     {
-        lua_State *L = m_pLuaVm->LuaState();
-
-        LuaVm::AssertIsActive(m_pLuaVm);
-        return Class<Derived>(name, *this, ClassInfo<Base>::GetStaticKey());
+        m_pLuaVm->AssertIsActive();
+        return Class<Derived>(name, m_pLuaVm, ClassInfo<Base>::GetStaticKey());
     }
 private:
     LuaVm *m_pLuaVm;

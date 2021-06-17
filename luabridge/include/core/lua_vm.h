@@ -87,12 +87,6 @@ public:
             throw std::logic_error("Unable to continue registration");
         }
     }
-    static void AssertIsActive(LuaVm* luaVm)
-    {
-        if (luaVm->GetStackSize() == 0) {
-            throw std::logic_error("Unable to continue registration");
-        }
-    }
 };
 
 }
