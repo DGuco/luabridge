@@ -458,10 +458,10 @@ namespace luabridge
         */
         void endClass()
         {
-    //        assert (m_stackSize > 3);
-    //        m_stackSize -= 3;
-    //        lua_pop(L, 3);
-    //        return Namespace(*this);
+            assert (m_pLuaVm->GetStackSize() > 3);
+            m_pLuaVm->AddStackSize(-3);
+            lua_State * L = m_pLuaVm->LuaState();
+            lua_pop(L, 3);
         }
 
         //--------------------------------------------------------------------------

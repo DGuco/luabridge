@@ -102,12 +102,12 @@ int main()
     LuaBridge luaBridge(L);
     luaBridge.LoadFile("../script/111111.lua");
 
-    BEGIN_NAMESPACE_CLASS("space",luaBridge,OuterClass,"OuterClass")
+    BEGIN_NAMESPACE_CLASS("space", luaBridge, OuterClass, "OuterClass")
         CLASS_ADD_CONSTRUCTOR(void(*)(int))
         CLASS_ADD_FUNC("Say",&OuterClass::Say)
     END_NAMESPACE_CLASS
 
-    BEGIN_CLASS(luaBridge,OuterClass,"OuterClass")
+    BEGIN_CLASS(luaBridge, OuterClass, "OuterClass")
             CLASS_ADD_CONSTRUCTOR(void(*)(int))
             CLASS_ADD_FUNC("Say",&OuterClass::Say)
             CLASS_ADD_STATIC_PROPERTY("data",&OuterClass::data)
@@ -117,7 +117,7 @@ int main()
             LuaHelper::DumpTable(L,-4,std::cout,2);
     END_CLASS
 
-    BEGIN_CLASS(luaBridge,OuterClass1,"OuterClass1")
+    BEGIN_CLASS(luaBridge, OuterClass1, "OuterClass1")
         CLASS_ADD_CONSTRUCTOR(void(*)(int))
         CLASS_ADD_FUNC("Say",&OuterClass1::Say)
 //        LuaHelper::DumpTable(L,-1,std::cout,2);

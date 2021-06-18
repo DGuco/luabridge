@@ -46,7 +46,7 @@ namespace luabridge
 */
 class Namespace
 {
-private:
+public:
     //----------------------------------------------------------------------------
     /**
         Open the global namespace for registrations.
@@ -110,43 +110,14 @@ private:
         m_pLuaVm->AddStackSize(1);
     }
 
-public:
     //----------------------------------------------------------------------------
     /**
-        Open the global namespace.
+        Add or replace a variable.
     */
-    static Namespace GetGlobalNamespace(LuaVm *luaVm)
+    template<class T>
+    void AddProperty(char const *name, T *pt, bool isWritable = true)
     {
-        return Namespace(luaVm);
-    }
-
-    //----------------------------------------------------------------------------
-    /**
-        Open a new or existing namespace for registrations.
-    */
-    Namespace BeginNamespace(char const *name,LuaVm *luaVm)
-    {
-        m_pLuaVm->AssertIsActive();
-        return Namespace(name, m_pLuaVm);
-    }
-
-    //----------------------------------------------------------------------------
-    /**
-        Continue namespace registration in the parent.
-
-        Do not use this on the global namespace.
-    */
-    Namespace endNamespace()
-    {
-        if (m_pLuaVm->GetStackSize()  == 1) {
-            throw std::logic_error("endNamespace () called on global namespace");
-        }
-
-        assert (m_pLuaVm->GetStackSize()  > 1);
-        m_pLuaVm->AddStackSize(-1);
-        lua_State *L = m_pLuaVm->LuaState();
-        lua_pop(L, 1);
-        return Namespace(m_pLuaVm);
+        AddVariable(name, pt, isWritable);
     }
 
     //----------------------------------------------------------------------------
@@ -154,21 +125,11 @@ public:
         Add or replace a variable.
     */
     template<class T>
-    Namespace &addProperty(char const *name, T *pt, bool isWritable = true)
-    {
-        return addVariable(name, pt, isWritable);
-    }
-
-    //----------------------------------------------------------------------------
-    /**
-        Add or replace a variable.
-    */
-    template<class T>
-    Namespace &addVariable(char const *name, T *pt, bool isWritable = true)
+    void AddVariable(char const *name, T *pt, bool isWritable = true)
     {
 
         if (m_pLuaVm->GetStackSize()  == 1) {
-            throw std::logic_error("addProperty () called on global namespace");
+            throw std::logic_error("AddProperty () called on global namespace");
         }
         lua_State *L = m_pLuaVm->LuaState();
 
@@ -187,8 +148,6 @@ public:
             lua_pushcclosure(L, &CFunc::readOnlyError, 1); // Stack: ns, error_fn
         }
         CFunc::AddSetter(L, name, -2); // Stack: ns
-
-        return *this;
     }
 
     //----------------------------------------------------------------------------
@@ -198,10 +157,10 @@ public:
         If the set function is omitted or null, the property is read-only.
     */
     template<class TG, class TS = TG>
-    Namespace &addProperty(char const *name, TG (*get)(), void (*set)(TS) = 0)
+    void AddProperty(char const *name, TG (*get)(), void (*set)(TS) = 0)
     {
         if (m_pLuaVm->GetStackSize()  == 1) {
-            throw std::logic_error("addProperty () called on global namespace");
+            throw std::logic_error("AddProperty () called on global namespace");
         }
         lua_State *L = m_pLuaVm->LuaState();
 
@@ -220,8 +179,6 @@ public:
             lua_pushcclosure(L, &CFunc::readOnlyError, 1);
         }
         CFunc::AddSetter(L, name, -2);
-
-        return *this;
     }
 
     //----------------------------------------------------------------------------
@@ -229,10 +186,10 @@ public:
         Add or replace a property.
         If the set function is omitted or null, the property is read-only.
     */
-    Namespace &addProperty(char const *name, int (*get)(lua_State *), int (*set)(lua_State *) = 0)
+    void AddProperty(char const *name, int (*get)(lua_State *), int (*set)(lua_State *) = 0)
     {
         if (m_pLuaVm->GetStackSize() == 1) {
-            throw std::logic_error("addProperty () called on global namespace");
+            throw std::logic_error("AddProperty () called on global namespace");
         }
         lua_State *L = m_pLuaVm->LuaState();
 
@@ -248,8 +205,6 @@ public:
             lua_pushcclosure(L, &CFunc::readOnlyError, 1); // Stack: ns, name, readOnlyError
             CFunc::AddSetter(L, name, -2); // Stack: ns
         }
-
-        return *this;
     }
 
 //----------------------------------------------------------------------------
@@ -257,7 +212,7 @@ public:
         Add or replace a free function.
     */
     template<class FP>
-    Namespace &addFunction(char const *name, FP const fp)
+    void AddFunction(char const *name, FP const fp)
     {
         lua_State *L = m_pLuaVm->LuaState();
 
@@ -266,23 +221,22 @@ public:
         lua_pushlightuserdata(L, reinterpret_cast <void *> (fp)); // Stack: ns, function ptr
         lua_pushcclosure(L, &CFunc::Call<FP>::f, 1); // Stack: ns, function
         LuaHelper::RawSetField(L, -2, name); // Stack: ns
-        return *this;
     }
 
     //----------------------------------------------------------------------------
     /**
         Add or replace a lua_CFunction.
     */
-    Namespace &addFunction(char const *name, int (*const fp)(lua_State *))
+    void AddFunction(char const *name, int (*const fp)(lua_State *))
     {
-        return addCFunction(name, fp);
+        AddCFunction(name, fp);
     }
 
     //----------------------------------------------------------------------------
     /**
         Add or replace a lua_CFunction.
     */
-    Namespace &addCFunction(char const *name, int (*const fp)(lua_State *))
+    void AddCFunction(char const *name, int (*const fp)(lua_State *))
     {
         lua_State *L = m_pLuaVm->LuaState();
 
@@ -290,8 +244,6 @@ public:
 
         lua_pushcfunction(L, fp); // Stack: ns, function
         LuaHelper::RawSetField(L, -2, name); // Stack: ns
-
-        return *this;
     }
 
     //----------------------------------------------------------------------------
@@ -299,7 +251,7 @@ public:
         Open a new or existing class for registrations.
     */
     template<class T>
-    Class<T> beginClass(char const *name)
+    Class<T> BeginClass(char const *name)
     {
         m_pLuaVm->AssertIsActive();
         return Class<T>(name, m_pLuaVm);
@@ -309,11 +261,11 @@ public:
     /**
         Derive a new class for registrations.
 
-        To continue registrations for the class later, use beginClass ().
-        Do not call deriveClass () again.
+        To continue registrations for the class later, use BeginClass ().
+        Do not call DeriveClass () again.
     */
     template<class Derived, class Base>
-    Class<Derived> deriveClass(char const *name)
+    Class<Derived> DeriveClass(char const *name)
     {
         m_pLuaVm->AssertIsActive();
         return Class<Derived>(name, m_pLuaVm, ClassInfo<Base>::GetStaticKey());
@@ -321,20 +273,6 @@ public:
 private:
     LuaVm *m_pLuaVm;
 };
-
-//------------------------------------------------------------------------------
-/**
-    Retrieve the global namespace.
-
-    It is recommended to put your namespace inside the global namespace, and
-    then add your classes and functions to it, rather than adding many classes
-    and functions directly to the global namespace.
-*/
-inline Namespace getGlobalNamespace(LuaVm *L)
-{
-    return Namespace::GetGlobalNamespace(L);
-}
-
 } // namespace luabridge
 
 #endif

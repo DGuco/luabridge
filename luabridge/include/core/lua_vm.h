@@ -36,7 +36,7 @@ namespace  luabridge
 /**
  * Base for class and namespace registration.
  * Maintains Lua stack in the proper state.
- * Once beginNamespace, beginClass or deriveClass is called the parent
+ * Once beginNamespace, BeginClass or DeriveClass is called the parent
  * object upon its destruction may no longer clear the Lua stack.
  * Then endNamespace or endClass is called, a new parent is created
  * and the child transfers the responsibility for clearing stack to it.

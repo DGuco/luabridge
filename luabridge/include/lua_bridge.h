@@ -98,9 +98,9 @@ namespace luabridge {
         const char *Call(const char *func, const char *sig, ...);
 
         /**
-         * @return
+         * @return _G TABLE
          */
-        Namespace GetGlobalNamespace();
+        Namespace& GetGlobalNamespace();
 
         /**
          * @param name
@@ -108,6 +108,11 @@ namespace luabridge {
          */
         Namespace BeginNameSpace(char *name);
 
+        /**
+         *Continue namespace registration in the parent.
+         * Do not use this on the global namespace.
+         */
+        void EndNamespace();
     private:
         //InitLuaLibrary
         void InitLuaLibrary();
@@ -373,12 +378,29 @@ namespace luabridge {
     }
 
     Namespace LuaBridge::BeginNameSpace(char *name) {
-        return GetGlobalNamespace().BeginNamespace(name,m_pLuaVm);
+        GetGlobalNamespace();
+        return Namespace(name, m_pLuaVm);
     }
 
-    Namespace LuaBridge::GetGlobalNamespace() {
-        return Namespace::GetGlobalNamespace(m_pLuaVm);
+    void LuaBridge::EndNamespace()
+    {
+        if (m_pLuaVm->GetStackSize()  == 1) {
+            throw std::logic_error("endNamespace () called on global namespace");
+        }
+
+        assert (m_pLuaVm->GetStackSize()  > 1);
+        m_pLuaVm->AddStackSize(-1);
+        lua_State *L = m_pLuaVm->LuaState();
+        lua_pop(L, 1);
     }
+
+    Namespace& LuaBridge::GetGlobalNamespace()
+    {
+        static Namespace g_namespace(m_pLuaVm);
+        return g_namespace;
+    }
+
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 #define REGISTER_GLOBAL_FUNC(luaBridge, funcname, func)                    \
@@ -388,12 +410,12 @@ namespace luabridge {
     {                                                                    \
         {                                                                \
             Namespace nameSpace = (luaBridge).BeginNameSpace(spacename); \
-            Class<ClassT> classt = nameSpace.beginClass<ClassT>(name);
+            Class<ClassT> classt = nameSpace.BeginClass<ClassT>(name);
 
 #define BEGIN_CLASS(luaBridge, ClassT, name)                             \
     {                                                                    \
         Namespace nameSpace = (luaBridge).GetGlobalNamespace();          \
-        Class<ClassT> classt = nameSpace.beginClass<ClassT>(name);
+        Class<ClassT> classt = nameSpace.BeginClass<ClassT>(name);
 
 #define CLASS_ADD_CONSTRUCTOR(FT)                                        \
         classt.addConstructor<FT>();
@@ -402,15 +424,15 @@ namespace luabridge {
         classt.addFunction("Say", func);
 
 #define CLASS_ADD_STATIC_PROPERTY(name,data)                             \
-         classt.addStaticProperty(name, data,true);
+        classt.addStaticProperty(name, data,true);
 
 #define END_CLASS                                                        \
         classt.endClass();                                               \
     }
 
 #define END_NAMESPACE_CLASS                                              \
-            classt.endClass();                               \
-            nameSpace.endNamespace();                                    \
+            classt.endClass();                                           \
+            luaBridge.EndNamespace();                                    \
         }                                                                \
     }
 
