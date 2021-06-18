@@ -110,6 +110,12 @@ public:
         m_pLuaVm->AddStackSize(1);
     }
 
+    Namespace BeginNamespace (char const* name)
+    {
+        m_pLuaVm->AssertIsActive ();
+        return Namespace(name, m_pLuaVm);
+    }
+
     //----------------------------------------------------------------------------
     /**
         Add or replace a variable.

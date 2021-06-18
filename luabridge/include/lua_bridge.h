@@ -378,8 +378,7 @@ namespace luabridge {
     }
 
     Namespace LuaBridge::BeginNameSpace(char *name) {
-        GetGlobalNamespace();
-        return Namespace(name, m_pLuaVm);
+        return GetGlobalNamespace().BeginNamespace(name);
     }
 
     void LuaBridge::EndNamespace()
