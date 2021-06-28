@@ -75,14 +75,14 @@ protected:
 
 private:
     //--------------------------------------------------------------------------
-    /**
+    /**DD
       Validate and retrieve a Userdata on the stack.
 
       The Userdata must exactly match the corresponding class table or
       const table, or else a Lua error is raised. This is used for the
       __gc metamethod.
     */
-    static Userdata *getExactClass(lua_State *L, int index, void const *classKey)
+    static Userdata *GetExactClass(lua_State *L, int index, void const *classKey)
     {
         return static_cast <Userdata *> (lua_touserdata(L, lua_absindex(L, index)));
     }
@@ -198,7 +198,7 @@ public:
     template<class T>
     static inline Userdata *getExact(lua_State *L, int index)
     {
-        return getExactClass(L, index, ClassInfo<T>::GetClassKey());
+        return GetExactClass(L, index, ClassInfo<T>::GetClassKey());
     }
 
     //--------------------------------------------------------------------------

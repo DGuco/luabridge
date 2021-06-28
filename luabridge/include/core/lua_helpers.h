@@ -338,7 +338,7 @@ int LuaHelper::GetStackLen(lua_State *L, int idx)
 
 void LuaHelper::RawGetField(lua_State *L, int index, char const *key)
 {
-    assert (lua_istable(L, index));
+    LuaHelper::LuaAssert(L,lua_istable(L, index),__FILE__,__LINE__,"lua_istable(L, index)",false);
     index = lua_absindex(L, index);
     lua_pushstring(L, key);
     lua_rawget(L, index);
@@ -346,7 +346,7 @@ void LuaHelper::RawGetField(lua_State *L, int index, char const *key)
 
 void LuaHelper::RawSetField(lua_State *L, int index, char const *key)
 {
-    assert (lua_istable(L, index));
+    LuaHelper::LuaAssert(L,lua_istable(L, index),__FILE__,__LINE__,"lua_istable(L, index)",false);
     index = lua_absindex(L, index);
     lua_pushstring(L, key);
     lua_insert(L, -2);
