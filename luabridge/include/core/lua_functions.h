@@ -155,9 +155,9 @@ struct CFunc
         __newindex metamethod for namespace or class static members.
         Retrieves properties from propset tables.
     */
-    static int newindexStaticMetaMethod(lua_State *L)
+    static int NewindexStaticMetaMethod(lua_State *L)
     {
-        return newindexMetaMethod(L, false);
+        return NewindexMetaMethod(L, false);
     }
 
     //----------------------------------------------------------------------------
@@ -165,12 +165,12 @@ struct CFunc
         __newindex metamethod for non-static members.
         Retrieves properties from propset tables.
     */
-    static int newindexObjectMetaMethod(lua_State *L)
+    static int NewindexObjectMetaMethod(lua_State *L)
     {
-        return newindexMetaMethod(L, true);
+        return NewindexMetaMethod(L, true);
     }
 
-    static int newindexMetaMethod(lua_State *L, bool pushSelf)
+    static int NewindexMetaMethod(lua_State *L, bool pushSelf)
     {
         assert (
             lua_istable(L, 1) || lua_isuserdata(L, 1)); // Stack (further not shown): table | userdata, name, new value
@@ -229,7 +229,7 @@ struct CFunc
 
         The name of the variable is in the first upvalue.
     */
-    static int readOnlyError(lua_State *L)
+    static int ReadOnlyError(lua_State *L)
     {
         std::string s;
 
@@ -247,7 +247,7 @@ struct CFunc
         The pointer to the data is in the first upvalue.
     */
     template<class T>
-    static int getVariable(lua_State *L)
+    static int GetVariable(lua_State *L)
     {
         assert (lua_islightuserdata(L, lua_upvalueindex(1)));
         T const *ptr = static_cast <T const *> (lua_touserdata(L, lua_upvalueindex (1)));
@@ -265,7 +265,7 @@ struct CFunc
         The pointer to the data is in the first upvalue.
     */
     template<class T>
-    static int setVariable(lua_State *L)
+    static int SetVariable(lua_State *L)
     {
         assert (lua_islightuserdata(L, lua_upvalueindex(1)));
         T *ptr = static_cast <T *> (lua_touserdata(L, lua_upvalueindex (1)));

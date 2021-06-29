@@ -97,8 +97,8 @@ public:
             // ns.__index = IndexMetaMethod
             LuaHelper::RawSetField(L, -2, "__index"); // Stack: pns, ns
 
-            lua_pushcfunction(L, &CFunc::newindexStaticMetaMethod); // Stack: pns, ns,&CFunc::newindexStaticMetaMethod
-            // ns.__newindex = newindexMetaMethod
+            lua_pushcfunction(L, &CFunc::NewindexStaticMetaMethod); // Stack: pns, ns,&CFunc::NewindexStaticMetaMethod
+            // ns.__newindex = NewindexMetaMethod
             LuaHelper::RawSetField(L, -2, "__newindex"); // Stack: pns, ns
 
             lua_newtable(L); // Stack: pns, ns, propget table (pg)
@@ -144,19 +144,19 @@ public:
 
         //注册getter方法
         lua_pushlightuserdata(L, pt); // Stack: ns, pointer
-        lua_pushcclosure(L, &CFunc::getVariable<T>, 1); // Stack: ns, getter
+        lua_pushcclosure(L, &CFunc::GetVariable<T>, 1); // Stack: ns, getter
         CFunc::AddGetter(L, name, -2); // Stack: ns
 
         //注册setter方法
         if (isWritable) {
             //isWritable is true  注册setter方法
             lua_pushlightuserdata(L, pt); // Stack: ns, pointer
-            lua_pushcclosure(L, &CFunc::setVariable<T>, 1); // Stack: ns, setter
+            lua_pushcclosure(L, &CFunc::SetVariable<T>, 1); // Stack: ns, setter
         }
         else {
             //isWritable is false  调用setter 方法时抛出lua error
             lua_pushstring(L, name); // Stack: ns, ps, namedd
-            lua_pushcclosure(L, &CFunc::readOnlyError, 1); // Stack: ns, error_fn
+            lua_pushcclosure(L, &CFunc::ReadOnlyError, 1); // Stack: ns, error_fn
         }
         CFunc::AddSetter(L, name, -2); // Stack: ns
     }
@@ -187,7 +187,7 @@ public:
         }
         else {
             lua_pushstring(L, name);
-            lua_pushcclosure(L, &CFunc::readOnlyError, 1);
+            lua_pushcclosure(L, &CFunc::ReadOnlyError, 1);
         }
         CFunc::AddSetter(L, name, -2);
     }
@@ -213,7 +213,7 @@ public:
         }
         else {
             lua_pushstring(L, name); // Stack: ns, name
-            lua_pushcclosure(L, &CFunc::readOnlyError, 1); // Stack: ns, name, readOnlyError
+            lua_pushcclosure(L, &CFunc::ReadOnlyError, 1); // Stack: ns, name, ReadOnlyError
             CFunc::AddSetter(L, name, -2); // Stack: ns
         }
     }

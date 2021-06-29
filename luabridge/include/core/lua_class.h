@@ -90,8 +90,8 @@ namespace luabridge
             LuaHelper::RawSetField(L, -2, "__index");
 
             lua_pushcfunction(L,
-                              &CFunc::newindexObjectMetaMethod); //栈状态lua_gettop(L)== n + 3:ns=>co=>newindexObjectMetaMethod
-            //co.__newindex = &CFunc::newindexObjectMetaMethod 栈状态lua_gettop(L)== n + 2:ns=>co
+                              &CFunc::NewindexObjectMetaMethod); //栈状态lua_gettop(L)== n + 3:ns=>co=>NewindexObjectMetaMethod
+            //co.__newindex = &CFunc::NewindexObjectMetaMethod 栈状态lua_gettop(L)== n + 2:ns=>co
             LuaHelper::RawSetField(L, -2, "__newindex");
 
             lua_newtable(L); //propget table(gt) 栈状态lua_gettop(L)== n + 3:ns=>co=>gt
@@ -156,8 +156,8 @@ namespace luabridge
             LuaHelper::RawSetField(L, -2, "__index");
 
             lua_pushcfunction(L,
-                              &CFunc::newindexStaticMetaMethod); //Stack 栈状态lua_gettop(L) == n + 5:ns=>co=>cl=>st=>newindexStaticMetaMethod
-            //st.__newindex = newindexStaticMetaMethod,Stack 栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
+                              &CFunc::NewindexStaticMetaMethod); //Stack 栈状态lua_gettop(L) == n + 5:ns=>co=>cl=>st=>NewindexStaticMetaMethod
+            //st.__newindex = NewindexStaticMetaMethod,Stack 栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
             LuaHelper::RawSetField(L, -2, "__newindex");
 
             lua_newtable(L); // proget table (pg) Stack 栈状态lua_gettop(L) == n + 5:ns=>co=>cl=>st=>pg
@@ -269,14 +269,14 @@ namespace luabridge
           vst(visible static table) = {
               __metatable =  {
                   __index = &CFunc::IndexMetaMethod,
-                  __newindex = &CFunc::newindexStaticMetaMethod,
+                  __newindex = &CFunc::NewindexStaticMetaMethod,
               }
           }
           co(const table) = {
               __metatable = co,
               typekey = const_name,
               __index = &CFunc::IndexMetaMethod,
-              __newindex = &CFunc::newindexStaticMetaMethod,
+              __newindex = &CFunc::NewindexStaticMetaMethod,
               __gc = &CFunc::gcMetaMethod<T>,
               propgetKey = {table}(通过addProperty注册普通成员变量的get方法会注册在这里),
               classKey = cl,
@@ -288,7 +288,7 @@ namespace luabridge
               __metatable = cl,
               typekey = name,
               __index = &CFunc::IndexMetaMethod,
-              __newindex = &CFunc::newindexStaticMetaMethod,
+              __newindex = &CFunc::NewindexStaticMetaMethod,
               __gc = &CFunc::gcMetaMethod<T>,
               propgetKey = {}(table)(通过addProperty注册普通成员变量的get方法也会注册在这里),
               propsetKey = {}(table)(通过addProperty注册普通成员变量的set方法也会注册在这里),,
@@ -299,7 +299,7 @@ namespace luabridge
 
           st(static table) = {
               __index = &CFunc::IndexMetaMethod,
-              __newindex = &CFunc::newindexStaticMetaMethod,
+              __newindex = &CFunc::NewindexStaticMetaMethod,
               __call = class Constructor(class Constructor 会被注册在这个表里),
               propgetKey = {}(table)(通过addStaticProperty注册静态成员变量的get方法会注册在这里),
               propsetKey = {}(table)(通过addStaticProperty注册静态成员变量的set方法会注册在这里),
@@ -485,16 +485,16 @@ namespace luabridge
             lua_State *L = m_pLuaVm->LuaState();
 
             lua_pushlightuserdata(L, pu); // Stack: co, cl, st, pointer
-            lua_pushcclosure(L, &CFunc::getVariable<U>, 1); // Stack: co, cl, st, getter
+            lua_pushcclosure(L, &CFunc::GetVariable<U>, 1); // Stack: co, cl, st, getter
             CFunc::AddGetter(L, name, -2); // Stack: co, cl, st
 
             if (isWritable) {
                 lua_pushlightuserdata(L, pu); // Stack: co, cl, st, ps, pointer
-                lua_pushcclosure(L, &CFunc::setVariable<U>, 1); // Stack: co, cl, st, ps, setter
+                lua_pushcclosure(L, &CFunc::SetVariable<U>, 1); // Stack: co, cl, st, ps, setter
             }
             else {
                 lua_pushstring(L, name); // Stack: co, cl, st, name
-                lua_pushcclosure(L, &CFunc::readOnlyError, 1); // Stack: co, cl, st, error_fn
+                lua_pushcclosure(L, &CFunc::ReadOnlyError, 1); // Stack: co, cl, st, error_fn
             }
             CFunc::AddSetter(L, name, -2); // Stack: co, cl, st
 
@@ -523,7 +523,7 @@ namespace luabridge
             }
             else {
                 lua_pushstring(L, name); // Stack: co, cl, st, ps, name
-                lua_pushcclosure(L, &CFunc::readOnlyError, 1); // Stack: co, cl, st, error_fn
+                lua_pushcclosure(L, &CFunc::ReadOnlyError, 1); // Stack: co, cl, st, error_fn
             }
             CFunc::AddSetter(L, name, -2); // Stack: co, cl, st
 
