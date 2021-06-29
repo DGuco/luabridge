@@ -4,7 +4,7 @@ project(lua)
 set(CMAKE_C_COMPILER gcc)
 set(CMAKE_CXX_COMPILER g++)
 
-add_compile_options(-O0 -Wall -g -pipe -Wextra -std=c++11)
+add_compile_options(-O2 -Wall -g -pipe -Wextra -std=c++11)
 
 set(LUA_HEADER_FILES
         lapi.h
