@@ -11,7 +11,7 @@ cmake-build-debug/
 .idea/
 
 #vscode setting file
-.vscode/
+#.vscode/
 
 #lib file
 lib/
