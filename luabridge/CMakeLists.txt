@@ -1,10 +1,11 @@
 cmake_minimum_required(VERSION 3.6)
 project(luabridge)
 
-set(CMAKE_C_COMPILER g++)
+set(CMAKE_C_COMPILER gcc)
 set(CMAKE_CXX_COMPILER g++)
 add_compile_options(-O0 -Wall -g -pipe -Wextra -Wunused-parameter -std=c++11)
-add_definitions(-DLUABRIDGE_CXX11 -DCOMPILE_LUA_WITH_CXX)
+#add_definitions(-DLUABRIDGE_CXX11 -DCOMPILE_LUA_WITH_CXX)
+add_definitions(-DLUABRIDGE_CXX11)
 
 
 set(LUA_BRIDGE_HEADER_FILES

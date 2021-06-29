@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.6)
 project(lua)
 
-set(CMAKE_C_COMPILER g++)#用c++编译器重新编译lua https://blog.codingnow.com/2015/05/lua_c_api.html(如何正确使用lua api)
+set(CMAKE_C_COMPILER gcc)#用c++编译器重新编译lua https://blog.codingnow.com/2015/05/lua_c_api.html(如何正确使用lua api)
 set(CMAKE_CXX_COMPILER g++)
 
 add_compile_options(-O0 -Wall -g -pipe -Wextra -std=c++11)

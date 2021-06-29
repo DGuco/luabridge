@@ -1,0 +1,17 @@
+#cmake build file
+build/
+
+#execute file
+bin/
+
+#cmake debug file
+cmake-build-debug/
+
+#idea setting file
+.idea/
+
+#vscode setting file
+.vscode/
+
+#lib file
+lib/

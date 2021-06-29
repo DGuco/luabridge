@@ -49,11 +49,11 @@ namespace luabridge
 class Namespace
 {
 public:
-    //----------------------------------------------------------------------------
     /**
-        Open the global namespace for registrations.
-        默认命名空间，lua _G表，如果没有指定命名空间则所有的操作在_G表中
-    */
+     * Open the global namespace for registrations.
+     * 默认命名空间，lua _G表，如果没有指定命名空间则所有的操作在_G表中
+     * @param luaVm
+     */
     explicit Namespace(LuaVm *luaVm)
         : m_pLuaVm(luaVm)
     {
@@ -62,14 +62,14 @@ public:
         m_pLuaVm->AddStackSize(1);
     }
 
-    //----------------------------------------------------------------------------
     /**
-        Open a namespace for registrations.
-
-        The namespace is created if it doesn't already exist.
-        The parent namespace is at the top of the Lua stack.
-        打开新的命名空间，如果不存在则创建
-    */
+     * Open a namespace for registrations.
+     * The namespace is created if it doesn't already exist.
+     * The parent namespace is at the top of the Lua stack.
+     * 打开新的命名空间，如果不存在则创建
+     * @param name
+     * @param luaVm
+     */
     Namespace(char const *name, LuaVm *luaVm)
         : m_pLuaVm(luaVm)
     {
@@ -114,36 +114,33 @@ public:
         m_pLuaVm->AddStackSize(1);
     }
 
+    /**
+     * 打开新的命名空间，如果不存在则创建
+     * @param name
+     * @return
+     */
     Namespace BeginNamespace (char const* name)
     {
         m_pLuaVm->AssertIsActive ();
         return Namespace(name, m_pLuaVm);
     }
 
-    //----------------------------------------------------------------------------
     /**
-        Add or replace a variable.
-    */
+     *  Add or replace a variable.添加一个属性
+     * @tparam T  class type
+     * @param name
+     * @param pt   对象指针
+     * @param isWritable  是否可写
+     */
     template<class T>
     void AddProperty(char const *name, T *pt, bool isWritable = true)
     {
-        AddVariable(name, pt, isWritable);
-    }
-
-    //----------------------------------------------------------------------------
-    /**
-        Add or replace a variable.
-    */
-    template<class T>
-    void AddVariable(char const *name, T *pt, bool isWritable = true)
-    {
-
-        if (m_pLuaVm->GetStackSize()  == 1) {
-            throw std::logic_error("AddProperty () called on global namespace");
-        }
         lua_State *L = m_pLuaVm->LuaState();
+        if (m_pLuaVm->GetStackSize()  == 1) {
+            LUA_ASSERT_EX(L, false,"AddProperty () called on global namespace", false);
+        }
 
-        assert (lua_istable(L, -1)); // Stack: namespace table (ns)
+        LUA_ASSERT_EX (L,lua_istable(L, -1),"lua_istable(L, -1)", false); // Stack: namespace table (ns)
 
         lua_pushlightuserdata(L, pt); // Stack: ns, pointer
         lua_pushcclosure(L, &CFunc::getVariable<T>, 1); // Stack: ns, getter
@@ -154,7 +151,7 @@ public:
             lua_pushcclosure(L, &CFunc::setVariable<T>, 1); // Stack: ns, setter
         }
         else {
-            lua_pushstring(L, name); // Stack: ns, ps, name
+            lua_pushstring(L, name); // Stack: ns, ps, namedd
             lua_pushcclosure(L, &CFunc::readOnlyError, 1); // Stack: ns, error_fn
         }
         CFunc::AddSetter(L, name, -2); // Stack: ns
