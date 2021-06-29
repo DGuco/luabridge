@@ -142,15 +142,19 @@ public:
 
         LUA_ASSERT_EX (L,lua_istable(L, -1),"lua_istable(L, -1)", false); // Stack: namespace table (ns)
 
+        //注册getter方法
         lua_pushlightuserdata(L, pt); // Stack: ns, pointer
         lua_pushcclosure(L, &CFunc::getVariable<T>, 1); // Stack: ns, getter
         CFunc::AddGetter(L, name, -2); // Stack: ns
 
+        //注册setter方法
         if (isWritable) {
+            //isWritable is true  注册setter方法
             lua_pushlightuserdata(L, pt); // Stack: ns, pointer
             lua_pushcclosure(L, &CFunc::setVariable<T>, 1); // Stack: ns, setter
         }
         else {
+            //isWritable is false  调用setter 方法时抛出lua error
             lua_pushstring(L, name); // Stack: ns, ps, namedd
             lua_pushcclosure(L, &CFunc::readOnlyError, 1); // Stack: ns, error_fn
         }
