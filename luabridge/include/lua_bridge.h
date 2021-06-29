@@ -64,16 +64,6 @@ namespace luabridge {
         bool LoadFile(const char *filePath);
 
         /**
-         * register cfunction
-         * @param func func name 函数名
-         * @param f
-         */
-        void RegisterCFunc(const char *func, lua_CFunction f);
-
-        template<class Func>
-        void RegisterCFunc(const char *func, Func const fp);
-
-        /**
          * Call Lua function
          * @tparam R    返回类型
          * @tparam Args 函数参数列表
@@ -113,6 +103,8 @@ namespace luabridge {
          * Do not use this on the global namespace.
          */
         void EndNamespace();
+
+        lua_State* LuaState();
     private:
         //InitLuaLibrary
         void InitLuaLibrary();
@@ -188,15 +180,6 @@ namespace luabridge {
         return 0;
     }
 
-    void LuaBridge::RegisterCFunc(const char *func, lua_CFunction f) {
-        lua_State * L = m_pLuaVm->LuaState();
-        lua_register(L, func, f);
-    }
-
-    template<class Func>
-    void LuaBridge::RegisterCFunc(const char *func, Func const fp) {
-        RegisterCFunc(func, LuaCFunctionWrap<__COUNTER__>(fp));
-    }
 
     void LuaBridge::InitLuaLibrary()
     {
@@ -399,11 +382,16 @@ namespace luabridge {
         return g_namespace;
     }
 
+    lua_State* LuaBridge::LuaState()
+    {
+        return m_pLuaVm->LuaState();
+    }
+
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
-#define REGISTER_GLOBAL_FUNC(luaBridge, funcname, func)                    \
-    (luaBridge).RegisterCFunc(funcname,func);
+#define REGISTER_GLOBAL_FUNC(luaBridge, funcname, func)                  \
+    Namespace::RegisterCFunc(luaBridge.LuaState(),funcname,func);
 
 #define BEGIN_NAMESPACE_CLASS(spacename, luaBridge, ClassT, name)        \
     {                                                                    \

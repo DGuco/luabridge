@@ -100,7 +100,7 @@ int main()
 {
     lua_State *L = luaL_newstate();
     LuaBridge luaBridge(L);
-    luaBridge.LoadFile("./script/111111.lua");
+    luaBridge.LoadFile("../script/111111.lua");
 
     BEGIN_NAMESPACE_CLASS("space", luaBridge, OuterClass, "OuterClass")
         CLASS_ADD_CONSTRUCTOR(void(*)(int))

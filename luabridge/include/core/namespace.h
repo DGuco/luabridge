@@ -126,10 +126,10 @@ public:
     }
 
     /**
-     *  Add or replace a variable.添加一个属性
-     * @tparam T  class type
+     *  Add or replace a variable.在命名空间中添加一个全局变量
+     * @tparam T  variable type
      * @param name
-     * @param pt   对象指针
+     * @param pt   变量的地址
      * @param isWritable  是否可写
      */
     template<class T>
@@ -161,12 +161,15 @@ public:
         CFunc::AddSetter(L, name, -2); // Stack: ns
     }
 
-    //----------------------------------------------------------------------------
     /**
-        Add or replace a property.
-
-        If the set function is omitted or null, the property is read-only.
-    */
+     * Add or replace a variable.在命名空间中添加一个全局变量
+     * @tparam TG  variable type
+     * @tparam TS  variable type
+     * @param name
+     * @param get   get func
+     * @param set   set func
+     * 
+     * */
     template<class TG, class TS = TG>
     void AddProperty(char const *name, TG (*get)(), void (*set)(TS) = 0)
     {
@@ -192,11 +195,13 @@ public:
         CFunc::AddSetter(L, name, -2);
     }
 
-    //----------------------------------------------------------------------------
     /**
-        Add or replace a property.
-        If the set function is omitted or null, the property is read-only.
-    */
+     * Add or replace a variable.在命名空间中添加一个全局变量
+     * @param name
+     * @param get   get func
+     * @param set   set func
+     * 
+     * */
     void AddProperty(char const *name, int (*get)(lua_State *), int (*set)(lua_State *) = 0)
     {
         if (m_pLuaVm->GetStackSize() == 1) {
@@ -255,6 +260,30 @@ public:
 
         lua_pushcfunction(L, fp); // Stack: ns, function
         LuaHelper::RawSetField(L, -2, name); // Stack: ns
+    }
+    
+    /**
+     * register cfunction
+     * @param L    lua_State
+     * @param func func name 函数名
+     * @param f
+     **/
+    static void RegisterCFunc(lua_State* L,const char *func, lua_CFunction f) 
+    {
+        lua_register(L, func, f);
+    }
+
+    /**
+     * register cfunction
+     * @param L  lua_State
+     * @tparam   Func func type
+     * @param fp func name 函数名
+     * @param f
+     **/
+    template<class Func>
+    static void RegisterCFunc(lua_State* L,const char *func, Func const fp) 
+    {
+        RegisterCFunc(L,func, LuaCFunctionWrap<__COUNTER__>(fp));
     }
 
     //----------------------------------------------------------------------------
