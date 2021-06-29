@@ -14,6 +14,12 @@ int Add(int a, int b)
     return a + b;
 }
 
+int SpaceAdd(int a, int b)
+{
+    printf("lua call SpaceAdd,a = %d,b = %d\n", a, b);
+    return a + b;
+}
+
 int Sub(int a, int b)
 {
     printf("lua call Sub,a = %d,b = %d\n", a, b);
@@ -102,10 +108,14 @@ int main()
     LuaBridge luaBridge(L);
     luaBridge.LoadFile("../script/111111.lua");
 
-    BEGIN_NAMESPACE_CLASS("space", luaBridge, OuterClass, "OuterClass")
+    BEGIN_NAMESPACE_CLASS(luaBridge,"space",OuterClass, "OuterClass")
         CLASS_ADD_CONSTRUCTOR(void(*)(int))
         CLASS_ADD_FUNC("Say",&OuterClass::Say)
     END_NAMESPACE_CLASS
+
+    BEGIN_NAMESPACE(luaBridge,"space")
+        REGISTER_SPACE_CFUNC("Add", SpaceAdd)
+    END_NAMESPACE
 
     BEGIN_CLASS(luaBridge, OuterClass, "OuterClass")
             CLASS_ADD_CONSTRUCTOR(void(*)(int))
@@ -126,11 +136,11 @@ int main()
 //        LuaHelper::DumpTable(L,-4,std::cout,2);
     END_CLASS
 
-    REGISTER_GLOBAL_FUNC(luaBridge, "Add", Add)
-    REGISTER_GLOBAL_FUNC(luaBridge, "LambdaAdd", func)
-    REGISTER_GLOBAL_FUNC(luaBridge, "Sub", Sub)
-    REGISTER_GLOBAL_FUNC(luaBridge, "Say", Say)
-    REGISTER_GLOBAL_FUNC(luaBridge, "LuaFnAdd", LuaFnAdd)
+    REGISTER_GLOBAL_CFUNC(luaBridge, "Add", Add)
+    REGISTER_GLOBAL_CFUNC(luaBridge, "LambdaAdd", func)
+    REGISTER_GLOBAL_CFUNC(luaBridge, "Sub", Sub)
+    REGISTER_GLOBAL_CFUNC(luaBridge, "Say", Say)
+    REGISTER_GLOBAL_CFUNC(luaBridge, "LuaFnAdd", LuaFnAdd)
 
     lua_getglobal(L, "_G");
     LuaHelper::DumpTable(L,-1,std::cout,2);

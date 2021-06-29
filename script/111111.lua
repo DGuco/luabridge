@@ -23,7 +23,8 @@ function x11111_test(x,y)
     testclass1:Say("Hello cpp");
     local spaceclass = space.OuterClass (10)
     spaceclass:Say("Space Hello cpp");
-    print("x11111_test done")
+    local spaceadd = space.Add(100,200)
+    print("x11111_test spaceadd ="..spaceadd)
     return 1
 end
 

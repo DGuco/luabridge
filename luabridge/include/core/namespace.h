@@ -222,53 +222,42 @@ public:
             CFunc::AddSetter(L, name, -2); // Stack: ns
         }
     }
-
-//----------------------------------------------------------------------------
+    
     /**
-        Add or replace a free function.
-    */
-    template<class FP>
-    void AddFunction(char const *name, FP const fp)
-    {
-        lua_State *L = m_pLuaVm->LuaState();
-
-        assert (lua_istable(L, -1)); // Stack: namespace table (ns)
-
-        lua_pushlightuserdata(L, reinterpret_cast <void *> (fp)); // Stack: ns, function ptr
-        lua_pushcclosure(L, &CFunc::Call<FP>::f, 1); // Stack: ns, function
-        LuaHelper::RawSetField(L, -2, name); // Stack: ns
-    }
-
-    //----------------------------------------------------------------------------
-    /**
-        Add or replace a lua_CFunction.
-    */
-    void AddFunction(char const *name, int (*const fp)(lua_State *))
-    {
-        AddCFunction(name, fp);
-    }
-
-    //----------------------------------------------------------------------------
-    /**
-        Add or replace a lua_CFunction.
-    */
-    void AddCFunction(char const *name, int (*const fp)(lua_State *))
+     * register cfunction
+     * @param func func name 函数名
+     * @param f
+     **/
+    void AddSpaceCFunction(const char *func, lua_CFunction fp) 
     {
         lua_State *L = m_pLuaVm->LuaState();
 
         assert (lua_istable(L, -1)); // Stack: namespace table (ns)
 
         lua_pushcfunction(L, fp); // Stack: ns, function
-        LuaHelper::RawSetField(L, -2, name); // Stack: ns
+        LuaHelper::RawSetField(L, -2, func); // Stack: ns
     }
-    
+
+    /**
+     * register cfunction
+     * @param L  lua_State
+     * @tparam   Func func type
+     * @param fp func name 函数名
+     * @param f
+     **/
+    template<class Func>
+    void AddSpaceCFunction(const char *func, Func const fp) 
+    {
+        AddSpaceCFunction(func,LuaCFunctionWrap<__COUNTER__>(fp)); 
+    }
+
     /**
      * register cfunction
      * @param L    lua_State
      * @param func func name 函数名
      * @param f
      **/
-    static void RegisterCFunc(lua_State* L,const char *func, lua_CFunction f) 
+    static void AddGlobalCFunc(lua_State* L,const char *func, lua_CFunction f) 
     {
         lua_register(L, func, f);
     }
@@ -281,9 +270,9 @@ public:
      * @param f
      **/
     template<class Func>
-    static void RegisterCFunc(lua_State* L,const char *func, Func const fp) 
+    static void AddGlobalCFunc(lua_State* L,const char *func, Func const fp) 
     {
-        RegisterCFunc(L,func, LuaCFunctionWrap<__COUNTER__>(fp));
+        AddGlobalCFunc(L,func, LuaCFunctionWrap<__COUNTER__>(fp));
     }
 
     //----------------------------------------------------------------------------

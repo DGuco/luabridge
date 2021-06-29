@@ -390,25 +390,33 @@ namespace luabridge {
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
-#define REGISTER_GLOBAL_FUNC(luaBridge, funcname, func)                  \
-    Namespace::RegisterCFunc(luaBridge.LuaState(),funcname,func);
 
-#define BEGIN_NAMESPACE_CLASS(spacename, luaBridge, ClassT, name)        \
+#define BEGIN_NAMESPACE(luaBridge,spacename)                             \
     {                                                                    \
         {                                                                \
-            Namespace nameSpace = (luaBridge).BeginNameSpace(spacename); \
+            Namespace nameSpace = luaBridge.BeginNameSpace(spacename); 
+
+#define END_NAMESPACE                                                    \
+            luaBridge.EndNamespace();                                    \
+        }                                                                \
+    }
+
+#define BEGIN_NAMESPACE_CLASS(luaBridge,spacename,ClassT, name)        \
+    {                                                                    \
+        {                                                                \
+            Namespace nameSpace = luaBridge.BeginNameSpace(spacename); \
             Class<ClassT> classt = nameSpace.BeginClass<ClassT>(name);
 
 #define BEGIN_CLASS(luaBridge, ClassT, name)                             \
     {                                                                    \
-        Namespace nameSpace = (luaBridge).GetGlobalNamespace();          \
+        Namespace nameSpace = luaBridge.GetGlobalNamespace();          \
         Class<ClassT> classt = nameSpace.BeginClass<ClassT>(name);
 
 #define CLASS_ADD_CONSTRUCTOR(FT)                                        \
         classt.addConstructor<FT>();
 
 #define CLASS_ADD_FUNC(name, func)                                       \
-        classt.addFunction("Say", func);
+        classt.addFunction(name, func);
 
 #define CLASS_ADD_STATIC_PROPERTY(name,data)                             \
         classt.addStaticProperty(name, data,true);
@@ -422,6 +430,12 @@ namespace luabridge {
             luaBridge.EndNamespace();                                    \
         }                                                                \
     }
+
+#define REGISTER_GLOBAL_CFUNC(luaBridge, funcname, func)                  \
+    Namespace::AddGlobalCFunc(luaBridge.LuaState(),funcname,func);
+
+#define REGISTER_SPACE_CFUNC(funcname, func)                              \
+    nameSpace.AddSpaceCFunction(funcname,func);
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 }
