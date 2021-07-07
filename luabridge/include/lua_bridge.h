@@ -391,6 +391,20 @@ namespace luabridge {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+#define BEGIN_NAMESPACE_CLASS(luaBridge,spacename,ClassT, name)              \
+    {                                                                        \
+        {                                                                    \
+            {                                                                \
+                Namespace nameSpace = luaBridge.BeginNameSpace(spacename);   \
+                Class<ClassT> classt = nameSpace.BeginClass<ClassT>(name);
+
+    #define END_NAMESPACE_CLASS                                              \
+                classt.endClass();                                           \
+                luaBridge.EndNamespace();                                    \
+            }                                                                \
+        }                                                                    \
+    }
+
 #define BEGIN_NAMESPACE(luaBridge,spacename)                             \
     {                                                                    \
         {                                                                \
@@ -400,12 +414,6 @@ namespace luabridge {
             luaBridge.EndNamespace();                                    \
         }                                                                \
     }
-
-#define BEGIN_NAMESPACE_CLASS(luaBridge,spacename,ClassT, name)        \
-    {                                                                    \
-        {                                                                \
-            Namespace nameSpace = luaBridge.BeginNameSpace(spacename); \
-            Class<ClassT> classt = nameSpace.BeginClass<ClassT>(name);
 
 #define BEGIN_CLASS(luaBridge, ClassT, name)                             \
     {                                                                    \
@@ -425,17 +433,11 @@ namespace luabridge {
         classt.endClass();                                               \
     }
 
-#define END_NAMESPACE_CLASS                                              \
-            classt.endClass();                                           \
-            luaBridge.EndNamespace();                                    \
-        }                                                                \
-    }
-
 #define REGISTER_GLOBAL_CFUNC(luaBridge, funcname, func)                  \
     Namespace::AddGlobalCFunc(luaBridge.LuaState(),funcname,func);
 
 #define REGISTER_SPACE_CFUNC(funcname, func)                              \
-    nameSpace.AddSpaceCFunction(funcname,func);
+    nameSpace.AddCFunction(funcname,func);
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 }

@@ -131,7 +131,7 @@ int main()
         CLASS_ADD_CONSTRUCTOR(void(*)(int))
         CLASS_ADD_FUNC("Say",&OuterClass1::Say)
 //        LuaHelper::DumpTable(L,-1,std::cout,2);
-//        LuaHelper::DumpTable(L,-2,std::cout,2);
+//        LuaHelper::DumpTable(L,-2,std::cout,dd2);
 //        LuaHelper::DumpTable(L,-3,std::cout,2);
 //        LuaHelper::DumpTable(L,-4,std::cout,2);
     END_CLASS
@@ -148,7 +148,7 @@ int main()
     int ret = luaBridge.CallLuaFunc<int>("x11111_callfailedtest", 1, 2, 200, 100, "Hello lua");
     printf("ret = %d\n", ret);
     printf("-------------------\n");
-    ret = luaBridge.CallLuaFunc<int>("x11111_test", 1, 2);
+    ret = luaBridge.CallLuaFunc<int>("x11111_test", 1, 2,BinaryStr("1111111111",11));
     printf("ret = %d\n", ret);
 //    printf("-------------------\n");
 //    ret = luaBridge.CallLuaFunc<int>("x11111_test",10,20);

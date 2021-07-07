@@ -222,13 +222,14 @@ public:
             CFunc::AddSetter(L, name, -2); // Stack: ns
         }
     }
+
     
     /**
      * register cfunction
      * @param func func name 函数名
      * @param f
      **/
-    void AddSpaceCFunction(const char *func, lua_CFunction fp) 
+    void AddCFunction(const char *func, lua_CFunction fp) 
     {
         lua_State *L = m_pLuaVm->LuaState();
 
@@ -246,9 +247,9 @@ public:
      * @param f
      **/
     template<class Func>
-    void AddSpaceCFunction(const char *func, Func const fp) 
+    void AddCFunction(const char *func, Func const fp) 
     {
-        AddSpaceCFunction(func,LuaCFunctionWrap<__COUNTER__>(fp)); 
+        AddCFunction(func,LuaCFunctionWrap<__COUNTER__>(fp)); 
     }
 
     /**

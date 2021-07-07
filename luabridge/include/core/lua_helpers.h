@@ -39,6 +39,22 @@
 
 namespace luabridge
 {
+
+/**
+ * 
+ * */
+struct BinaryStr
+{
+    BinaryStr(const char* pdata,int len)
+    {
+        m_pStr = pdata;
+        m_iLen = len;
+    }
+ 
+    const char* m_pStr;
+    int         m_iLen; 
+};
+
 class LuaHelper
 {
 public:

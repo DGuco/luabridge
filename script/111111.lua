@@ -11,12 +11,12 @@ function x11111_callfailedtest(x,y,i,j,world)
 end
 
 
-function x11111_test(x,y)
+function x11111_test(x,y,str)
     local addNum = LuaFnAdd(x,y);
     local subNum = Sub(x,y);
     print("addNum = "..addNum)
     print("subNum = "..subNum)
-    Say("Hello world11111");
+    Say("Hello world: "..str);
     local testclass = OuterClass (10)
     local testclass1 = OuterClass1 (10)
     testclass:Say("Hello cpp");

@@ -390,7 +390,7 @@ struct Stack<char *>
 {
     static void push(lua_State *L, char const *str)
     {
-        if (str != 0)
+        if (str != NULL)
             lua_pushstring(L, str);
         else
             lua_pushnil(L);
@@ -405,6 +405,31 @@ struct Stack<char *>
             return const_cast<char *>("");
         }
         return const_cast<char *>(lua_tostring(L, index));
+    }
+};
+
+//------------------------------------------------------------------------------
+/**
+    Stack specialization for `BinaryStr`.
+*/
+template<>
+struct Stack<BinaryStr>
+{
+    static void push(lua_State *L, BinaryStr pStr)
+    {
+        if (pStr.m_pStr != NULL && pStr.m_iLen > 0)
+        {
+            lua_pushlstring(L,pStr.m_pStr,pStr.m_iLen);
+        }
+    }
+
+    BinaryStr get(lua_State *L, int index, bool luaerror = true)
+    {
+        //抛出c++异常
+        LUA_ASSERT_EX(L, LuaHelper::CheckLuaArg_Str(L, index), "CheckLuaArg_Str failed",luaerror);
+        size_t len;
+        const char *str = lua_tolstring(L, index, &len);
+        return BinaryStr(str,len);
     }
 };
 //------------------------------------------------------------------------------
