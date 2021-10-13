@@ -28,8 +28,8 @@
 */
 //==============================================================================
 
-#ifndef _LUA_EXCEPTION_H__
-#define _LUA_EXCEPTION_H__
+#ifndef __LUA_EXCEPTION_H__
+#define __LUA_EXCEPTION_H__
 
 #include <exception>
 #include <string>

@@ -29,8 +29,8 @@
 */
 //==============================================================================
 
-#ifndef _LUA_REF_H__
-#define _LUA_REF_H__
+#ifndef __LUA_REF_H__
+#define __LUA_REF_H__
 
 #include <iostream>
 #include <string>

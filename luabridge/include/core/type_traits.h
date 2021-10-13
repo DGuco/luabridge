@@ -28,8 +28,8 @@
 */
 //==============================================================================
 
-#ifndef _TYPE_TRAITS_H__
-#define _TYPE_TRAITS_H__
+#ifndef __TYPE_TRAITS_H__
+#define __TYPE_TRAITS_H__
 
 #include <string>
 

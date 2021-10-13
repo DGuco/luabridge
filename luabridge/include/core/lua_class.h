@@ -25,8 +25,8 @@
   SOFTWARE.
 */
 //==============================================================================
-#ifndef LBRIDGE_LUA_CLASS_H
-#define LBRIDGE_LUA_CLASS_H
+#ifndef __LUA_CLASS_H__
+#define __LUA_CLASS_H__
 
 #include "lua_vm.h"
 #include <functional>
@@ -969,4 +969,4 @@ namespace luabridge
     };
 } // namespace luabridge
 
-#endif //LBRIDGE_LUA_CLASS_H
+#endif //__LUA_CLASS_H__

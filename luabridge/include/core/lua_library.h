@@ -30,8 +30,8 @@
 /** Include file for the Lua library.
 */
 
-#ifndef _LUA_LIBRARY_H_
-#define _LUA_LIBRARY_H_
+#ifndef __LUA_LIBRARY_H_
+#define __LUA_LIBRARY_H_
 
 //lua lib源码库是否用g++编译
 #ifdef  COMPILE_LUA_WITH_CXX
@@ -48,4 +48,4 @@
     }
 #endif
 
-#endif //_LUA_LIBRARY_H_
+#endif //__LUA_LIBRARY_H_

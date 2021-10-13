@@ -28,8 +28,8 @@
 */
 //==============================================================================
 
-#ifndef _CONSTRUCTOR_H__
-#define _CONSTRUCTOR_H__
+#ifndef __CONSTRUCTOR_H__
+#define __CONSTRUCTOR_H__
 
 #include "type_list.h"
 #include "lua_stack.h"

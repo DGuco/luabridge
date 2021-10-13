@@ -1,5 +1,5 @@
-#ifndef _SECURITY_H__
-#define _SECURITY_H__
+#ifndef __SECURITY_H__
+#define __SECURITY_H__
 
 namespace luabridge
 {

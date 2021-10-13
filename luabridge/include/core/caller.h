@@ -26,8 +26,8 @@
 */
 //==============================================================================
 
-#ifndef LBRIDGE_CALLER_H
-#define LBRIDGE_CALLER_H
+#ifndef __LUA_CALLER_H__
+#define __LUA_CALLER_H__
 
 #include <functional>
 #include "type_list.h"
@@ -36,9 +36,14 @@
 namespace luabridge
 {
 
-template<size_t NUM_PARAMS,class ReturnType,class... ParamList>
+template<size_t NUM_PARAMS/*参数个数*/,class ReturnType/*返回类型*/,class... ParamList/*参数列表*/>
 struct Caller;
 
+/**
+ * 无参数
+ * @tparam ReturnType
+ * @tparam ParamList
+ */
 template<class ReturnType,class... ParamList>
 struct Caller<0,ReturnType,ParamList...>
 {
@@ -55,6 +60,11 @@ struct Caller<0,ReturnType,ParamList...>
     }
 };
 
+/**
+ * 1参数
+ * @tparam ReturnType
+ * @tparam ParamList
+ */
 template<class ReturnType,class... ParamList>
 struct Caller<1,ReturnType,ParamList...>
 {
@@ -71,6 +81,11 @@ struct Caller<1,ReturnType,ParamList...>
     }
 };
 
+/**
+ * 2参数
+ * @tparam ReturnType
+ * @tparam ParamList
+ */
 template<class ReturnType,class... ParamList>
 struct Caller<2,ReturnType,ParamList...>
 {
@@ -89,6 +104,11 @@ struct Caller<2,ReturnType,ParamList...>
     }
 };
 
+/**
+ * 3参数
+ * @tparam ReturnType
+ * @tparam ParamList
+ */
 template<class ReturnType,class... ParamList>
 struct Caller<3,ReturnType,ParamList...>
 {
@@ -109,6 +129,11 @@ struct Caller<3,ReturnType,ParamList...>
     }
 };
 
+/**
+ * 4参数
+ * @tparam ReturnType
+ * @tparam ParamList
+ */
 template<class ReturnType,class... ParamList>
 struct Caller<4,ReturnType,ParamList...>
 {
@@ -131,6 +156,11 @@ struct Caller<4,ReturnType,ParamList...>
     }
 };
 
+/**
+ * 5参数
+ * @tparam ReturnType
+ * @tparam ParamList
+ */
 template<class ReturnType,class... ParamList>
 struct Caller<5,ReturnType,ParamList...>
 {
@@ -155,6 +185,11 @@ struct Caller<5,ReturnType,ParamList...>
     }
 };
 
+/**
+ * 6参数
+ * @tparam ReturnType
+ * @tparam ParamList
+ */
 template<class ReturnType,class... ParamList>
 struct Caller<6,ReturnType,ParamList...>
 {
@@ -181,6 +216,11 @@ struct Caller<6,ReturnType,ParamList...>
     }
 };
 
+/**
+ * 7参数
+ * @tparam ReturnType
+ * @tparam ParamList
+ */
 template<class ReturnType,class... ParamList>
 struct Caller<7,ReturnType,ParamList...>
 {
@@ -209,6 +249,11 @@ struct Caller<7,ReturnType,ParamList...>
     }
 };
 
+/**
+ * 8参数
+ * @tparam ReturnType
+ * @tparam ParamList
+ */
 template<class ReturnType,class... ParamList>
 struct Caller<8,ReturnType,ParamList...>
 {
@@ -239,6 +284,11 @@ struct Caller<8,ReturnType,ParamList...>
     }
 };
 
+/**
+ * 9参数
+ * @tparam ReturnType
+ * @tparam ParamList
+ */
 template<class ReturnType,class... ParamList>
 struct Caller<9,ReturnType,ParamList...>
 {
@@ -271,6 +321,11 @@ struct Caller<9,ReturnType,ParamList...>
     }
 };
 
+/**
+ * 10参数
+ * @tparam ReturnType
+ * @tparam ParamList
+ */
 template<class ReturnType,class... ParamList>
 struct Caller<10,ReturnType,ParamList...>
 {
@@ -305,6 +360,11 @@ struct Caller<10,ReturnType,ParamList...>
     }
 };
 
+/**
+ * 11参数
+ * @tparam ReturnType
+ * @tparam ParamList
+ */
 template<class ReturnType,class... ParamList>
 struct Caller<11,ReturnType,ParamList...>
 {
@@ -341,6 +401,11 @@ struct Caller<11,ReturnType,ParamList...>
     }
 };
 
+/**
+ * 12参数
+ * @tparam ReturnType
+ * @tparam ParamList
+ */
 template<class ReturnType,class... ParamList>
 struct Caller<12,ReturnType,ParamList...>
 {
@@ -379,6 +444,11 @@ struct Caller<12,ReturnType,ParamList...>
     }
 };
 
+/**
+ * 13参数
+ * @tparam ReturnType
+ * @tparam ParamList
+ */
 template<class ReturnType,class... ParamList>
 struct Caller<13,ReturnType,ParamList...>
 {
@@ -419,6 +489,11 @@ struct Caller<13,ReturnType,ParamList...>
     }
 };
 
+/**
+ * 14参数
+ * @tparam ReturnType
+ * @tparam ParamList
+ */
 template<class ReturnType,class... ParamList>
 struct Caller<14,ReturnType,ParamList...>
 {
@@ -461,6 +536,11 @@ struct Caller<14,ReturnType,ParamList...>
     }
 };
 
+/**
+ * 15参数
+ * @tparam ReturnType
+ * @tparam ParamList
+ */
 template<class ReturnType,class... ParamList>
 struct Caller<15,ReturnType,ParamList...>
 {
@@ -505,6 +585,11 @@ struct Caller<15,ReturnType,ParamList...>
     }
 };
 
+/**
+ * 16参数
+ * @tparam ReturnType
+ * @tparam ParamList
+ */
 template<class ReturnType,class... ParamList>
 struct Caller<16,ReturnType,ParamList...>
 {
@@ -551,7 +636,11 @@ struct Caller<16,ReturnType,ParamList...>
     }
 };
 
-
+/**
+ * 17参数
+ * @tparam ReturnType
+ * @tparam ParamList
+ */
 template<class ReturnType,class... ParamList>
 struct Caller<17,ReturnType,ParamList...>
 {
@@ -600,7 +689,11 @@ struct Caller<17,ReturnType,ParamList...>
     }
 };
 
-
+/**
+ * 18参数
+ * @tparam ReturnType
+ * @tparam ParamList
+ */
 template<class ReturnType,class... ParamList>
 struct Caller<18,ReturnType,ParamList...>
 {
@@ -651,7 +744,11 @@ struct Caller<18,ReturnType,ParamList...>
     }
 };
 
-
+/**
+ * 19参数
+ * @tparam ReturnType
+ * @tparam ParamList
+ */
 template<class ReturnType,class... ParamList>
 struct Caller<19,ReturnType,ParamList...>
 {
@@ -704,7 +801,11 @@ struct Caller<19,ReturnType,ParamList...>
     }
 };
 
-
+/**
+ * 20参数
+ * @tparam ReturnType
+ * @tparam ParamList
+ */
 template<class ReturnType,class... ParamList>
 struct Caller<20,ReturnType,ParamList...>
 {
@@ -758,17 +859,40 @@ struct Caller<20,ReturnType,ParamList...>
                           Stack<LUA_PARAM_TYPE(19)>::get(L,startParam + 19));
     }
 };
+
+/**
+ * call cfunction
+ * @tparam ReturnType
+ * @tparam Fn
+ * @tparam ParamList
+ * @param L
+ * @param fn
+ * @param startParam
+ * @return
+ */
 template<class ReturnType, class Fn, class... ParamList>
-ReturnType doCall(lua_State*L,const Fn &fn,int startParam)
+ReturnType doCall(lua_State* L,const Fn& fn,int startParam)
 {
     return Caller<ArgTypeList<ParamList...>::arity,ReturnType,ParamList...>::f(L,fn,startParam);
 }
 
+/**
+ * call class memfunc
+ * @tparam ReturnType
+ * @tparam T
+ * @tparam MemFn
+ * @tparam ParamList
+ * @param L
+ * @param obj
+ * @param fn
+ * @param startParam
+ * @return
+ */
 template<class ReturnType, class T, class MemFn, class... ParamList>
-static ReturnType doCall(lua_State*L,T *obj,const MemFn &fn,int startParam)
+static ReturnType doCall(lua_State* L,T *obj,const MemFn& fn,int startParam)
 {
     return Caller<ArgTypeList<ParamList...>::arity,ReturnType, ParamList...>::f(L,obj, fn,startParam);
 }
 
 }
-#endif //LBRIDGE_CALLER_H
+#endif //__LUA_CALLER_H__

@@ -77,7 +77,10 @@ public:
      * @param condition
      * @param argindex
      * @param err_msg
-     * @param luaerror throw luaerror or not
+     * @param luaerror 当在无保护环境下发生错误到百度首页并且没有调用lua_atpanic(L, ThrowAtPanic)设置相应的异常回调
+     * lua会调用abort退出,luaerror是否为true取决于调用代码是否在保护环境下运行(在lua_pcall执行逻辑中),如果你没有调用
+     * lua_atpanic拦截luaerror并且在非保护环境下抛出luaerror程序会主动退出
+     *
      * @return never return when assert failed
      */
     static int LuaAssert(lua_State *L, bool condition, const char *file, int line, const char *err_msg, bool luaerror = true);
@@ -269,12 +272,10 @@ int LuaHelper::LuaAssert(lua_State *L, bool condition, const char *file, int lin
 #ifdef COMPILE_LUA_WITH_CXX
         if (luaerror) {
             std::string filename(file);
-            unsigned long pos = filename.find("\/luabridge\/include");
-            if (pos != std::string::npos) {
-                std::string lastName = filename.substr(pos);
+            if (NULL != file) {
                 return luaL_error(L,
                                   "(%s:%d assert fail) %s `%s' (%s)",
-                                  lastName.c_str(),
+                                  file,
                                   line,
                                   ar.namewhat,
                                   ar.name,
@@ -285,40 +286,34 @@ int LuaHelper::LuaAssert(lua_State *L, bool condition, const char *file, int lin
             }
         }
         else {
-            char Msg[256] = {0};
-            std::string filename(file);
-            unsigned long pos = filename.find("\/luabridge\/include");
-            if (pos != std::string::npos) {
-                std::string lastName = filename.substr(pos);
+            char Msg[512] = {'\0'};
+            if (NULL != file) {
                 snprintf(Msg,
-                         256,
+                         512,
                          "(%s:%d) assert fail: %s `%s' (%s)",
-                         lastName.c_str(),
+                         file,
                          line,
                          ar.namewhat,
                          ar.name,
                          err_msg);
             }
             else {
-                //filename.substr()
-                snprintf(Msg, 256, "(%s:%d) assert fail: %s `%s' (%s)", "?", line, ar.namewhat, ar.name, err_msg);
+                snprintf(Msg, 512, "(%s:%d) assert fail: %s `%s' (%s)", "?", line, ar.namewhat, ar.name, err_msg);
             }
+            Msg[511] = '\0';
             throw std::logic_error(Msg);
             return 0;
         }
 #else
-        char Msg[256] = {0};
-        std::string filename(file);
-        unsigned long pos = filename.find("\/luabridge\/include");
-        if (pos != std::string::npos)
+        char Msg[512] = {0};
+        if (NULL != file) {
         {
-            std::string lastName = filename.substr(pos);
-            snprintf(Msg,256,"(%s:%d) assert fail: %s `%s' (%s)",lastName.c_str(),line,ar.namewhat, ar.name, err_msg);
+            snprintf(Msg,512,"(%s:%d) assert fail: %s `%s' (%s)",file,line,ar.namewhat, ar.name, err_msg);
         }else
         {
-            //filename.substr()
             snprintf(Msg,256,"(%s:%d) assert fail: %s `%s' (%s)","?",line,ar.namewhat, ar.name, err_msg);
         }
+        Msg[511] = '\0';
         throw std::logic_error(Msg);
         return 0;
 #endif

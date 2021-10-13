@@ -44,8 +44,8 @@
 */
 //==============================================================================
 
-#ifndef _TYPE_LIST_H__
-#define _TYPE_LIST_H__
+#ifndef __TYPE_LIST_H__
+#define __TYPE_LIST_H__
 
 #include <string>
 #include <typeinfo>
@@ -220,6 +220,7 @@ struct ArgTypeList
 {
     enum
     {
+        //参数个数
         arity = sizeof...(ParamList)
     };
     using ParamTypeElement = typename std::tuple<ParamList...>;
@@ -232,8 +233,9 @@ struct ArgTypeList
     };
 };
 
-//get参数的类型
+//获取指定函数参数指定位置的参数类型
 #define  LUA_PARAM_TYPE(n) typename ArgTypeList<ParamList...>::template args<n>::type
+
 } // namespace luabridge
 
 #endif

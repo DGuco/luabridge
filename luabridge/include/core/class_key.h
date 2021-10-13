@@ -27,8 +27,8 @@
 */
 //==============================================================================
 
-#ifndef _CLASS_INFO_H__
-#define _CLASS_INFO_H__
+#ifndef __CLASS_KEY_H__
+#define __CLASS_KEY_H__
 
 namespace luabridge {
 
