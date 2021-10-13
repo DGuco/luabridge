@@ -135,7 +135,7 @@ namespace luabridge {
         lua_State *pState = luaL_newstate();
         if (pState == NULL)
         {
-            throw  std::runtime_error("LuaBridge constructor luaL_newstate() failed");
+            throw std::runtime_error("LuaBridge constructor luaL_newstate() failed");
         }
         m_pLuaVm = new LuaVm(pState);
         // initialize lua standard library functions
@@ -398,7 +398,7 @@ namespace luabridge {
                 Namespace nameSpace = luaBridge.BeginNameSpace(spacename);   \
                 Class<ClassT> classt = nameSpace.BeginClass<ClassT>(name);
 
-    #define END_NAMESPACE_CLASS                                              \
+#define END_NAMESPACE_CLASS                                                  \
                 classt.endClass();                                           \
                 luaBridge.EndNamespace();                                    \
             }                                                                \
@@ -417,8 +417,12 @@ namespace luabridge {
 
 #define BEGIN_CLASS(luaBridge, ClassT, name)                             \
     {                                                                    \
-        Namespace nameSpace = luaBridge.GetGlobalNamespace();          \
+        Namespace nameSpace = luaBridge.GetGlobalNamespace();            \
         Class<ClassT> classt = nameSpace.BeginClass<ClassT>(name);
+
+#define END_CLASS                                                        \
+        classt.endClass();                                               \
+    }
 
 #define CLASS_ADD_CONSTRUCTOR(FT)                                        \
         classt.addConstructor<FT>();
@@ -428,11 +432,7 @@ namespace luabridge {
 
 #define CLASS_ADD_STATIC_PROPERTY(name,data)                             \
         classt.addStaticProperty(name, data,true);
-
-#define END_CLASS                                                        \
-        classt.endClass();                                               \
-    }
-
+        
 #define REGISTER_GLOBAL_CFUNC(luaBridge, funcname, func)                  \
     Namespace::AddGlobalCFunc(luaBridge.LuaState(),funcname,func);
 

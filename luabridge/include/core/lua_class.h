@@ -183,7 +183,7 @@ namespace luabridge
           lua_CFunction to construct a class object wrapped in a container.
         */
         template<class MemFn, class C>
-        static int ctorContainerProxy(lua_State *L)
+        static int CtorContainerProxy(lua_State *L)
         {
             typedef typename ContainerTraits<C>::Type T;
             T *const p = FuncTraits<MemFn>::template callnew<T>(L, 2);
@@ -949,7 +949,7 @@ namespace luabridge
             AssertStackState(); // Stack: const table (co), class table (cl), static table (st)
             lua_State *L = m_pLuaVm->LuaState();
 
-            lua_pushcclosure(L, &ctorContainerProxy < MemFn, C > , 0);
+            lua_pushcclosure(L, &CtorContainerProxy < MemFn, C > , 0);
             LuaHelper::RawSetField(L, -2, "__call");
 
             return *this;

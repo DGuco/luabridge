@@ -29,8 +29,8 @@
 */
 //==============================================================================
 
-#ifndef __NAMESPACE_H__
-#define __NAMESPACE_H__
+#ifndef __LUA_NAMESPACE_H__
+#define __LUA_NAMESPACE_H__
 
 #include "lua_class.h"
 #include "lua_helpers.h"

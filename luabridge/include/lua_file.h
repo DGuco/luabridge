@@ -41,7 +41,7 @@
 #include "core/lua_ref.h"
 #include "core/user_data.h"
 #include "core/security.h"
-#include "core/namespace.h"
+#include "core/lua_space.h"
 #include "core/lua_vm.h"
 #include "core/caller.h"
 #include "core/lua_class.h"

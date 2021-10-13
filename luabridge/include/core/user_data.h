@@ -75,7 +75,7 @@ protected:
 
 private:
     //--------------------------------------------------------------------------
-    /**DD
+    /**
       Validate and retrieve a Userdata on the stack.
 
       The Userdata must exactly match the corresponding class table or
