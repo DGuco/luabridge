@@ -110,13 +110,19 @@ int main()
         LuaBridge luaBridge(L);
         luaBridge.LoadFile("../script/111111.lua");
 
-        BEGIN_NAMESPACE_CLASS(luaBridge,"space",OuterClass, "OuterClass")
-                    CLASS_ADD_CONSTRUCTOR(void(*)(int))
-                    CLASS_ADD_FUNC("Say",&OuterClass::Say)
-        END_NAMESPACE_CLASS
+//        BEGIN_NAMESPACE_CLASS(luaBridge,"space",OuterClass, "OuterClass")
+//                    CLASS_ADD_CONSTRUCTOR(void(*)(int))
+//                    CLASS_ADD_FUNC("Say",&OuterClass::Say)
+//        END_NAMESPACE_CLASS
 
         BEGIN_NAMESPACE(luaBridge,"space")
-                REGISTER_SPACE_CFUNC("Add", SpaceAdd)
+            BEGIN_CLASS(luaBridge,OuterClass,"OuterClass")
+                CLASS_ADD_CONSTRUCTOR(void(*)(int))
+                CLASS_ADD_FUNC("Say",&OuterClass::Say)
+            END_CLASS
+            BEGIN_REGISTER_CFUNC(luaBridge)
+                REGISTER_CFUNC("Add", SpaceAdd)
+            END_REGISTER_CFUNC
         END_NAMESPACE
 
         BEGIN_CLASS(luaBridge, OuterClass, "OuterClass")
@@ -132,17 +138,15 @@ int main()
         BEGIN_CLASS(luaBridge, OuterClass1, "OuterClass1")
             CLASS_ADD_CONSTRUCTOR(void(*)(int))
             CLASS_ADD_FUNC("Say",&OuterClass1::Say)
-//        LuaHelper::DumpTable(L,-1,std::cout,2);
-//        LuaHelper::DumpTable(L,-2,std::cout,dd2);
-//        LuaHelper::DumpTable(L,-3,std::cout,2);
-//        LuaHelper::DumpTable(L,-4,std::cout,2);
         END_CLASS
 
-        REGISTER_GLOBAL_CFUNC(luaBridge, "Add", Add)
-        REGISTER_GLOBAL_CFUNC(luaBridge, "LambdaAdd", func)
-        REGISTER_GLOBAL_CFUNC(luaBridge, "Sub", Sub)
-        REGISTER_GLOBAL_CFUNC(luaBridge, "Say", Say)
-        REGISTER_GLOBAL_CFUNC(luaBridge, "LuaFnAdd", LuaFnAdd)
+        BEGIN_REGISTER_CFUNC(luaBridge)
+            REGISTER_CFUNC("Add", Add)
+            REGISTER_CFUNC("LambdaAdd", func)
+            REGISTER_CFUNC("Sub", Sub)
+            REGISTER_CFUNC("Say", Say)
+            REGISTER_CFUNC("LuaFnAdd", LuaFnAdd)
+        END_REGISTER_CFUNC
 
         lua_getglobal(L, "_G");
         LuaHelper::DumpTable(L,-1,std::cout,2);
@@ -152,16 +156,16 @@ int main()
         printf("-------------------\n");
         ret = luaBridge.CallLuaFunc<int>("x11111_test", 1, 2,BinaryStr("1111111111",11));
         printf("ret = %d\n", ret);
-    //    printf("-------------------\n");
-    //    ret = luaBridge.CallLuaFunc<int>("x11111_test",10,20);
-    //    printf("ret = %d\n",ret);
-    //    printf("-------------------\n");
-    //    ret = luaBridge.CallLuaFunc<int>("x11111_test",100,200);
-    //    printf("ret = %d\n",ret);
-    //    printf("-------------------\n");
-    //    ret = luaBridge.CallLuaFunc<int>("x11111_test",1000,2000);
-    //    printf("ret = %d\n",ret);
-    //    printf("-------------------\n");
+        printf("-------------------\n");
+        ret = luaBridge.CallLuaFunc<int>("x11111_test",10,20);
+        printf("ret = %d\n",ret);
+        printf("-------------------\n");
+        ret = luaBridge.CallLuaFunc<int>("x11111_test",100,200);
+        printf("ret = %d\n",ret);
+        printf("-------------------\n");
+        ret = luaBridge.CallLuaFunc<int>("x11111_test",1000,2000);
+        printf("ret = %d\n",ret);
+        printf("-------------------\n");
     }catch (std::exception& e)
     {
         printf("run catch one execption,msg = %s\n",e.what());

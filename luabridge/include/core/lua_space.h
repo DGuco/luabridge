@@ -50,12 +50,37 @@ class Namespace
 {
 public:
     /**
+     *
+     */
+    Namespace()
+    {
+        m_pLuaVm = NULL;
+        m_name = "";
+    }
+
+    ~Namespace()
+    {
+        m_pLuaVm = NULL;
+        m_name = "";
+    }
+
+    Namespace(const Namespace& other)
+    {
+       if(&other == this)
+       {
+           return;
+       }
+       this->m_pLuaVm  = other.m_pLuaVm;
+       this->m_name = other.m_name;
+    }
+
+    /**
      * Open the global namespace for registrations.
      * 默认命名空间，lua _G表，如果没有指定命名空间则所有的操作在_G表中
      * @param luaVm
      */
     explicit Namespace(LuaVm *luaVm)
-        : m_pLuaVm(luaVm)
+        : m_pLuaVm(luaVm),m_name("_G")
     {
         lua_State * L = m_pLuaVm->LuaState();
         lua_getglobal(L, "_G");
@@ -71,7 +96,7 @@ public:
      * @param luaVm
      */
     Namespace(char const *name, LuaVm *luaVm)
-        : m_pLuaVm(luaVm)
+        : m_pLuaVm(luaVm),m_name(name)
     {
         lua_State * L = m_pLuaVm->LuaState();
 
@@ -300,8 +325,26 @@ public:
         m_pLuaVm->AssertIsActive();
         return Class<Derived>(name, m_pLuaVm, ClassInfo<Base>::GetStaticKey());
     }
+
+    void Reset()
+    {
+        m_pLuaVm = NULL;
+        m_name = "";
+    }
+
+    bool IsValid()
+    {
+        return  m_pLuaVm != NULL && m_name != "";
+    }
+
+    const std::string& SpaceName() const
+    {
+        return  m_name;
+    }
+
 private:
-    LuaVm *m_pLuaVm;
+    LuaVm       *m_pLuaVm;
+    std::string  m_name;
 };
 } // namespace luabridge
 

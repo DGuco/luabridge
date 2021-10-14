@@ -77,10 +77,9 @@ public:
      * @param condition
      * @param argindex
      * @param err_msg
-     * @param luaerror 当在无保护环境下发生错误到百度首页并且没有调用lua_atpanic(L, ThrowAtPanic)设置相应的异常回调
-     * lua会调用abort退出,luaerror是否为true取决于调用代码是否在保护环境下运行(在lua_pcall执行逻辑中),如果你没有调用
-     * lua_atpanic拦截luaerror并且在非保护环境下抛出luaerror程序会主动退出
-     *
+     * @param luaerror 当在无保护环境下发生错误并且没有调用lua_atpanic(L, ThrowAtPanic)设置相应的异常回调lua会调用abort退出,
+     * luaerror是否为true取决于调用代码是否在保护环境下运行(在lua_pcall执行逻辑中),如果你没有调用lua_atpanic拦截luaerror并且
+     * 在非保护环境下抛出luaerror程序会主动退出
      * @return never return when assert failed
      */
     static int LuaAssert(lua_State *L, bool condition, const char *file, int line, const char *err_msg, bool luaerror = true);
@@ -142,13 +141,12 @@ void LuaHelper::LuaStackInfo(lua_State *L)
         "==========================Lua stack info start=====================================");
     lua_Debug trouble_info;
     memset(&trouble_info, 0, sizeof(lua_Debug));
-    char Msg[128] = {0};
+    char Msg[512] = {0};
     for (int i = 0;; i++) {
         if (lua_getstack(L, i, &trouble_info) == 0)
             break;
         lua_getinfo(L, "Snl", &trouble_info);
-        memset(Msg, 0, 128);
-        snprintf(Msg, 128, "name[%s] what[%s] short_src[%s] linedefined[%d] currentline[%d]",
+        snprintf(Msg, 512 - 1, "name[%s] what[%s] short_src[%s] linedefined[%d] currentline[%d]",
                  trouble_info.name,
                  trouble_info.what,
                  trouble_info.short_src,
@@ -228,12 +226,12 @@ bool LuaHelper::CheckLuaArg_Str(lua_State *L, int Index)
         trouble_info.name = "?";
     }
 
-    char Msg[128] = {0};
+    char Msg[512] = {0};
     if (lua_isnil(L, Index)) {
-        printf("Lua function[%s], arg[%d] is null \n", trouble_info.name, Index);
+        snprintf(Msg,512 - 1,"Lua function[%s], arg[%d] is null \n", trouble_info.name, Index);
     }
     else {
-        printf("Lua function[%s], arg[%d] type error not str \n", trouble_info.name, Index);
+        snprintf(Msg,512 - 1,"Lua function[%s], arg[%d] type error not str \n", trouble_info.name, Index);
     }
     LuaHelper::DefaultDebugLuaErrorInfo(Msg);
     LuaStackInfo(L);
@@ -269,6 +267,11 @@ int LuaHelper::LuaAssert(lua_State *L, bool condition, const char *file, int lin
          * 所以在使用luaL_checkxxx时候，需要很小心，在luaL_checkxxx之前尽量不要申请一些需要之后释放的资源，尤其是加锁函数,智能指针和auto锁也不能正常工作。
          * 如果用g++重新编译lua源码不会有问题
          **/
+#ifdef __cplusplus
+
+#else
+
+#endif
 #ifdef COMPILE_LUA_WITH_CXX
         if (luaerror) {
             std::string filename(file);
@@ -289,7 +292,7 @@ int LuaHelper::LuaAssert(lua_State *L, bool condition, const char *file, int lin
             char Msg[512] = {'\0'};
             if (NULL != file) {
                 snprintf(Msg,
-                         512,
+                         512 - 1,
                          "(%s:%d) assert fail: %s `%s' (%s)",
                          file,
                          line,
@@ -298,9 +301,8 @@ int LuaHelper::LuaAssert(lua_State *L, bool condition, const char *file, int lin
                          err_msg);
             }
             else {
-                snprintf(Msg, 512, "(%s:%d) assert fail: %s `%s' (%s)", "?", line, ar.namewhat, ar.name, err_msg);
+                snprintf(Msg, 512 - 1, "(%s:%d) assert fail: %s `%s' (%s)", "?", line, ar.namewhat, ar.name, err_msg);
             }
-            Msg[511] = '\0';
             throw std::logic_error(Msg);
             return 0;
         }
@@ -308,16 +310,14 @@ int LuaHelper::LuaAssert(lua_State *L, bool condition, const char *file, int lin
         char Msg[512] = {0};
         if (NULL != file) {
         {
-            snprintf(Msg,512,"(%s:%d) assert fail: %s `%s' (%s)",file,line,ar.namewhat, ar.name, err_msg);
+            snprintf(Msg,512 - 1,"(%s:%d) assert fail: %s `%s' (%s)",file,line,ar.namewhat, ar.name, err_msg);
         }else
         {
-            snprintf(Msg,256,"(%s:%d) assert fail: %s `%s' (%s)","?",line,ar.namewhat, ar.name, err_msg);
+            snprintf(Msg,512 - 1,"(%s:%d) assert fail: %s `%s' (%s)","?",line,ar.namewhat, ar.name, err_msg);
         }
-        Msg[511] = '\0';
         throw std::logic_error(Msg);
         return 0;
 #endif
-
     }
     else {
         return 1;
