@@ -449,7 +449,7 @@ Namespace &LuaBridge::CurNameSpace()
         }
 
 #define CLASS_ADD_CONSTRUCTOR(FT)                                        \
-        pclasst->addConstructor<FT>();
+        pclasst->AddConstructor<FT>();
 
 #define CLASS_ADD_FUNC(name, func)                                       \
         pclasst->addFunction(name, func);

@@ -240,7 +240,8 @@ bool LuaHelper::CheckLuaArg_Str(lua_State *L, int Index)
 
 int LuaHelper::LuaAssert(lua_State *L, bool condition, const char *file, int line, const char *err_msg, bool luaerror)
 {
-    if (!condition) {
+    if (!condition)
+    {
         lua_Debug ar;
         memset(&ar, 0, sizeof(lua_Debug));
         if (lua_getstack(L, 0, &ar)) {
@@ -267,11 +268,6 @@ int LuaHelper::LuaAssert(lua_State *L, bool condition, const char *file, int lin
          * 所以在使用luaL_checkxxx时候，需要很小心，在luaL_checkxxx之前尽量不要申请一些需要之后释放的资源，尤其是加锁函数,智能指针和auto锁也不能正常工作。
          * 如果用g++重新编译lua源码不会有问题
          **/
-#ifdef __cplusplus
-
-#else
-
-#endif
 #ifdef COMPILE_LUA_WITH_CXX
         if (luaerror) {
             std::string filename(file);
@@ -304,11 +300,10 @@ int LuaHelper::LuaAssert(lua_State *L, bool condition, const char *file, int lin
                 snprintf(Msg, 512 - 1, "(%s:%d) assert fail: %s `%s' (%s)", "?", line, ar.namewhat, ar.name, err_msg);
             }
             throw std::logic_error(Msg);
-            return 0;
         }
 #else
         char Msg[512] = {0};
-        if (NULL != file) {
+        if (NULL != file)
         {
             snprintf(Msg,512 - 1,"(%s:%d) assert fail: %s `%s' (%s)",file,line,ar.namewhat, ar.name, err_msg);
         }else
@@ -316,10 +311,10 @@ int LuaHelper::LuaAssert(lua_State *L, bool condition, const char *file, int lin
             snprintf(Msg,512 - 1,"(%s:%d) assert fail: %s `%s' (%s)","?",line,ar.namewhat, ar.name, err_msg);
         }
         throw std::logic_error(Msg);
-        return 0;
 #endif
     }
-    else {
+    else
+    {
         return 1;
     }
 }

@@ -70,8 +70,8 @@ set(LUA_SOURCE_FILES
         )
 
 #用c++编译器重新编译lua https://blog.codingnow.com/2015/05/lua_c_api.html(如何正确使用lua api)
-set_source_files_properties(${LUA_HEADER_FILES} PROPERTIES LANGUAGE CXX) 
-set_source_files_properties(${LUA_SOURCE_FILES} PROPERTIES LANGUAGE CXX) 
+set_source_files_properties(${LUA_HEADER_FILES} PROPERTIES LANGUAGE CXX)
+set_source_files_properties(${LUA_SOURCE_FILES} PROPERTIES LANGUAGE CXX)
 
 include_directories(
         /usr/include/

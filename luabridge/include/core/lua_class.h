@@ -944,7 +944,7 @@ namespace luabridge
           and pass it as an argument).
         */
         template<class MemFn, class C>
-        Class<T> &addConstructor()
+        Class<T> &AddConstructor()
         {
             AssertStackState(); // Stack: const table (co), class table (cl), static table (st)
             lua_State *L = m_pLuaVm->LuaState();
@@ -956,7 +956,7 @@ namespace luabridge
         }
 
         template<class MemFn>
-        Class<T> &addConstructor()
+        Class<T> &AddConstructor()
         {
             AssertStackState(); // Stack: const table (co), class table (cl), static table (st)
             lua_State *L = m_pLuaVm->LuaState();

@@ -129,11 +129,6 @@ struct TypeTraits
     };
     /**@}*/
 };
-
-
-template <class T>
-struct Stack;
-
 } // namespace luabridge
 
 #endif

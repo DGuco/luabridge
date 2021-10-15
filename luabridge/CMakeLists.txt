@@ -3,8 +3,9 @@ project(luabridge)
 
 set(CMAKE_C_COMPILER gcc)
 set(CMAKE_CXX_COMPILER g++)
-add_compile_options(-O1 -Wall -g -pipe -Wextra -std=c++11)
+add_compile_options(-O2 -Wall -g -pipe -Wextra -std=c++11)
 add_definitions(-DLUABRIDGE_CXX11 -DCOMPILE_LUA_WITH_CXX)
+#add_definitions(-DLUABRIDGE_CXX11)
 
 
 set(LUA_BRIDGE_HEADER_FILES
@@ -45,8 +46,8 @@ link_directories(
 )
 
 add_executable(luabridge
-        main.cpp
         ${LUA_BRIDGE_HEADER_FILES}
+        ${SOURCE_FILES}
         )
 
 target_link_libraries(luabridge lua dl)
