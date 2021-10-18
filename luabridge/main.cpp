@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 #include <functional>
+#include <memory>
 #include "lua_bridge.h"
 
 using namespace luabridge;
@@ -117,7 +118,7 @@ int main()
 
         BEGIN_NAMESPACE(luaBridge,"space")
             BEGIN_CLASS(luaBridge,OuterClass,"OuterClass")
-                CLASS_ADD_CONSTRUCTOR(void(*)(int))
+                SAFE_CLASS_ADD_CONSTRUCTOR(void(*)(int),std::shared_ptr<OuterClass>)
                 CLASS_ADD_FUNC("Say",&OuterClass::Say)
             END_CLASS
             BEGIN_REGISTER_CFUNC(luaBridge)
@@ -126,7 +127,7 @@ int main()
         END_NAMESPACE
 
         BEGIN_CLASS(luaBridge, OuterClass, "OuterClass")
-            CLASS_ADD_CONSTRUCTOR(void(*)(int))
+            SAFE_CLASS_ADD_CONSTRUCTOR(void(*)(int),std::shared_ptr<OuterClass>)
             CLASS_ADD_FUNC("Say",&OuterClass::Say)
             CLASS_ADD_STATIC_PROPERTY("data",&OuterClass::data)
             LuaHelper::DumpTable(L,-1,std::cout,2);
@@ -136,7 +137,7 @@ int main()
         END_CLASS
 
         BEGIN_CLASS(luaBridge, OuterClass1, "OuterClass1")
-            CLASS_ADD_CONSTRUCTOR(void(*)(int))
+            SAFE_CLASS_ADD_CONSTRUCTOR(void(*)(int),std::shared_ptr<OuterClass1>)
             CLASS_ADD_FUNC("Say",&OuterClass1::Say)
         END_CLASS
 

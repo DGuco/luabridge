@@ -460,7 +460,7 @@ struct CFunc
         __gc metamethod for a class.
     */
     template<class C>
-    static int gcMetaMethod(lua_State *L)
+    static int GCMetaMethod(lua_State *L)
     {
         Userdata *const ud = Userdata::getExact<C>(L, 1);
         ud->~Userdata();

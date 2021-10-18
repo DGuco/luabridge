@@ -422,7 +422,7 @@ struct UserdataSharedHelper
             new(lua_newuserdata(L, sizeof(UserdataShared<C>))) UserdataShared<C>(c);
             lua_rawgetp(L, LUA_REGISTRYINDEX, ClassInfo<T>::GetClassKey());
             // If this goes off it means the class T is unregistered!
-            assert (lua_istable(L, -1));
+            LUA_ASSERT(L,lua_istable(L, -1), "UserdataSharedHelper::push<C&> lua_istable failed");
             lua_setmetatable(L, -2);
         }
         else {
@@ -436,7 +436,7 @@ struct UserdataSharedHelper
             new(lua_newuserdata(L, sizeof(UserdataShared<C>))) UserdataShared<C>(t);
             lua_rawgetp(L, LUA_REGISTRYINDEX, ClassInfo<T>::GetClassKey());
             // If this goes off it means the class T is unregistered!
-            assert (lua_istable(L, -1));
+            LUA_ASSERT(L,lua_istable(L, -1), "UserdataSharedHelper::push<T*> lua_istable failed");
             lua_setmetatable(L, -2);
         }
         else {

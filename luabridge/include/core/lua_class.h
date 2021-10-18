@@ -277,7 +277,7 @@ namespace luabridge
               typekey = const_name,
               __index = &CFunc::IndexMetaMethod,
               __newindex = &CFunc::NewindexStaticMetaMethod,
-              __gc = &CFunc::gcMetaMethod<T>,
+              __gc = &CFunc::GCMetaMethod<T>,
               propgetKey = {table}(通过addProperty注册普通成员变量的get方法会注册在这里),
               classKey = cl,
               func1_name = func1,(普通成员函数1 会被注册在这个表里),
@@ -289,7 +289,7 @@ namespace luabridge
               typekey = name,
               __index = &CFunc::IndexMetaMethod,
               __newindex = &CFunc::NewindexStaticMetaMethod,
-              __gc = &CFunc::gcMetaMethod<T>,
+              __gc = &CFunc::GCMetaMethod<T>,
               propgetKey = {}(table)(通过addProperty注册普通成员变量的get方法也会注册在这里),
               propsetKey = {}(table)(通过addProperty注册普通成员变量的set方法也会注册在这里),,
               constKey = co,
@@ -336,7 +336,7 @@ namespace luabridge
                 createConstTable(name);
                 //now 栈状态lua_gettop(L)== n + 2:ns=>co
                 //注册gc元方法
-                lua_pushcfunction(L, &CFunc::gcMetaMethod<T>); // 栈状态lua_gettop(L)== n + 3:ns=>co=>gcfun
+                lua_pushcfunction(L, &CFunc::GCMetaMethod<T>); // 栈状态lua_gettop(L)== n + 3:ns=>co=>gcfun
                 //co.__gc = gcfun 即co.__metatable.__gc = gcfun 栈状态lua_gettop(L)== n + 2:ns=>co
                 LuaHelper::RawSetField(L, -2, "__gc");
                 m_pLuaVm->AddStackSize(1);
@@ -345,7 +345,7 @@ namespace luabridge
                 createClassTable(name); //class table (cl) stack栈状态lua_gettop(L)== n + 3:ns=>co=>cl
                 //now 栈状态lua_gettop(L) == n + 3:ns=>co=>cl
                 //注册gc元方法
-                lua_pushcfunction(L, &CFunc::gcMetaMethod<T>); //gcfun stack栈状态lua_gettop(L)== n + 4:ns=>co=>cl=>gcfun
+                lua_pushcfunction(L, &CFunc::GCMetaMethod<T>); //gcfun stack栈状态lua_gettop(L)== n + 4:ns=>co=>cl=>gcfun
                 //cl.__gc = gcfun 即 cl.__metatable.__gc = gcfun stack栈状态lua_gettop(L)== n + 3:ns=>co=>cl
                 LuaHelper::RawSetField(L, -2, "__gc");
                 m_pLuaVm->AddStackSize(1);
@@ -410,13 +410,13 @@ namespace luabridge
             assert (lua_istable(L, -1)); // Stack: namespace table (ns)
 
             createConstTable(name); // Stack: ns, const table (co)
-            lua_pushcfunction(L, &CFunc::gcMetaMethod<T>); // Stack: ns, co, function
+            lua_pushcfunction(L, &CFunc::GCMetaMethod<T>); // Stack: ns, co, function
             LuaHelper::RawSetField(L, -2, "__gc"); // Stack: ns, co
             m_pLuaVm->AddStackSize(1);
 
 
             createClassTable(name); // Stack: ns, co, class table (cl)
-            lua_pushcfunction(L, &CFunc::gcMetaMethod<T>); // Stack: ns, co, cl, function
+            lua_pushcfunction(L, &CFunc::GCMetaMethod<T>); // Stack: ns, co, cl, function
             LuaHelper::RawSetField(L, -2, "__gc"); // Stack: ns, co, cl
             m_pLuaVm->AddStackSize(1);
 

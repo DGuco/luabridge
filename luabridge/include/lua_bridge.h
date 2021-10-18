@@ -34,6 +34,7 @@
 #include <map>
 #include <string>
 #include <utility>
+#include <memory>
 #include "lua_file.h"
 
 namespace luabridge
@@ -98,13 +99,13 @@ public:
      * @param name
      * @return
      */
-    Namespace& BeginNameSpace(char *name);
+    Namespace &BeginNameSpace(char *name);
 
     /**
      *
      * @return
      */
-    Namespace& CurNameSpace();
+    Namespace &CurNameSpace();
     /**
      *Continue namespace registration in the parent.
      * Do not use this on the global namespace.
@@ -386,7 +387,7 @@ const char *LuaBridge::Call(const char *func, const char *sig, ...)
     return sresult;
 }
 
-Namespace& LuaBridge::BeginNameSpace(char *name)
+Namespace &LuaBridge::BeginNameSpace(char *name)
 {
     m_namespace = GetGlobalNamespace().BeginNamespace(name);;
     return m_namespace;
@@ -448,17 +449,20 @@ Namespace &LuaBridge::CurNameSpace()
             pclasst = &classt;                                            \
         }
 
-#define CLASS_ADD_CONSTRUCTOR(FT)                                        \
+#define CLASS_ADD_CONSTRUCTOR(FT)                                         \
         pclasst->AddConstructor<FT>();
 
-#define CLASS_ADD_FUNC(name, func)                                       \
+#define SAFE_CLASS_ADD_CONSTRUCTOR(FT,CO)                                   \
+        pclasst->AddConstructor<FT,CO>();
+
+#define CLASS_ADD_FUNC(name, func)                                        \
         pclasst->addFunction(name, func);
 
 #define CLASS_ADD_STATIC_PROPERTY(name, data)                             \
         pclasst->addStaticProperty(name, data,true);
 
-#define END_CLASS                                                        \
-        pclasst->endClass();                                             \
+#define END_CLASS                                                         \
+        pclasst->endClass();                                              \
     }
 
 #define BEGIN_REGISTER_CFUNC(luabridge)                                   \
@@ -466,13 +470,13 @@ Namespace &LuaBridge::CurNameSpace()
         LuaBridge& _luabridge_ = luabridge;
 
 #define REGISTER_CFUNC(name, func)                                        \
-        if(!_luabridge_.CurNameSpace().IsValid())                        \
+        if(!_luabridge_.CurNameSpace().IsValid())                         \
         {                                                                 \
-            Namespace::AddGlobalCFunc(_luabridge_.LuaState(),name,func); \
+            Namespace::AddGlobalCFunc(_luabridge_.LuaState(),name,func);  \
         }                                                                 \
         else                                                              \
         {                                                                 \
-             _luabridge_.CurNameSpace().AddCFunction(name,func);         \
+             _luabridge_.CurNameSpace().AddCFunction(name,func);          \
         }
 
 #define END_REGISTER_CFUNC                                                \
