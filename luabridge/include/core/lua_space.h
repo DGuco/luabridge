@@ -306,10 +306,10 @@ public:
         Open a new or existing class for registrations.
     */
     template<class T>
-    Class<T> BeginClass(char const *name)
+    Class<T> BeginClass(char const *name,bool shared)
     {
         m_pLuaVm->AssertIsActive();
-        return Class<T>(name, m_pLuaVm);
+        return Class<T>(name, m_pLuaVm,shared);
     }
 
     //----------------------------------------------------------------------------

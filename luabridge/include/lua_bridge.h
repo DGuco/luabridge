@@ -424,62 +424,62 @@ Namespace &LuaBridge::CurNameSpace()
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define BEGIN_NAMESPACE(luabridge, name)                                  \
-    {                                                                     \
-        LuaBridge& _luabridge_ = luabridge;                               \
+#define BEGIN_NAMESPACE(luabridge, name)                                                \
+    {                                                                                   \
+        LuaBridge& _luabridge_ = luabridge;                                             \
         _luabridge_.BeginNameSpace(name);
 
-#define END_NAMESPACE                                                     \
-        _luabridge_.EndNamespace();                                       \
+#define END_NAMESPACE                                                                   \
+        _luabridge_.EndNamespace();                                                     \
     }
 
-#define BEGIN_CLASS(luabridge, ClassT, name)                              \
-    {                                                                     \
-        Class<ClassT> *pclasst = NULL;                                    \
-        if(!luabridge.CurNameSpace().IsValid())                           \
-        {                                                                 \
-            Namespace& nameSpace = luabridge.GetGlobalNamespace();        \
-            Class<ClassT> classt = nameSpace.BeginClass<ClassT>(name);    \
-            pclasst = &classt;                                            \
-        }                                                                 \
-        else                                                              \
-        {                                                                 \
-            Namespace& nameSpace = luabridge.CurNameSpace();              \
-            Class<ClassT> classt = nameSpace.BeginClass<ClassT>(name);    \
-            pclasst = &classt;                                            \
+#define BEGIN_CLASS_SHARED_OR_NOT(luabridge, ClassT, name,shared)                       \
+    {                                                                                   \
+        Class<ClassT> *pclasst = NULL;                                                  \
+        if(!luabridge.CurNameSpace().IsValid())                                         \
+        {                                                                               \
+            Namespace& nameSpace = luabridge.GetGlobalNamespace();                      \
+            Class<ClassT> classt = nameSpace.BeginClass<ClassT>(name,shared);           \
+            pclasst = &classt;                                                          \
+        }                                                                               \
+        else                                                                            \
+        {                                                                               \
+            Namespace& nameSpace = luabridge.CurNameSpace();                            \
+            Class<ClassT> classt = nameSpace.BeginClass<ClassT>(name,shared);           \
+            pclasst = &classt;                                                          \
         }
 
-#define CLASS_ADD_CONSTRUCTOR(FT)                                         \
+#define BEGIN_CLASS(luabridge, ClassT, name) BEGIN_CLASS_SHARED_OR_NOT(luabridge, ClassT, name,false)
+#define BEGIN_SHARED_CLASS(luabridge, ClassT, name) BEGIN_CLASS_SHARED_OR_NOT(luabridge, ClassT, name,true)
+
+#define CLASS_ADD_CONSTRUCTOR(FT)                                                       \
         pclasst->AddConstructor<FT>();
 
-#define SAFE_CLASS_ADD_CONSTRUCTOR(FT,CO)                                   \
-        pclasst->AddConstructor<FT,CO>();
-
-#define CLASS_ADD_FUNC(name, func)                                        \
+#define CLASS_ADD_FUNC(name, func)                                                      \
         pclasst->addFunction(name, func);
 
-#define CLASS_ADD_STATIC_PROPERTY(name, data)                             \
+#define CLASS_ADD_STATIC_PROPERTY(name, data)                                           \
         pclasst->addStaticProperty(name, data,true);
 
-#define END_CLASS                                                         \
-        pclasst->endClass();                                              \
+#define END_CLASS                                                                       \
+        pclasst->endClass();                                                            \
     }
 
-#define BEGIN_REGISTER_CFUNC(luabridge)                                   \
-    {                                                                     \
+#define BEGIN_REGISTER_CFUNC(luabridge)                                                 \
+    {                                                                                   \
         LuaBridge& _luabridge_ = luabridge;
 
-#define REGISTER_CFUNC(name, func)                                        \
-        if(!_luabridge_.CurNameSpace().IsValid())                         \
-        {                                                                 \
-            Namespace::AddGlobalCFunc(_luabridge_.LuaState(),name,func);  \
-        }                                                                 \
-        else                                                              \
-        {                                                                 \
-             _luabridge_.CurNameSpace().AddCFunction(name,func);          \
+#define REGISTER_CFUNC(name, func)                                                      \
+        if(!_luabridge_.CurNameSpace().IsValid())                                       \
+        {                                                                               \
+            Namespace::AddGlobalCFunc(_luabridge_.LuaState(),name,func);                \
+        }                                                                               \
+        else                                                                            \
+        {                                                                               \
+             _luabridge_.CurNameSpace().AddCFunction(name,func);                        \
         }
 
-#define END_REGISTER_CFUNC                                                \
+#define END_REGISTER_CFUNC                                                              \
     }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 } //namespace luabridge

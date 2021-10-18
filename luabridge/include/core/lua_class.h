@@ -51,8 +51,8 @@ namespace luabridge
     class ClassBase
     {
     public:
-        explicit ClassBase(const char *name, LuaVm *puaVm)
-            : className(name), m_pLuaVm(puaVm)
+        explicit ClassBase(const char *name, LuaVm *puaVm,bool  shared)
+            : className(name), m_pLuaVm(puaVm),m_bshared(shared)
         {
         }
 
@@ -241,7 +241,8 @@ namespace luabridge
         }
     protected:
         std::string className;
-        LuaVm *m_pLuaVm;
+        LuaVm       *m_pLuaVm;
+        bool        m_bshared;
     };
 
     //============================================================================
@@ -318,8 +319,8 @@ namespace luabridge
               ClassInfo<T>_const_key = co,
           }
          **/
-        Class(char const *name, LuaVm *luaVm)
-            : ClassBase(name, luaVm)
+        Class(char const *name, LuaVm *luaVm,bool shared)
+            : ClassBase(name, luaVm,shared)
         {
             lua_State *L = m_pLuaVm->LuaState();
             //栈顶是否是表(_G)
@@ -403,8 +404,8 @@ namespace luabridge
         /**
           Derive a new class.
         */
-        Class(char const *name, LuaVm *luaVm, void const *const staticKey)
-            : ClassBase(name, luaVm)
+        Class(char const *name, LuaVm *luaVm, void const *const staticKey,bool shared)
+            : ClassBase(name, luaVm,shared)
         {
             lua_State *L = m_pLuaVm->LuaState();
             assert (lua_istable(L, -1)); // Stack: namespace table (ns)
@@ -943,28 +944,28 @@ namespace luabridge
           the desired Constructor (since you can't take the address of a Constructor
           and pass it as an argument).
         */
-        template<class MemFn, class C>
-        Class<T> &AddConstructor()
-        {
-            AssertStackState(); // Stack: const table (co), class table (cl), static table (st)
-            lua_State *L = m_pLuaVm->LuaState();
-
-            lua_pushcclosure(L, &CtorContainerProxy < MemFn, C > , 0);
-            LuaHelper::RawSetField(L, -2, "__call");
-
-            return *this;
-        }
-
         template<class MemFn>
         Class<T> &AddConstructor()
         {
-            AssertStackState(); // Stack: const table (co), class table (cl), static table (st)
-            lua_State *L = m_pLuaVm->LuaState();
+            if (m_bshared)
+            {
+                AssertStackState(); // Stack: const table (co), class table (cl), static table (st)
+                lua_State *L = m_pLuaVm->LuaState();
 
-            lua_pushcclosure(L, &CtorPlacementProxy < MemFn, T > , 0);
-            LuaHelper::RawSetField(L, -2, "__call");
+                lua_pushcclosure(L, &CtorContainerProxy < MemFn, std::shared_ptr<T>> , 0);
+                LuaHelper::RawSetField(L, -2, "__call");
 
-            return *this;
+                return *this;
+            }else
+            {
+                AssertStackState(); // Stack: const table (co), class table (cl), static table (st)
+                lua_State *L = m_pLuaVm->LuaState();
+
+                lua_pushcclosure(L, &CtorPlacementProxy < MemFn, T > , 0);
+                LuaHelper::RawSetField(L, -2, "__call");
+
+                return *this;
+            }
         }
     };
 } // namespace luabridge
