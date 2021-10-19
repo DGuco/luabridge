@@ -210,39 +210,33 @@ namespace luabridge
             lua_State *L = m_pLuaVm->LuaState();
             // Stack: const table (co), class table (cl), static table (st)
             lua_rawgetp(L, -1, GetTypeKey()); // Stack: rt, registry type
+
+            LUA_ASSERT_EX(L,lua_isstring(L,-1),"AssertStackState lua_isstring(L,-1)",luaerror);
             std::string name = std::string(lua_tostring(L, -1));
             lua_pop(L, 1);
             std::string rightName = std::string("static_") + className;
-            LUA_ASSERT_EX(L,
-                          name == rightName,
-                          (std::string("table type name wrong,rightName = ") + rightName + std::string(",curname = ")
-                              + name).c_str(),
-                          luaerror);
-            assert (lua_istable(L, -2));
+            LUA_ASSERT_EX(L,name == rightName,(std::string("table type name wrong,rightName = ") + rightName + std::string(",curname = ") + name).c_str(),luaerror);
+
+            LUA_ASSERT_EX(L,lua_istable(L,-2),"AssertStackState lua_istable(L,-1)",luaerror);
             lua_rawgetp(L, -2, GetTypeKey()); // Stack: rt, registry type
+
+            LUA_ASSERT_EX(L,lua_isstring(L,-1),"AssertStackState lua_isstring(L,-1)",luaerror);
             name = std::string(lua_tostring(L, -1));
             lua_pop(L, 1);
             rightName = className;
-            LUA_ASSERT_EX(L,
-                          name == rightName,
-                          (std::string("table type name wrong,rightName = ") + rightName + std::string(",curname = ")
-                              + name).c_str(),
-                          luaerror);
-            assert (lua_istable(L, -3));
+            LUA_ASSERT_EX(L,name == rightName,(std::string("table type name wrong,rightName = ") + rightName + std::string(",curname = ")+ name).c_str(),luaerror);
+
+            LUA_ASSERT_EX(L,lua_istable(L,-3),"AssertStackState lua_istable(L,-3)",luaerror);
             lua_rawgetp(L, -3, GetTypeKey()); // Stack: rt, registry type
             name = std::string(lua_tostring(L, -1));
             lua_pop(L, 1);
             rightName = std::string("const_") + className;
-            LUA_ASSERT_EX(L,
-                          name == rightName,
-                          (std::string("table type name wrong,rightName = ") + rightName + std::string(",curname = ")
-                              + name).c_str(),
-                          luaerror);
+            LUA_ASSERT_EX(L,name == rightName,(std::string("table type name wrong,rightName = ") + rightName + std::string(",curname = ")+ name).c_str(),luaerror);
         }
     protected:
-        std::string className;
+        std::string  className;
         LuaVm       *m_pLuaVm;
-        bool        m_bshared;
+        bool         m_bshared;
     };
 
     //============================================================================

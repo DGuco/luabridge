@@ -104,8 +104,8 @@ std::function<int(int, int)> func = [](int a, int b) -> int
 
 int main()
 {
-    try
-    {
+//    try
+//    {
         lua_State *L = luaL_newstate();
         LuaBridge luaBridge(L);
         luaBridge.LoadFile("../script/111111.lua");
@@ -116,7 +116,7 @@ int main()
 //        END_NAMESPACE_CLASS
 
         BEGIN_NAMESPACE(luaBridge,"space")
-            BEGIN_CLASS(luaBridge,OuterClass,"OuterClass")
+            BEGIN_CLASS(luaBridge,OuterClass)
                 CLASS_ADD_CONSTRUCTOR(void(*)(int))
                 CLASS_ADD_FUNC("Say",&OuterClass::Say)
             END_CLASS
@@ -125,7 +125,7 @@ int main()
             END_REGISTER_CFUNC
         END_NAMESPACE
 
-        BEGIN_CLASS(luaBridge, OuterClass, "OuterClass")
+        BEGIN_CLASS(luaBridge, OuterClass)
             CLASS_ADD_CONSTRUCTOR(void(*)(int))
             CLASS_ADD_FUNC("Say",&OuterClass::Say)
             CLASS_ADD_STATIC_PROPERTY("data",&OuterClass::data)
@@ -135,7 +135,7 @@ int main()
             LuaHelper::DumpTable(L,-4,std::cout,2);
         END_CLASS
 
-        BEGIN_SHARED_CLASS(luaBridge, OuterClass1, "OuterClass1")
+        BEGIN_SHARED_CLASS(luaBridge, OuterClass1)
             CLASS_ADD_CONSTRUCTOR(void(*)(int))
             CLASS_ADD_FUNC("Say",&OuterClass1::Say)
         END_CLASS
@@ -166,10 +166,10 @@ int main()
         ret = luaBridge.CallLuaFunc<int>("x11111_test",1000,2000);
         printf("ret = %d\n",ret);
         printf("-------------------\n");
-    }catch (std::exception& e)
-    {
-        printf("run catch one execption,msg = %s\n",e.what());
-    }
+//    }catch (std::exception& e)
+//    {
+//        printf("run catch one execption,msg = %s\n",e.what());
+//    }
 
     return 0;
 }

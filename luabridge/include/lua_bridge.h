@@ -433,24 +433,24 @@ Namespace &LuaBridge::CurNameSpace()
         _luabridge_.EndNamespace();                                                     \
     }
 
-#define BEGIN_CLASS_SHARED_OR_NOT(luabridge, ClassT, name,shared)                       \
+#define BEGIN_CLASS_SHARED_OR_NOT(luabridge, ClassT,shared)                             \
     {                                                                                   \
         Class<ClassT> *pclasst = NULL;                                                  \
         if(!luabridge.CurNameSpace().IsValid())                                         \
         {                                                                               \
             Namespace& nameSpace = luabridge.GetGlobalNamespace();                      \
-            Class<ClassT> classt = nameSpace.BeginClass<ClassT>(name,shared);           \
+            Class<ClassT> classt = nameSpace.BeginClass<ClassT>(#ClassT,shared);        \
             pclasst = &classt;                                                          \
         }                                                                               \
         else                                                                            \
         {                                                                               \
             Namespace& nameSpace = luabridge.CurNameSpace();                            \
-            Class<ClassT> classt = nameSpace.BeginClass<ClassT>(name,shared);           \
+            Class<ClassT> classt = nameSpace.BeginClass<ClassT>(#ClassT,shared);        \
             pclasst = &classt;                                                          \
         }
 
-#define BEGIN_CLASS(luabridge, ClassT, name) BEGIN_CLASS_SHARED_OR_NOT(luabridge, ClassT, name,false)
-#define BEGIN_SHARED_CLASS(luabridge, ClassT, name) BEGIN_CLASS_SHARED_OR_NOT(luabridge, ClassT, name,true)
+#define BEGIN_CLASS(luabridge, ClassT) BEGIN_CLASS_SHARED_OR_NOT(luabridge, ClassT,false)
+#define BEGIN_SHARED_CLASS(luabridge, ClassT) BEGIN_CLASS_SHARED_OR_NOT(luabridge, ClassT,true)
 
 #define CLASS_ADD_CONSTRUCTOR(FT)                                                       \
         pclasst->AddConstructor<FT>();
