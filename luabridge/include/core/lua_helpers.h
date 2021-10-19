@@ -99,11 +99,11 @@ public:
 
     static int GetStackLen(lua_State *L, int idx);
 
-    /** Get a table value, bypassing metamethods.
+    /** Get a table value, by passing metamethods.
     */
     static void RawGetField(lua_State *L, int index, char const *key);
 
-    /** Set a table value, bypassing metamethods.
+    /** Set a table value, by passing metamethods.
     */
     static void RawSetField(lua_State *L, int index, char const *key);
     /** Returns true if the value is a full userdata (not light).

@@ -84,7 +84,7 @@ public:
     void AssertIsActive() const
     {
         if (m_stackSize == 0) {
-            throw std::logic_error("Unable to continue registration");
+            throw std::runtime_error("Unable to continue registration");
         }
     }
 };
