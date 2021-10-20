@@ -362,8 +362,13 @@ namespace luabridge
             }
             else
             {
-                //表存在
-                LUA_ASSERT_EX (L, lua_istable(L, -1), "lua_istable(L, -1)", false); // Stack: 栈状态ua_gettop(L)== n + 2:ns=>st
+                //表存在Stack: ns 栈状态ua_gettop(L)== n + 2:ns=>vst
+                LUA_ASSERT_EX (L, lua_istable(L, -1), "lua_istable(L, -1)", false);
+                LuaHelper::RawGetField(L, -1, "classname");
+                LUA_ASSERT_EX (L, lua_isstring(L, -1), "lua_isstring(L, -1)", false);
+                std::string  classname =  std::string(lua_tostring(L,-1));
+                LUA_ASSERT_EX(L,name == classname,(std::string("class wrong,rightclass = ") + name + std::string(",curname = ") + classname).c_str(),false);
+                lua_pop(L, 1); //name出栈  Stack: ns 栈状态ua_gettop(L)== n + 2:ns=>vst
 //                printf("========================metatable==========================\n");
 //                int top = lua_gettop(L);
 //                if(lua_getmetatable(L,-1))
@@ -377,7 +382,9 @@ namespace luabridge
 //                lua_pop(L, 1); // Stack: ns 栈状态ua_gettop(L)== n + 1:ns
 //                top = lua_gettop(L);
 
-                lua_rawgetp(L, LUA_REGISTRYINDEX, ClassInfo<T>::GetStaticKey()); // Stack 栈状态ua_gettop(L)== n + 3:ns=>st=>co
+                lua_pop(L, 1); //vst出栈  Stack: ns 栈状态ua_gettop(L)== n + 1:ns
+
+                lua_rawgetp(L, LUA_REGISTRYINDEX, ClassInfo<T>::GetStaticKey()); // Stack 栈状态ua_gettop(L)== n + 3:ns=>st
                 m_pLuaVm->AddStackSize(1);
 
                 // Map T back from its stored tables
@@ -390,6 +397,8 @@ namespace luabridge
                 //把栈顶元素移动到指定的有效索引处， 依次移动这个索引之上的元素,调整cl的位置
                 lua_insert(L, -2); // Stack 栈状态ua_gettop(L)== n + 4:ns=>co=>cl=>st
                 m_pLuaVm->AddStackSize(1);
+
+                //now stack栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
             }
         }
 
@@ -417,7 +426,6 @@ namespace luabridge
 
             CreateStaticTable(name); // Stack: ns, co, cl, st
             m_pLuaVm->AddStackSize(1);
-
 
             lua_rawgetp(L, LUA_REGISTRYINDEX, staticKey); // Stack: ns, co, cl, st, parent st (pst) | nil
             if (lua_isnil(L, -1)) // Stack: ns, co, cl, st, nil
@@ -458,7 +466,7 @@ namespace luabridge
         /**
           Continue registration in the enclosing namespace.
         */
-        void endClass()
+        void EndClass()
         {
             assert (m_pLuaVm->GetStackSize() > 3);
             m_pLuaVm->AddStackSize(-3);
@@ -471,9 +479,9 @@ namespace luabridge
           Add or replace a static data member.
         */
         template<class U>
-        Class<T> &addStaticProperty(char const *name, U *pu, bool isWritable = true)
+        Class<T> &AddStaticProperty(char const *name, U *pu, bool isWritable = true)
         {
-            return addStaticData(name, pu, isWritable);
+            return AddStaticData(name, pu, isWritable);
         }
 
         //--------------------------------------------------------------------------
@@ -481,7 +489,7 @@ namespace luabridge
           Add or replace a static data member.
         */
         template<class U>
-        Class<T> &addStaticData(char const *name, U *pu, bool isWritable = true)
+        Class<T> &AddStaticData(char const *name, U *pu, bool isWritable = true)
         {
             AssertStackState(); // Stack: const table (co), class table (cl), static table (st)
             lua_State *L = m_pLuaVm->LuaState();
@@ -510,7 +518,7 @@ namespace luabridge
           If the set function is null, the property is read-only.
         */
         template<class U>
-        Class<T> &addStaticProperty(char const *name, U (*get)(), void (*set)(U) = 0)
+        Class<T> &AddStaticProperty(char const *name, U (*get)(), void (*set)(U) = 0)
         {
             AssertStackState(); // Stack: const table (co), class table (cl), static table (st)
             lua_State *L = m_pLuaVm->LuaState();
@@ -537,7 +545,7 @@ namespace luabridge
           Add or replace a static member function.
         */
         template<class FP>
-        Class<T> &addStaticFunction(char const *name, FP const fp)
+        Class<T> &AddStaticFunction(char const *name, FP const fp)
         {
             AssertStackState(); // Stack: const table (co), class table (cl), static table (st)
             lua_State *L = m_pLuaVm->LuaState();
@@ -553,16 +561,16 @@ namespace luabridge
         /**
           Add or replace a lua_CFunction.
         */
-        Class<T> &addStaticFunction(char const *name, int (*const fp)(lua_State *))
+        Class<T> &AddStaticFunction(char const *name, int (*const fp)(lua_State *))
         {
-            return addStaticCFunction(name, fp);
+            return AddStaticCFunction(name, fp);
         }
 
         //--------------------------------------------------------------------------
         /**
           Add or replace a lua_CFunction.
         */
-        Class<T> &addStaticCFunction(char const *name, int (*const fp)(lua_State *))
+        Class<T> &AddStaticCFunction(char const *name, int (*const fp)(lua_State *))
         {
             AssertStackState(); // Stack: const table (co), class table (cl), static table (st)
             lua_State *L = m_pLuaVm->LuaState();
@@ -578,9 +586,9 @@ namespace luabridge
           Add or replace a data member.
         */
         template<class U>
-        Class<T> &addProperty(char const *name, U T::* mp, bool isWritable = true)
+        Class<T> &AddProperty(char const *name, U T::* mp, bool isWritable = true)
         {
-            return addData(name, mp, isWritable);
+            return AddData(name, mp, isWritable);
         }
 
         //--------------------------------------------------------------------------
@@ -588,7 +596,7 @@ namespace luabridge
           Add or replace a data member.
         */
         template<class U>
-        Class<T> &addData(char const *name, U T::* mp, bool isWritable = true)
+        Class<T> &AddData(char const *name, U T::* mp, bool isWritable = true)
         {
             AssertStackState(); // Stack: const table (co), class table (cl), static table (st)
             lua_State *L = m_pLuaVm->LuaState();
@@ -614,7 +622,7 @@ namespace luabridge
           Add or replace a property member.
         */
         template<class TG, class TS = TG>
-        Class<T> &addProperty(char const *name, TG (T::* get)() const, void (T::* set)(TS) = 0)
+        Class<T> &AddProperty(char const *name, TG (T::* get)() const, void (T::* set)(TS) = 0)
         {
             AssertStackState(); // Stack: const table (co), class table (cl), static table (st)
             lua_State *L = m_pLuaVm->LuaState();
@@ -641,7 +649,7 @@ namespace luabridge
           Add or replace a property member.
         */
         template<class TG, class TS = TG>
-        Class<T> &addProperty(char const *name, TG (T::* get)(lua_State *) const, void (T::* set)(TS, lua_State *) = 0)
+        Class<T> &AddProperty(char const *name, TG (T::* get)(lua_State *) const, void (T::* set)(TS, lua_State *) = 0)
         {
             AssertStackState(); // Stack: const table (co), class table (cl), static table (st)
             lua_State *L = m_pLuaVm->LuaState();
@@ -675,7 +683,7 @@ namespace luabridge
           argument respectively.
         */
         template<class TG, class TS = TG>
-        Class<T> &addProperty(char const *name, TG (*get)(T const *), void (*set)(T *, TS) = 0)
+        Class<T> &AddProperty(char const *name, TG (*get)(T const *), void (*set)(T *, TS) = 0)
         {
             AssertStackState(); // Stack: const table (co), class table (cl), static table (st)
             lua_State *L = m_pLuaVm->LuaState();
@@ -706,7 +714,7 @@ namespace luabridge
           The object userdata ('this') value is at the index 1.
           The new value for set function is at the index 2.
         */
-        Class<T> &addProperty(char const *name, int (*get)(lua_State *), int (*set)(lua_State *) = 0)
+        Class<T> &AddProperty(char const *name, int (*get)(lua_State *), int (*set)(lua_State *) = 0)
         {
             AssertStackState(); // Stack: const table (co), class table (cl), static table (st)
             lua_State *L = m_pLuaVm->LuaState();
@@ -726,7 +734,7 @@ namespace luabridge
 
         template<class TG, class TS = TG>
         Class<T> &
-        addProperty(char const *name, std::function<TG(const T *)> get, std::function<void(T *, TS)> set = nullptr)
+        AddProperty(char const *name, std::function<TG(const T *)> get, std::function<void(T *, TS)> set = nullptr)
         {
             lua_State *L = m_pLuaVm->LuaState();
 
@@ -761,7 +769,7 @@ namespace luabridge
             Add or replace a member function by std::function.
         */
         template<class ReturnType, class... Params>
-        Class<T> &addFunction(char const *name, std::function<ReturnType(T *, Params...)> function)
+        Class<T> &AddFunction(char const *name, std::function<ReturnType(T *, Params...)> function)
         {
             AssertStackState(); // Stack: const table (co), class table (cl), static table (st)
             lua_State *L = m_pLuaVm->LuaState();
@@ -784,7 +792,7 @@ namespace luabridge
             Add or replace a const member function by std::function.
         */
         template<class ReturnType, class... Params>
-        Class<T> &addFunction(char const *name, std::function<ReturnType(const T *, Params...)> function)
+        Class<T> &AddFunction(char const *name, std::function<ReturnType(const T *, Params...)> function)
         {
             AssertStackState(); // Stack: const table (co), class table (cl), static table (st)
             lua_State *L = m_pLuaVm->LuaState();
@@ -809,7 +817,7 @@ namespace luabridge
             Add or replace a member function.
         */
         template<class ReturnType, class... Params>
-        Class<T> &addFunction(char const *name, ReturnType (T::* mf)(Params...))
+        Class<T> &AddFunction(char const *name, ReturnType (T::* mf)(Params...))
         {
             using MemFn = ReturnType (T::*)(Params...);
 
@@ -825,7 +833,7 @@ namespace luabridge
         }
 
         template<class ReturnType, class... Params>
-        Class<T> &addFunction(char const *name, ReturnType (T::* mf)(Params...) const)
+        Class<T> &AddFunction(char const *name, ReturnType (T::* mf)(Params...) const)
         {
             using MemFn = ReturnType (T::*)(Params...) const;
 
@@ -845,7 +853,7 @@ namespace luabridge
             Add or replace a proxy function.
         */
         template<class ReturnType, class... Params>
-        Class<T> &addFunction(char const *name, ReturnType (*proxyFn)(T *object, Params...))
+        Class<T> &AddFunction(char const *name, ReturnType (*proxyFn)(T *object, Params...))
         {
             AssertStackState(); // Stack: const table (co), class table (cl), static table (st)
             lua_State *L = m_pLuaVm->LuaState();
@@ -862,7 +870,7 @@ namespace luabridge
         }
 
         template<class ReturnType, class... Params>
-        Class<T> &addFunction(char const *name, ReturnType (*proxyFn)(const T *object, Params...))
+        Class<T> &AddFunction(char const *name, ReturnType (*proxyFn)(const T *object, Params...))
         {
             AssertStackState(); // Stack: const table (co), class table (cl), static table (st)
             lua_State *L = m_pLuaVm->LuaState();
@@ -884,16 +892,16 @@ namespace luabridge
         /**
             Add or replace a member lua_CFunction.
         */
-        Class<T> &addFunction(char const *name, int (T::*mfp)(lua_State *))
+        Class<T> &AddFunction(char const *name, int (T::*mfp)(lua_State *))
         {
-            return addCFunction(name, mfp);
+            return AddCFunction(name, mfp);
         }
 
         //--------------------------------------------------------------------------
         /**
             Add or replace a member lua_CFunction.
         */
-        Class<T> &addCFunction(char const *name, int (T::*mfp)(lua_State *))
+        Class<T> &AddCFunction(char const *name, int (T::*mfp)(lua_State *))
         {
             AssertStackState(); // Stack: const table (co), class table (cl), static table (st)
             lua_State *L = m_pLuaVm->LuaState();
@@ -910,16 +918,16 @@ namespace luabridge
         /**
             Add or replace a const member lua_CFunction.
         */
-        Class<T> &addFunction(char const *name, int (T::*mfp)(lua_State *) const)
+        Class<T> &AddFunction(char const *name, int (T::*mfp)(lua_State *) const)
         {
-            return addCFunction(name, mfp);
+            return AddCFunction(name, mfp);
         }
 
         //--------------------------------------------------------------------------
         /**
             Add or replace a const member lua_CFunction.
         */
-        Class<T> &addCFunction(char const *name, int (T::*mfp)(lua_State *) const)
+        Class<T> &AddCFunction(char const *name, int (T::*mfp)(lua_State *) const)
         {
             AssertStackState(); // Stack: const table (co), class table (cl), static table (st)
             lua_State *L = m_pLuaVm->LuaState();

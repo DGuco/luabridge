@@ -104,16 +104,11 @@ std::function<int(int, int)> func = [](int a, int b) -> int
 
 int main()
 {
-//    try
-//    {
+    try
+    {
         lua_State *L = luaL_newstate();
         LuaBridge luaBridge(L);
         luaBridge.LoadFile("../script/111111.lua");
-
-//        BEGIN_NAMESPACE_CLASS(luaBridge,"space",OuterClass, "OuterClass")
-//                    CLASS_ADD_CONSTRUCTOR(void(*)(int))
-//                    CLASS_ADD_FUNC("Say",&OuterClass::Say)
-//        END_NAMESPACE_CLASS
 
         BEGIN_NAMESPACE(luaBridge,"space")
             BEGIN_CLASS(luaBridge,OuterClass)
@@ -122,7 +117,7 @@ int main()
                 LuaHelper::DumpTable(L,-3,std::cout,2);
                 LuaHelper::DumpTable(L,-4,std::cout,2);
                 CLASS_ADD_CONSTRUCTOR(void(*)(int))
-                CLASS_ADD_FUNC("Say",&OuterClass::Say)
+                CLASS_ADD_FUNC("Say", &OuterClass::Say)
             END_CLASS
             BEGIN_REGISTER_CFUNC(luaBridge)
                 REGISTER_CFUNC("Add", SpaceAdd)
@@ -131,18 +126,18 @@ int main()
 
         BEGIN_CLASS(luaBridge, OuterClass)
             CLASS_ADD_CONSTRUCTOR(void(*)(int))
-            CLASS_ADD_FUNC("Say",&OuterClass::Say)
-            CLASS_ADD_STATIC_PROPERTY("data",&OuterClass::data)
+            CLASS_ADD_FUNC("Say", &OuterClass::Say)
+            CLASS_ADD_STATIC_PROPERTY("data", &OuterClass::data)
         END_CLASS
 
         BEGIN_CLASS(luaBridge, OuterClass1)
             CLASS_ADD_CONSTRUCTOR(void(*)(int))
-            CLASS_ADD_FUNC("Say",&OuterClass1::Say)
+            CLASS_ADD_FUNC("Say", &OuterClass1::Say)
         END_CLASS
 
-        BEGIN_CLASS(luaBridge, OuterClass1)
+        BEGIN_SHARED_CLASS(luaBridge, OuterClass1)
             CLASS_ADD_CONSTRUCTOR(void(*)(int))
-            CLASS_ADD_FUNC("Say",&OuterClass1::Say)
+            CLASS_ADD_FUNC("Say", &OuterClass1::Say)
         END_CLASS
 
         BEGIN_REGISTER_CFUNC(luaBridge)
@@ -171,10 +166,10 @@ int main()
         ret = luaBridge.CallLuaFunc<int>("x11111_test",1000,2000);
         printf("ret = %d\n",ret);
         printf("-------------------\n");
-//    }catch (std::exception& e)
-//    {
-//        printf("run catch one execption,msg = %s\n",e.what());
-//    }
+    }catch (std::exception& e)
+    {
+        printf("run catch one execption,msg = %s\n",e.what());
+    }
 
     return 0;
 }

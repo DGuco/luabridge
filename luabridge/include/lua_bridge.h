@@ -456,13 +456,13 @@ Namespace &LuaBridge::CurNameSpace()
         pclasst->AddConstructor<FT>();
 
 #define CLASS_ADD_FUNC(name, func)                                                      \
-        pclasst->addFunction(name, func);
+        pclasst->AddFunction(name, func);
 
 #define CLASS_ADD_STATIC_PROPERTY(name, data)                                           \
-        pclasst->addStaticProperty(name, data,true);
+        pclasst->AddStaticProperty(name, data,true);
 
 #define END_CLASS                                                                       \
-        pclasst->endClass();                                                            \
+        pclasst->EndClass();                                                            \
     }
 
 #define BEGIN_REGISTER_CFUNC(luabridge)                                                 \
