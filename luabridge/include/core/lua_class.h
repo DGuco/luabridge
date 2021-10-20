@@ -139,13 +139,7 @@ namespace luabridge
             lua_State *L = m_pLuaVm->LuaState();
             // Stack: namespace table (ns), const table (co), class table (cl)
             // Stack 栈状态lua_gettop(L) == n + 3:ns=>co=>cl
-            lua_newtable(L); //visible static table (vst) Stack 栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>vst
-            lua_newtable(L); //static metatable (st) Stack 栈状态lua_gettop(L) == n + 5:ns=>co=>cl=>vst=>st
-            lua_pushvalue(L, -1); // Stack 栈状态lua_gettop(L) == n + 6:ns=>co=>cl=>vst=>st=>st
-            lua_setmetatable(L, -3); // vst.__metatable = st. Stack 栈状态lua_gettop(L) == n + 5:ns=>co=>cl=>vst=>st
-            lua_insert(L, -2); // Stack 栈状态lua_gettop(L) == n + 5:ns=>co=>cl=>st=>vst
-            LuaHelper::RawSetField(L, -5, name); // ns [name] = vst. Stack 栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
-
+            lua_newtable(L); //visible static table (vst) Stack 栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
             std::string type_name = std::string("static_") + name;
             lua_pushstring(L, type_name.c_str()); //Stack 栈状态lua_gettop(L) == n + 5:ns=>co=>cl=>st=>type_name
             lua_rawsetp(L, -2, GetTypeKey()); //st.typekey = type_name Stack 栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
@@ -171,7 +165,6 @@ namespace luabridge
                 lua_pushnil(L); // Stack 栈状态lua_gettop(L) == n + 5:ns=>co=>cl=>st=>nil
                 LuaHelper::RawSetField(L,-2,"__metatable"); //st.__metatable = nil   Stack 栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
             }
-            //now 栈状态lua_gettop(L)== n + 4:ns=>co=>cl=>st
         }
 
         //==========================================================================
@@ -258,10 +251,7 @@ namespace luabridge
           Register a new class or add to an existing class registration.
           构造函数完成后
           vst(visible static table) = {
-              __metatable =  {
-                  __index = &CFunc::IndexMetaMethod,
-                  __newindex = &CFunc::NewindexStaticMetaMethod,
-              }
+              __metatable = st,
           }
           co(const table) = {
               __metatable = co,
@@ -316,7 +306,7 @@ namespace luabridge
             //栈顶是否是表(_G)
             LUA_ASSERT_EX(L, lua_istable(L, -1), "lua_istable(L, -1)", false); //栈状态lua_gettop(L)== n + 1:ns
             //尝试find类的metadata表_G[name]
-            LuaHelper::RawGetField(L, -1, name); // st = _G[name] 栈状态ua_gettop(L)== n + 2:ns=>st|nil
+            LuaHelper::RawGetField(L, -1, name); // st = _G[name] 栈状态lua_gettop(L)== n + 2:ns=>st|nil
 
             //表不存在create it
             if (lua_isnil(L, -1)) // Stack: ns, nil 栈状态:ns=>nil
@@ -361,12 +351,33 @@ namespace luabridge
                 lua_pushvalue(L, -3); // 栈状态lua_gettop(L) == n + 5:ns=>co=>cl=>st=>co
                 //把const metadata表插入registry表
                 lua_rawsetp(L,LUA_REGISTRYINDEX,ClassInfo<T>::GetConstKey()); //stack栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
+
+                lua_newtable(L);             //Stack 栈状态lua_gettop(L) == n + 5:ns=>co=>cl=>st=>vst
+                lua_pushstring(L,name);      //Stack 栈状态lua_gettop(L) == n + 6:ns=>co=>cl=>st=>vst=>name
+                LuaHelper::RawSetField(L, -2, "classname"); // vst [classname] = name Stack 栈状态lua_gettop(L) == n + 6:ns=>co=>cl=>st=>vst
+                lua_pushvalue(L, -2); // 栈状态lua_gettop(L) == n + 6:ns=>co=>cl=>st=>vst=>st
+                lua_setmetatable(L,-2);  // vst.__metatable = st. 栈状态lua_gettop(L) == n + 5:ns=>co=>cl=>st=>vst
+                LuaHelper::RawSetField(L, -5, name); // ns [name] = vst. Stack 栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
                 //now stack栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
             }
             else
             {
                 //表存在
                 LUA_ASSERT_EX (L, lua_istable(L, -1), "lua_istable(L, -1)", false); // Stack: 栈状态ua_gettop(L)== n + 2:ns=>st
+//                printf("========================metatable==========================\n");
+//                int top = lua_gettop(L);
+//                if(lua_getmetatable(L,-1))
+//                {
+//                    top = lua_gettop(L);
+//                    LuaHelper::DumpTable(L,-1,std::cout,2);
+//                    top = lua_gettop(L);
+//                }
+//                printf("========================metatable==========================\n");
+//                lua_pop(L, 1); // Stack: ns 栈状态ua_gettop(L)== n + 1:ns
+//                lua_pop(L, 1); // Stack: ns 栈状态ua_gettop(L)== n + 1:ns
+//                top = lua_gettop(L);
+
+                lua_rawgetp(L, LUA_REGISTRYINDEX, ClassInfo<T>::GetStaticKey()); // Stack 栈状态ua_gettop(L)== n + 3:ns=>st=>co
                 m_pLuaVm->AddStackSize(1);
 
                 // Map T back from its stored tables
@@ -374,7 +385,6 @@ namespace luabridge
                 //调整co的位置
                 lua_insert(L, -2); // Stack 栈状态ua_gettop(L)== n + 3:ns=>co=>st
                 m_pLuaVm->AddStackSize(1);
-
 
                 lua_rawgetp(L,LUA_REGISTRYINDEX,ClassInfo<T>::GetClassKey()); // Stack 栈状态ua_gettop(L)== n + 4:ns=>co=>st=>cl
                 //把栈顶元素移动到指定的有效索引处， 依次移动这个索引之上的元素,调整cl的位置
@@ -434,6 +444,14 @@ namespace luabridge
             lua_rawsetp(L, LUA_REGISTRYINDEX, ClassInfo<T>::GetClassKey()); // Stack: ns, co, cl, st
             lua_pushvalue(L, -3); // Stack: ns, co, cl, st, co
             lua_rawsetp(L, LUA_REGISTRYINDEX, ClassInfo<T>::GetConstKey()); // Stack: ns, co, cl, st
+
+            lua_newtable(L);             //Stack 栈状态lua_gettop(L) == n + 5:ns=>co=>cl=>st=>vst
+            lua_pushstring(L,name);      //Stack 栈状态lua_gettop(L) == n + 6:ns=>co=>cl=>st=>vst=>name
+            LuaHelper::RawSetField(L, -2, "classname"); // vst [classname] = name Stack 栈状态lua_gettop(L) == n + 6:ns=>co=>cl=>st=>vst
+            lua_pushvalue(L, -2); // 栈状态lua_gettop(L) == n + 6:ns=>co=>cl=>st=>vst=>st
+            lua_setmetatable(L,-2);  // vst.__metatable = st. 栈状态lua_gettop(L) == n + 5:ns=>co=>cl=>st=>vst
+            LuaHelper::RawSetField(L, -5, name); // ns [name] = vst. Stack 栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
+            //now stack栈状态lua_gettop(L) == n + 4:ns=>co=>cl=>st
         }
 
         //--------------------------------------------------------------------------

@@ -117,6 +117,10 @@ int main()
 
         BEGIN_NAMESPACE(luaBridge,"space")
             BEGIN_CLASS(luaBridge,OuterClass)
+                LuaHelper::DumpTable(L,-1,std::cout,2);
+                LuaHelper::DumpTable(L,-2,std::cout,2);
+                LuaHelper::DumpTable(L,-3,std::cout,2);
+                LuaHelper::DumpTable(L,-4,std::cout,2);
                 CLASS_ADD_CONSTRUCTOR(void(*)(int))
                 CLASS_ADD_FUNC("Say",&OuterClass::Say)
             END_CLASS
@@ -126,26 +130,17 @@ int main()
         END_NAMESPACE
 
         BEGIN_CLASS(luaBridge, OuterClass)
-//            LuaHelper::DumpTable(L,-1,std::cout,2);
-//            LuaHelper::DumpTable(L,-2,std::cout,2);
-//            LuaHelper::DumpTable(L,-3,std::cout,2);
-//            LuaHelper::DumpTable(L,-4,std::cout,2);
             CLASS_ADD_CONSTRUCTOR(void(*)(int))
             CLASS_ADD_FUNC("Say",&OuterClass::Say)
             CLASS_ADD_STATIC_PROPERTY("data",&OuterClass::data)
-            LuaHelper::DumpTable(L,-1,std::cout,2);
-            LuaHelper::DumpTable(L,-2,std::cout,2);
-            LuaHelper::DumpTable(L,-3,std::cout,2);
-            LuaHelper::DumpTable(L,-4,std::cout,2);
-            printf("------------------------------------------------------------\n");
-            printf("------------------------------------------------------------\n");
         END_CLASS
 
         BEGIN_CLASS(luaBridge, OuterClass1)
-//            LuaHelper::DumpTable(L,-1,std::cout,2);
-//            LuaHelper::DumpTable(L,-2,std::cout,2);
-//            LuaHelper::DumpTable(L,-3,std::cout,2);
-//            LuaHelper::DumpTable(L,-4,std::cout,2);
+            CLASS_ADD_CONSTRUCTOR(void(*)(int))
+            CLASS_ADD_FUNC("Say",&OuterClass1::Say)
+        END_CLASS
+
+        BEGIN_CLASS(luaBridge, OuterClass1)
             CLASS_ADD_CONSTRUCTOR(void(*)(int))
             CLASS_ADD_FUNC("Say",&OuterClass1::Say)
         END_CLASS
