@@ -164,21 +164,12 @@ int main()
         printf("-------------------\n");
         ret = luaBridge.CallLuaFunc<int>("x11111_test", 1, 2,BinaryStr("1111111111",11));
         printf("ret = %d\n", ret);
-//        printf("-------------------\n");
-//        ret = luaBridge.CallLuaFunc<int>("x11111_test",10,20);
-//        printf("ret = %d\n",ret);
-//        printf("-------------------\n");
-//        ret = luaBridge.CallLuaFunc<int>("x11111_test",100,200);
-//        printf("ret = %d\n",ret);
-//        printf("-------------------\n");
-//        ret = luaBridge.CallLuaFunc<int>("x11111_test",1000,2000);
-//        printf("ret = %d\n",ret);
-//        printf("-------------------\n");
 
     }catch (std::exception& e)
     {
         printf("run catch one execption,msg = %s\n",e.what());
     }
+    g_pt->Say("Cpp hello OuterClass1");
     printf("main end\n");
 
     return 0;

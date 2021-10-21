@@ -23,11 +23,10 @@ function x11111_test(x,y)
     local spaceclass = space.OuterClass (10)
     spaceclass:Say("Space Hello cpp");
     local spaceadd = space.Add(100,200)
-    print("x11111_test spaceadd ="..spaceadd)
-
+    print("x11111_test spaceadd = "..spaceadd)
     print("=======================lua===========================")
     local outerclass = LuaFnGetOurterClass(100)
-    outerclass:Say("Hello cpp outerclass1");
+    outerclass:Say("Lua Hello outerclass1");
     print("=======================lua===========================")
     return 1
 end
