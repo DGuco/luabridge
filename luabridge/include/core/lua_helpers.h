@@ -94,7 +94,7 @@ public:
      * @param FunName
      * @param Msg
      */
-    static void DefaultDebugLuaErrorInfo(const char *FunName, const char *Msg);
+    static void DebugCallFuncErrorStack(lua_State *L, const char *FunName, const char *Msg);
     static void DefaultDebugLuaErrorInfo(const char *Msg);
 
     static int GetStackLen(lua_State *L, int idx);
@@ -155,7 +155,7 @@ void LuaHelper::LuaStackInfo(lua_State *L)
         LuaHelper::DefaultDebugLuaErrorInfo(Msg);
     }
     LuaHelper::DefaultDebugLuaErrorInfo(
-        "==========================Lua stack info end=====================================");
+        "========================== Lua stack info end =====================================");
 
 }
 
@@ -324,8 +324,9 @@ int LuaHelper::GetParamCount(lua_State *L)
     return lua_gettop(L);
 }
 
-void LuaHelper::DefaultDebugLuaErrorInfo(const char *FunName, const char *Msg)
+void LuaHelper::DebugCallFuncErrorStack(lua_State *L, const char *FunName, const char *Msg)
 {
+    LuaStackInfo(L);
     printf("CallLuaFunc fun:[%s] failed,msg:[%s]\n", FunName, Msg);
 }
 

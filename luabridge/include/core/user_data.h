@@ -378,6 +378,7 @@ private:
 private:
     ~UserdataShared()
     {
+        //printf("~UserdataShared()\n");
     }
 
 public:

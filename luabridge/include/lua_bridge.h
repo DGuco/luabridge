@@ -247,7 +247,7 @@ R LuaBridge::SafeEndCall(const char *func, int nArg)
 {
     lua_State *L = m_pLuaVm->LuaState();
     if (lua_pcall(L, nArg, 1, 0) != LUA_OK) {
-        LuaHelper::DefaultDebugLuaErrorInfo(func, lua_tostring(L, -1));
+        LuaHelper::DebugCallFuncErrorStack(L,func, lua_tostring(L, -1));
         //恢复调用前的堆栈索引
         lua_settop(L, m_iTopIndex);
         return 0;
@@ -262,7 +262,7 @@ R LuaBridge::SafeEndCall(const char *func, int nArg)
         catch (std::exception &e) {
             //恢复调用前的堆栈索引
             lua_settop(L, m_iTopIndex);
-            LuaHelper::DefaultDebugLuaErrorInfo(func, e.what());
+            LuaHelper::DebugCallFuncErrorStack(L,func, e.what());
             return 0;
         }
     }
@@ -273,7 +273,7 @@ void LuaBridge::SafeEndCall(const char *func, int nArg)
 {
     lua_State *L = m_pLuaVm->LuaState();
     if (lua_pcall(L, nArg, 0, 0) != 0) {
-        LuaHelper::DefaultDebugLuaErrorInfo(func, lua_tostring(L, -1));
+        LuaHelper::DebugCallFuncErrorStack(L,func, lua_tostring(L, -1));
     }
     lua_settop(L, m_iTopIndex);
 }

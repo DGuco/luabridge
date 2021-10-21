@@ -17,12 +17,17 @@ function x11111_test(x,y)
     print("addNum = "..addNum)
     print("subNum = "..subNum)
     local testclass = OuterClass (10)
-    local testclass1 = OuterClass1 (10)
+    --local testclass1 = OuterClass1 (10)
     testclass:Say("Hello cpp");
-    testclass1:Say("Hello cpp");
+    --testclass1:Say("Hello cpp");
     local spaceclass = space.OuterClass (10)
     spaceclass:Say("Space Hello cpp");
     local spaceadd = space.Add(100,200)
     print("x11111_test spaceadd ="..spaceadd)
+
+    print("=======================lua===========================")
+    local outerclass = LuaFnGetOurterClass(100)
+    outerclass:Say("Hello cpp outerclass1");
+    print("=======================lua===========================")
     return 1
 end
