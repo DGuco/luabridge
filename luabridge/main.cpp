@@ -101,10 +101,11 @@ std::function<int(int, int)> func = [](int a, int b) -> int
     return a + b;
 };
 
+std::shared_ptr<OuterClass1> g_pt = std::shared_ptr<OuterClass1>(new OuterClass1(100));
+
 int LuaFnGetOurterClass(lua_State *L)
 {
-    std::shared_ptr<OuterClass1> pt = std::shared_ptr<OuterClass1>(new OuterClass1(100));
-    LuaBridge::PushSharedObjToLua<OuterClass1>(L, pt);
+    LuaBridge::PushSharedObjToLua<OuterClass1>(L, g_pt);
     return 1;
 }
 
