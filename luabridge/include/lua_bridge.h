@@ -97,7 +97,7 @@ public:
      * @param ptr
      */
     template<class T>
-    static void PushClassObjToLua(lua_State *L,std::shared_ptr<T> ptr);
+    static void PushSharedObjToLua(lua_State *L, std::shared_ptr<T> ptr);
     /**
      * @return _G TABLE
      */
@@ -395,7 +395,7 @@ const char *LuaBridge::Call(const char *func, const char *sig, ...)
 }
 
 template<typename T>
-void LuaBridge::PushClassObjToLua(lua_State *L,std::shared_ptr<T> ptr)
+void LuaBridge::PushSharedObjToLua(lua_State *L, std::shared_ptr<T> ptr)
 {
     new(lua_newuserdata(L, sizeof(UserdataShared<std::shared_ptr<T>>))) UserdataShared<std::shared_ptr<T>>(ptr);
     lua_rawgetp(L, LUA_REGISTRYINDEX, ClassInfo<T>::GetClassKey());

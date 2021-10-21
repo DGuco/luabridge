@@ -104,7 +104,7 @@ std::function<int(int, int)> func = [](int a, int b) -> int
 int LuaFnGetOurterClass(lua_State *L)
 {
     std::shared_ptr<OuterClass1> pt = std::shared_ptr<OuterClass1>(new OuterClass1(100));
-    LuaBridge::PushClassObjToLua<OuterClass1>(L,pt);
+    LuaBridge::PushSharedObjToLua<OuterClass1>(L, pt);
     return 1;
 }
 
