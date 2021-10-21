@@ -91,6 +91,14 @@ public:
     const char *Call(const char *func, const char *sig, ...);
 
     /**
+     *
+     * @tparam T
+     * @param L
+     * @param ptr
+     */
+    template<class T>
+    static void PushClassObjToLua(lua_State *L,std::shared_ptr<T> ptr);
+    /**
      * @return _G TABLE
      */
     Namespace &GetGlobalNamespace();
@@ -117,7 +125,6 @@ public:
      * @return
      */
     lua_State *LuaState();
-
 private:
     //InitLuaLibrary
     void InitLuaLibrary();
@@ -385,6 +392,15 @@ const char *LuaBridge::Call(const char *func, const char *sig, ...)
 
     lua_pop(L, nres);
     return sresult;
+}
+
+template<typename T>
+void LuaBridge::PushClassObjToLua(lua_State *L,std::shared_ptr<T> ptr)
+{
+    new(lua_newuserdata(L, sizeof(UserdataShared<std::shared_ptr<T>>))) UserdataShared<std::shared_ptr<T>>(ptr);
+    lua_rawgetp(L, LUA_REGISTRYINDEX, ClassInfo<T>::GetClassKey());
+    LUA_ASSERT(L,lua_istable(L, -1), "UserdataSharedHelper::push<T*> lua_istable failed");
+    lua_setmetatable(L, -2);
 }
 
 Namespace &LuaBridge::BeginNameSpace(char *name)

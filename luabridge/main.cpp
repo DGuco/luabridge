@@ -103,16 +103,8 @@ std::function<int(int, int)> func = [](int a, int b) -> int
 
 int LuaFnGetOurterClass(lua_State *L)
 {
-    OuterClass1* ptr = new OuterClass1(100);
-    std::shared_ptr<OuterClass1> pt = std::shared_ptr<OuterClass1>(ptr);
-    {
-        int a = Stack<int>::get(L, 1);
-        new(lua_newuserdata(L, sizeof(UserdataShared<std::shared_ptr<OuterClass1>>))) UserdataShared<std::shared_ptr<OuterClass1>>(pt);
-        lua_rawgetp(L, LUA_REGISTRYINDEX, ClassInfo<OuterClass1>::GetClassKey());
-        LUA_ASSERT(L,lua_istable(L, -1), "UserdataSharedHelper::push<T*> lua_istable failed");
-        lua_setmetatable(L, -2);
-        printf("----------------------------LuaFnGetOurterClass---------------------------------\n");
-    }
+    std::shared_ptr<OuterClass1> pt = std::shared_ptr<OuterClass1>(new OuterClass1(100));
+    LuaBridge::PushClassObjToLua<OuterClass1>(L,pt);
     return 1;
 }
 
