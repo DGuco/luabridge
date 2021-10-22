@@ -105,8 +105,7 @@ std::shared_ptr<OuterClass1> g_pt = std::shared_ptr<OuterClass1>(new OuterClass1
 
 int LuaFnGetOurterClass(lua_State *L)
 {
-    LuaBridge::PushSharedObjToLua<OuterClass1>(L, g_pt);
-    return 1;
+    return LuaBridge::PushSharedObjToLua<OuterClass1>(L, g_pt);
 }
 
 int main()
@@ -156,9 +155,6 @@ int main()
             REGISTER_CFUNC("LuaFnGetOurterClass", LuaFnGetOurterClass)
         END_REGISTER_CFUNC
 
-        lua_getglobal(L, "_G");
-        LuaHelper::DumpTable(L,-1,std::cout,2);
-        lua_pop(L,-1);
         int ret = luaBridge.CallLuaFunc<int>("x11111_callfailedtest", 1, 2, 200, 100, "Hello lua");
         printf("ret = %d\n", ret);
         printf("-------------------\n");

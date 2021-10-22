@@ -76,12 +76,12 @@ struct CFunc
     {
         //栈状态lua_gettop(L) == 2:tu(t)=>field name(k)
         //check第一个元素是否是一个表或者userdata
-        LUA_ASSERT(L,lua_istable(L, 1) || lua_isuserdata(L, 1),"lua_istable(L, 1) || lua_isuserdata(L, 1)");
+        LUA_ASSERT(L, lua_istable(L, 1) || lua_isuserdata(L, 1), "lua_istable(L, 1) || lua_isuserdata(L, 1)");
 
         //将其元表压栈
-        LUA_ASSERT (L,lua_getmetatable(L, 1) == 1,"lua_getmetatable(L, 1) == 1");
+        LUA_ASSERT (L, lua_getmetatable(L, 1) == 1, "lua_getmetatable(L, 1) == 1");
         //mt = tu.__metatable 栈状态lua_gettop(L) == 3:tu=>field name=>mt
-        LUA_ASSERT (L,lua_istable(L, -1),"lua_istable(L, 1)");
+        LUA_ASSERT (L, lua_istable(L, -1), "lua_istable(L, 1)");
 
         for (;;) {
             lua_pushvalue(L, 2); // 栈状态lua_gettop(L)==4:tu=>field name =>mt =>field name
@@ -96,11 +96,11 @@ struct CFunc
 
             //没有找到了name对应的函数
             // 栈状态lua_gettop(L) == 4:tu=>field name=>mt=>nil
-            LUA_ASSERT (L,lua_isnil(L, -1),"lua_istable(L, 1)");
+            LUA_ASSERT (L, lua_isnil(L, -1), "lua_istable(L, 1)");
             lua_pop (L, 1); // 栈状态lua_gettop(L) == 3:tu=>field name=>mt
 
             lua_rawgetp(L, -1, GetPropgetKey()); //pg=mg['getkey']  栈状态lua_gettop(L) == 4:tu=>field name=>mt=>pg
-            LUA_ASSERT (L,lua_istable(L, -1),"lua_istable(L, 1)");
+            LUA_ASSERT (L, lua_istable(L, -1), "lua_istable(L, 1)");
 
             lua_pushvalue(L, 2); //栈状态lua_gettop(L) == 5:tu=>field name=>mt=>pg=>field name
             lua_rawget(L, -2);  //getter = pg[field name]栈状态lua_gettop(L) == 5:tu=>field name=>mt=>pg=>getter|nil
@@ -124,7 +124,7 @@ struct CFunc
 
             //没有找到了name对应getter的函数
             // 栈状态lua_gettop(L) == 4:tu=>field name=>mt=>nil
-            LUA_ASSERT (L,lua_isnil(L, -1),"lua_isnil(L, -1)");
+            LUA_ASSERT (L, lua_isnil(L, -1), "lua_isnil(L, -1)");
             lua_pop (L, 1);            // 栈状态lua_gettop(L) == 3:tu=>field name=>mt
 
             // It may mean that the field may be in const table and it's constness violation.
@@ -133,7 +133,9 @@ struct CFunc
             // Repeat the lookup in the parent metafield,
             // or return nil if the field doesn't exist.
             //尝试获取父类的metatable
-            lua_rawgetp(L, -1, GetParentKey()); //pmt = mt['parentkey'] 栈状态lua_gettop(L) == 4:tu=>field name=>mt=>pmt|nil
+            lua_rawgetp(L,
+                        -1,
+                        GetParentKey()); //pmt = mt['parentkey'] 栈状态lua_gettop(L) == 4:tu=>field name=>mt=>pmt|nil
 
             //没有找到父类的metatable
             if (lua_isnil (L, -1)) // 栈状态lua_gettop(L) == 4:tu=>field name=>mt=>nil
@@ -144,7 +146,7 @@ struct CFunc
 
             //找到父类的metatable 栈状态lua_gettop(L) == 4:tu=>field name=>mt=>pmt
             // Removethe  metatable and repeat the search in the parent one.
-            LUA_ASSERT (L,lua_istable(L, -1),"lua_istable(L, -1)");
+            LUA_ASSERT (L, lua_istable(L, -1), "lua_istable(L, -1)");
             lua_remove(L, -2);
             //now 栈状态lua_gettop(L) == 3:tu=>field name=>pmt 回到开头在父类的metatable再找一遍
         }
@@ -310,7 +312,7 @@ struct CFunc
     {
         typedef typename FuncTraits<FnPtr>::ReturnType ReturnType;
 
-        static int f(lua_State *L,FnPtr fnptr)
+        static int f(lua_State *L, FnPtr fnptr)
         {
             return Invoke<ReturnType, 1>::run(L, fnptr);
         }
@@ -330,10 +332,10 @@ struct CFunc
 
         static int f(lua_State *L)
         {
-            LUA_ASSERT(L,LuaHelper::IsFullUserData(L, lua_upvalueindex(1)),"CallMember::f IsFullUserData");
+            LUA_ASSERT(L, LuaHelper::IsFullUserData(L, lua_upvalueindex(1)), "CallMember::f IsFullUserData");
             T *const t = Userdata::get<T>(L, 1, false);
             MemFnPtr const &fnptr = *static_cast <MemFnPtr const *> (lua_touserdata(L, lua_upvalueindex (1)));
-            LUA_ASSERT(L,fnptr != 0,"CallMember::f fnptr != 0 ");
+            LUA_ASSERT(L, fnptr != 0, "CallMember::f fnptr != 0 ");
             return Invoke<ReturnType, 2>::run(L, t, fnptr);
         }
     };
@@ -389,48 +391,40 @@ struct CFunc
         }
     };
 
-#ifdef LUABRIDGE_CXX11
+    /**
+        lua_CFunction to call on a object.
 
-    //--------------------------------------------------------------------------
-  /**
-      lua_CFunction to call on a object.
-
-      The proxy function pointer (lightuserdata) is in the first upvalue.
-      The class userdata object is at the top of the Lua stack.
-  */
-  template <class FnPtr>
-  struct CallProxyFunction
-  {
-    using ReturnType = typename FuncTraits <FnPtr>::ReturnType;
-
-    static int f (lua_State* L)
+        The proxy function pointer (lightuserdata) is in the first upvalue.
+        The class userdata object is at the top of the Lua stack.
+    */
+    template<class FnPtr>
+    struct CallProxyFunction
     {
-      assert (lua_islightuserdata (L, lua_upvalueindex (1)));
-      auto fnptr = reinterpret_cast <FnPtr> (lua_touserdata (L, lua_upvalueindex (1)));
-      assert (fnptr != 0);
-      return Invoke <ReturnType, 1>::run (L, fnptr);
-    }
-  };
+        using ReturnType = typename FuncTraits<FnPtr>::ReturnType;
 
-  template <class Functor>
-  struct CallProxyFunctor
-  {
-    using ReturnType = typename FuncTraits <Functor>::ReturnType;
+        static int f(lua_State *L)
+        {
+            assert (lua_islightuserdata(L, lua_upvalueindex(1)));
+            auto fnptr = reinterpret_cast <FnPtr> (lua_touserdata(L, lua_upvalueindex (1)));
+            assert (fnptr != 0);
+            return Invoke<ReturnType, 1>::run(L, fnptr);
+        }
+    };
 
-    static int f (lua_State* L)
+    template<class Functor>
+    struct CallProxyFunctor
     {
-      assert (LuaHelper::IsFullUserData(L, lua_upvalueindex(1)));
-      Functor& fn = *static_cast <Functor*> (lua_touserdata (L, lua_upvalueindex (1)));
-      return Invoke <ReturnType, 1>::run (L, fn);
-    }
-  };
+        using ReturnType = typename FuncTraits<Functor>::ReturnType;
 
-#endif
-
-    //--------------------------------------------------------------------------
+        static int f(lua_State *L)
+        {
+            assert (LuaHelper::IsFullUserData(L, lua_upvalueindex(1)));
+            Functor &fn = *static_cast <Functor *> (lua_touserdata(L, lua_upvalueindex (1)));
+            return Invoke<ReturnType, 1>::run(L, fn);
+        }
+    };
 
     // SFINAE Helpers
-
     template<class MemFnPtr, bool isConst>
     struct CallMemberFunctionHelper
     {
@@ -471,7 +465,7 @@ struct CFunc
         __gc metamethod for an arbitrary class.
     */
     template<class T>
-    static int gcMetaMethodAny(lua_State *L)
+    static int GCMetaMethodAny(lua_State *L)
     {
         assert (LuaHelper::IsFullUserData(L, 1));
         T *t = static_cast <T *> (lua_touserdata(L, 1));
@@ -522,7 +516,7 @@ struct CFunc
     }
 };
 
-template<typename Func,int FUNCID>
+template<typename Func, int FUNCID>
 struct lua_function
 {
     static Func fn;
@@ -532,44 +526,44 @@ struct lua_function
     }
 };
 
-template<typename Func,int FUNCID>
-Func lua_function<Func,FUNCID>::fn;
+template<typename Func, int FUNCID>
+Func lua_function<Func, FUNCID>::fn;
 
-template<int FUNCID,class FT>
+template<int FUNCID, class FT>
 struct LuaCFunctionWrapI
 {
 
 };
 
-template<int FUNCID,class R, class... ParamList>
-struct LuaCFunctionWrapI<FUNCID,R (*)(ParamList...)>
+template<int FUNCID, class R, class... ParamList>
+struct LuaCFunctionWrapI<FUNCID, R (*)(ParamList...)>
 {
     using DeclType = R (*)(ParamList...);
     typedef typename ArgTypeList<ParamList...>::template args<0>::type ParType;
     inline lua_CFunction operator()(DeclType f)
     {
-        lua_function<DeclType,FUNCID>::fn = f;
-        return &lua_function<DeclType,FUNCID>::Call;
+        lua_function<DeclType, FUNCID>::fn = f;
+        return &lua_function<DeclType, FUNCID>::Call;
     }
 };
 
-template<int FUNCID,class R, class... ParamList>
-struct LuaCFunctionWrapI<FUNCID,std::function<R(ParamList...)>>
+template<int FUNCID, class R, class... ParamList>
+struct LuaCFunctionWrapI<FUNCID, std::function<R(ParamList...)>>
 {
     using DeclType = std::function<R(ParamList...)>;
 
     typedef typename ArgTypeList<ParamList...>::template args<0>::type ParType;
     inline lua_CFunction operator()(DeclType f)
     {
-        lua_function<DeclType,FUNCID>::fn = f;
-        return &lua_function<DeclType,FUNCID>::Call;
+        lua_function<DeclType, FUNCID>::fn = f;
+        return &lua_function<DeclType, FUNCID>::Call;
     }
 };
 
-template<int FUNCID,typename Func>
+template<int FUNCID, typename Func>
 inline lua_CFunction LuaCFunctionWrap(Func f)
 {
-    return LuaCFunctionWrapI<FUNCID,Func>()(f);
+    return LuaCFunctionWrapI<FUNCID, Func>()(f);
 }
 
 } // namespace luabridge

@@ -741,7 +741,7 @@ namespace luabridge
             using GetType = decltype(get);
             new(lua_newuserdata(L, sizeof(get))) GetType(std::move(get)); // Stack: co, cl, st, function userdata (ud)
             lua_newtable (L); // Stack: co, cl, st, ud, ud metatable (mt)
-            lua_pushcfunction (L, &CFunc::gcMetaMethodAny<GetType>); // Stack: co, cl, st, ud, mt, gc function
+            lua_pushcfunction (L, &CFunc::GCMetaMethodAny<GetType>); // Stack: co, cl, st, ud, mt, gc function
             LuaHelper::RawSetField(L, -2, "__gc"); // Stack: co, cl, st, ud, mt
             lua_setmetatable(L, -2); // Stack: co, cl, st, ud
             lua_pushcclosure(L, &CFunc::CallProxyFunctor<GetType>::f, 1); // Stack: co, cl, st, getter
@@ -754,7 +754,7 @@ namespace luabridge
                 new(lua_newuserdata(L,
                                     sizeof(set))) SetType(std::move(set)); // Stack: co, cl, st, function userdata (ud)
                 lua_newtable (L); // Stack: co, cl, st, ud, ud metatable (mt)
-                lua_pushcfunction (L, &CFunc::gcMetaMethodAny<SetType>); // Stack: co, cl, st, ud, mt, gc function
+                lua_pushcfunction (L, &CFunc::GCMetaMethodAny<SetType>); // Stack: co, cl, st, ud, mt, gc function
                 LuaHelper::RawSetField(L, -2, "__gc"); // Stack: co, cl, st, ud, mt
                 lua_setmetatable(L, -2); // Stack: co, cl, st, ud
                 lua_pushcclosure(L, &CFunc::CallProxyFunctor<SetType>::f, 1); // Stack: co, cl, st, setter
@@ -778,7 +778,7 @@ namespace luabridge
             new(lua_newuserdata(L,
                                 sizeof(function))) FnType(std::move(function)); // Stack: co, cl, st, function userdata (ud)
             lua_newtable (L); // Stack: co, cl, st, ud, ud metatable (mt)
-            lua_pushcfunction (L, &CFunc::gcMetaMethodAny<FnType>); // Stack: co, cl, st, ud, mt, gc function
+            lua_pushcfunction (L, &CFunc::GCMetaMethodAny<FnType>); // Stack: co, cl, st, ud, mt, gc function
             LuaHelper::RawSetField(L, -2, "__gc"); // Stack: co, cl, st, ud, mt
             lua_setmetatable(L, -2); // Stack: co, cl, st, ud
             lua_pushcclosure(L, &CFunc::CallProxyFunctor<FnType>::f, 1); // Stack: co, cl, st, function
@@ -801,7 +801,7 @@ namespace luabridge
             new(lua_newuserdata(L,
                                 sizeof(function))) FnType(std::move(function)); // Stack: co, cl, st, function userdata (ud)
             lua_newtable (L); // Stack: co, cl, st, ud, ud metatable (mt)
-            lua_pushcfunction (L, &CFunc::gcMetaMethodAny<FnType>); // Stack: co, cl, st, ud, mt, gc function
+            lua_pushcfunction (L, &CFunc::GCMetaMethodAny<FnType>); // Stack: co, cl, st, ud, mt, gc function
             LuaHelper::RawSetField(L, -2, "__gc"); // Stack: co, cl, st, ud, mt
             lua_setmetatable(L, -2); // Stack: co, cl, st, ud
             lua_pushcclosure(L, &CFunc::CallProxyFunctor<FnType>::f, 1); // Stack: co, cl, st, function

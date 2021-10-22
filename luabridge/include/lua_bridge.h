@@ -97,7 +97,7 @@ public:
      * @param ptr
      */
     template<class T>
-    static void PushSharedObjToLua(lua_State *L, std::shared_ptr<T> ptr);
+    static int PushSharedObjToLua(lua_State *L, std::shared_ptr<T> ptr);
     /**
      * @return _G TABLE
      */
@@ -395,12 +395,14 @@ const char *LuaBridge::Call(const char *func, const char *sig, ...)
 }
 
 template<typename T>
-void LuaBridge::PushSharedObjToLua(lua_State *L, std::shared_ptr<T> ptr)
+int LuaBridge::PushSharedObjToLua(lua_State *L, std::shared_ptr<T> ptr)
 {
     new(lua_newuserdata(L, sizeof(UserdataShared<std::shared_ptr<T>>))) UserdataShared<std::shared_ptr<T>>(ptr);
+    //new(lua_newuserdata(L, sizeof(T))) T(1000);
     lua_rawgetp(L, LUA_REGISTRYINDEX, ClassInfo<T>::GetClassKey());
     LUA_ASSERT(L,lua_istable(L, -1), "UserdataSharedHelper::push<T*> lua_istable failed");
     lua_setmetatable(L, -2);
+    return 1;
 }
 
 Namespace &LuaBridge::BeginNameSpace(char *name)
@@ -465,7 +467,17 @@ Namespace &LuaBridge::CurNameSpace()
             pclasst = &classt;                                                          \
         }
 
+/*
+ * 通过BEGIN_CLASS注册的class只能在lua里创建类的对象obj,并且该obj只能在lua里访问,不能在c++中访问
+ * (注册在lua中的c++函数除外),因为随时有可能被lua虚拟机gc掉
+ * */
 #define BEGIN_CLASS(luabridge, ClassT) BEGIN_CLASS_SHARED_OR_NOT(luabridge, ClassT,false)
+
+/*
+ * 通过BEGIN_SHARED_CLASS注册的class可以在c++中创建对象obj然后调用PushSharedObjToLua传入lua中,
+ * 该obj在c++(注册在lua中的c++函数除外)和lua中共享,无需担心obj会被lua虚拟机gc掉,也可以在lua中创建
+ * obj，注意在lua中创建的obj只在lua中访问
+ * */
 #define BEGIN_SHARED_CLASS(luabridge, ClassT) BEGIN_CLASS_SHARED_OR_NOT(luabridge, ClassT,true)
 
 #define CLASS_ADD_CONSTRUCTOR(FT)                                                       \
