@@ -34,101 +34,100 @@
 #include <exception>
 #include <string>
 
-namespace luabridge {
+namespace luabridge
+{
 
-class LuaException : public std::exception 
+class LuaException: public std::exception
 {
 private:
-  lua_State* m_L;
-  std::string m_what;
+    lua_State *m_L;
+    std::string m_what;
 
 public:
-  //----------------------------------------------------------------------------
-  /**
-      Construct a LuaException after a lua_pcall().
-  */
-  LuaException (lua_State* L, int /*code*/)
-    : m_L (L)
-  {
-      WhatFromStack();
-  }
+    //----------------------------------------------------------------------------
+    /**
+        Construct a LuaException after a lua_pcall().
+    */
+    LuaException(lua_State *L, int /*code*/)
+        : m_L(L)
+    {
+        WhatFromStack();
+    }
 
-  //----------------------------------------------------------------------------
+    //----------------------------------------------------------------------------
 
-  LuaException (lua_State *L,
-                char const*,
-                char const*,
-                long)
-    : m_L (L)
-  {
-      WhatFromStack();
-  }
+    LuaException(lua_State *L,
+                 char const *,
+                 char const *,
+                 long)
+        : m_L(L)
+    {
+        WhatFromStack();
+    }
 
-  //----------------------------------------------------------------------------
+    //----------------------------------------------------------------------------
 
-  ~LuaException() throw ()
-  {
-  }
+    ~LuaException() throw()
+    {
+    }
 
-  //----------------------------------------------------------------------------
+    //----------------------------------------------------------------------------
 
-  char const* what() const throw ()
-  {
-    return m_what.c_str();
-  }
+    char const *what() const throw()
+    {
+        return m_what.c_str();
+    }
 
-  //============================================================================
-  /**
-      Throw an exception.
+    //============================================================================
+    /**
+        Throw an exception.
 
-      This centralizes all the exceptions thrown, so that we can set
-      breakpoints before the stack is unwound, or otherwise customize the
-      behavior.
-  */
-  template <class Exception>
-  static void Throw (Exception e)
-  {
-    throw e;
-  }
+        This centralizes all the exceptions thrown, so that we can set
+        breakpoints before the stack is unwound, or otherwise customize the
+        behavior.
+    */
+    template<class Exception>
+    static void Throw(Exception e)
+    {
+        throw e;
+    }
 
-  //----------------------------------------------------------------------------
-  /**
-      Initializes error handling. Subsequent Lua errors are translated to C++ exceptions.
-  */
-  static void EnableExceptions(lua_State *L)
-  {
-      lua_atpanic(L, ThrowAtPanic);
-  }
+    //----------------------------------------------------------------------------
+    /**
+        Initializes error handling. Subsequent Lua errors are translated to C++ exceptions.
+    */
+    static void EnableExceptions(lua_State *L)
+    {
+        lua_atpanic(L, ThrowAtPanic);
+    }
 
 protected:
-  void WhatFromStack ()
-  {
-    if (lua_gettop (m_L) > 0)
+    void WhatFromStack()
     {
-      char const* s = lua_tostring (m_L, -1);
-      m_what = s ? s : "";
+        if (lua_gettop(m_L) > 0) {
+            char const *s = lua_tostring (m_L, -1);
+            m_what = s ? s : "";
+        }
+        else {
+            // stack is empty
+            m_what = "missing error";
+        }
     }
-    else
-    {
-      // stack is empty
-      m_what = "missing error";
-    }
-  }
 
 private:
-  static int ThrowAtPanic (lua_State* L)
-  {
-    throw LuaException (L, -1);
-  }
+    static int ThrowAtPanic(lua_State *L)
+    {
+        throw LuaException(L, -1);
+    }
 };
 
 //----------------------------------------------------------------------------
 /**
     Initializes error handling. Subsequent Lua errors are translated to C++ exceptions.
 */
-static void EnableExceptions (lua_State* L)
+static void EnableExceptions(lua_State *L)
 {
-  LuaException::EnableExceptions(L);
+    LuaException::EnableExceptions(L);
 }
 
 } // namespace luabridge

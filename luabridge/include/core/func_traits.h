@@ -170,7 +170,7 @@ struct Invoke
     template<class Fn>
     static int run(lua_State *L, Fn &fn)
     {
-        if (!(LuaHelper::GetParamCount(L) == FuncTraits<Fn>::arity)) {
+        if (LuaHelper::GetParamCount(L) != FuncTraits<Fn>::arity) {
             char Msg[128] = {0};
             snprintf(Msg,
                      128,
@@ -192,7 +192,7 @@ struct Invoke
     static int run(lua_State *L, T *object, const MemFn &fn)
     {
         //参数个数:对象指针+成员函数参数个
-        if (!(LuaHelper::GetParamCount(L) == FuncTraits<MemFn>::arity + 1)) {
+        if (LuaHelper::GetParamCount(L) != FuncTraits<MemFn>::arity + 1) {
             char Msg[128] = {0};
             snprintf(Msg,
                      128,
@@ -217,7 +217,7 @@ struct Invoke<void,startParam>
     template<class Fn>
     static int run(lua_State *L, Fn &fn)
     {
-        if (!(LuaHelper::GetParamCount(L) == FuncTraits<Fn>::arity)) {
+        if (LuaHelper::GetParamCount(L) != FuncTraits<Fn>::arity) {
             char Msg[128] = {0};
             snprintf(Msg,
                      128,
@@ -239,7 +239,7 @@ struct Invoke<void,startParam>
     static int run(lua_State *L, T *object, const MemFn &fn)
     {
         //参数个数:对象指针+成员函数参数个
-        if (!(LuaHelper::GetParamCount(L) == (FuncTraits<MemFn>::arity + 1))) {
+        if (LuaHelper::GetParamCount(L) != (FuncTraits<MemFn>::arity + 1)) {
             char Msg[128] = {0};
             snprintf(Msg,
                      128,

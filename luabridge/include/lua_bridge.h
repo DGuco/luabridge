@@ -91,7 +91,7 @@ public:
     const char *Call(const char *func, const char *sig, ...);
 
     /**
-     *
+     * 把c++中的对象放入lua栈中
      * @tparam T
      * @param L
      * @param ptr
@@ -201,7 +201,6 @@ bool LuaBridge::LoadFile(const char *filePath)
     lua_State *L = m_pLuaVm->LuaState();
     int ret = luaL_dofile(L, filePath);
     if (ret != 0) {
-
         throw std::runtime_error("Lua loadfile:" + std::string(filePath) + " failed, error:" + lua_tostring(L, -1));
     }
     return 0;
@@ -254,7 +253,7 @@ R LuaBridge::SafeEndCall(const char *func, int nArg)
 {
     lua_State *L = m_pLuaVm->LuaState();
     if (lua_pcall(L, nArg, 1, 0) != LUA_OK) {
-        LuaHelper::DebugCallFuncErrorStack(L,func, lua_tostring(L, -1));
+        LuaHelper::DebugCallFuncErrorStack(L, func, lua_tostring(L, -1));
         //恢复调用前的堆栈索引
         lua_settop(L, m_iTopIndex);
         return 0;
@@ -269,7 +268,7 @@ R LuaBridge::SafeEndCall(const char *func, int nArg)
         catch (std::exception &e) {
             //恢复调用前的堆栈索引
             lua_settop(L, m_iTopIndex);
-            LuaHelper::DebugCallFuncErrorStack(L,func, e.what());
+            LuaHelper::DebugCallFuncErrorStack(L, func, e.what());
             return 0;
         }
     }
@@ -280,7 +279,7 @@ void LuaBridge::SafeEndCall(const char *func, int nArg)
 {
     lua_State *L = m_pLuaVm->LuaState();
     if (lua_pcall(L, nArg, 0, 0) != 0) {
-        LuaHelper::DebugCallFuncErrorStack(L,func, lua_tostring(L, -1));
+        LuaHelper::DebugCallFuncErrorStack(L, func, lua_tostring(L, -1));
     }
     lua_settop(L, m_iTopIndex);
 }
@@ -398,9 +397,8 @@ template<typename T>
 int LuaBridge::PushSharedObjToLua(lua_State *L, std::shared_ptr<T> ptr)
 {
     new(lua_newuserdata(L, sizeof(UserdataShared<std::shared_ptr<T>>))) UserdataShared<std::shared_ptr<T>>(ptr);
-    //new(lua_newuserdata(L, sizeof(T))) T(1000);
     lua_rawgetp(L, LUA_REGISTRYINDEX, ClassInfo<T>::GetClassKey());
-    LUA_ASSERT(L,lua_istable(L, -1), "UserdataSharedHelper::push<T*> lua_istable failed");
+    LUA_ASSERT(L, lua_istable(L, -1), "UserdataSharedHelper::push<T*> lua_istable failed");
     lua_setmetatable(L, -2);
     return 1;
 }
@@ -451,7 +449,7 @@ Namespace &LuaBridge::CurNameSpace()
         _luabridge_.EndNamespace();                                                     \
     }
 
-#define BEGIN_CLASS_SHARED_OR_NOT(luabridge, ClassT,shared)                             \
+#define BEGIN_CLASS_SHARED_OR_NOT(luabridge, ClassT, shared)                             \
     {                                                                                   \
         Class<ClassT> *pclasst = NULL;                                                  \
         if(!luabridge.CurNameSpace().IsValid())                                         \

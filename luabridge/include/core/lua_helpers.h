@@ -45,14 +45,14 @@ namespace luabridge
  * */
 struct BinaryStr
 {
-    BinaryStr(const char* pdata,int len)
+    BinaryStr(const char *pdata, int len)
     {
         m_pStr = pdata;
         m_iLen = len;
     }
- 
-    const char* m_pStr;
-    int         m_iLen; 
+
+    const char *m_pStr;
+    int m_iLen;
 };
 
 class LuaHelper
@@ -82,7 +82,8 @@ public:
      * 在非保护环境下抛出luaerror程序会主动退出
      * @return never return when assert failed
      */
-    static int LuaAssert(lua_State *L, bool condition, const char *file, int line, const char *err_msg, bool luaerror = true);
+    static int
+    LuaAssert(lua_State *L, bool condition, const char *file, int line, const char *err_msg, bool luaerror = true);
 
     /**
      * param count
@@ -128,11 +129,12 @@ public:
      * @param stream
      * @param level
      */
-    static void DumpTable(lua_State *L, int index, std::ostream &stream, unsigned int depth = 1,unsigned int level = 0);
+    static void
+    DumpTable(lua_State *L, int index, std::ostream &stream, unsigned int depth = 1, unsigned int level = 0);
 private:
     static void PutIndent(std::ostream &stream, unsigned int level);
-    static void DumpState(lua_State *L, std::ostream &stream,unsigned int depth,unsigned int level);
-    static void DumpValue(lua_State *L, int index, std::ostream &stream, unsigned int depth,unsigned int level);
+    static void DumpState(lua_State *L, std::ostream &stream, unsigned int depth, unsigned int level);
+    static void DumpValue(lua_State *L, int index, std::ostream &stream, unsigned int depth, unsigned int level);
 };
 
 void LuaHelper::LuaStackInfo(lua_State *L)
@@ -228,10 +230,10 @@ bool LuaHelper::CheckLuaArg_Str(lua_State *L, int Index)
 
     char Msg[512] = {0};
     if (lua_isnil(L, Index)) {
-        snprintf(Msg,512 - 1,"Lua function[%s], arg[%d] is null \n", trouble_info.name, Index);
+        snprintf(Msg, 512 - 1, "Lua function[%s], arg[%d] is null \n", trouble_info.name, Index);
     }
     else {
-        snprintf(Msg,512 - 1,"Lua function[%s], arg[%d] type error not str \n", trouble_info.name, Index);
+        snprintf(Msg, 512 - 1, "Lua function[%s], arg[%d] type error not str \n", trouble_info.name, Index);
     }
     LuaHelper::DefaultDebugLuaErrorInfo(Msg);
     LuaStackInfo(L);
@@ -240,8 +242,7 @@ bool LuaHelper::CheckLuaArg_Str(lua_State *L, int Index)
 
 int LuaHelper::LuaAssert(lua_State *L, bool condition, const char *file, int line, const char *err_msg, bool luaerror)
 {
-    if (!condition)
-    {
+    if (!condition) {
         lua_Debug ar;
         memset(&ar, 0, sizeof(lua_Debug));
         if (lua_getstack(L, 0, &ar)) {
@@ -313,8 +314,7 @@ int LuaHelper::LuaAssert(lua_State *L, bool condition, const char *file, int lin
         throw std::logic_error(Msg);
 #endif
     }
-    else
-    {
+    else {
         return 1;
     }
 }
@@ -345,7 +345,7 @@ int LuaHelper::GetStackLen(lua_State *L, int idx)
 
 void LuaHelper::RawGetField(lua_State *L, int index, char const *key)
 {
-    LuaHelper::LuaAssert(L,lua_istable(L, index),__FILE__,__LINE__,"lua_istable(L, index)",false);
+    LuaHelper::LuaAssert(L, lua_istable(L, index), __FILE__, __LINE__, "lua_istable(L, index)", false);
     index = lua_absindex(L, index);
     lua_pushstring(L, key);
     lua_rawget(L, index);
@@ -353,7 +353,7 @@ void LuaHelper::RawGetField(lua_State *L, int index, char const *key)
 
 void LuaHelper::RawSetField(lua_State *L, int index, char const *key)
 {
-    LuaHelper::LuaAssert(L,lua_istable(L, index),__FILE__,__LINE__,"lua_istable(L, index)",false);
+    LuaHelper::LuaAssert(L, lua_istable(L, index), __FILE__, __LINE__, "lua_istable(L, index)", false);
     index = lua_absindex(L, index);
     lua_pushstring(L, key);
     lua_insert(L, -2);
@@ -385,51 +385,49 @@ void LuaHelper::PutIndent(std::ostream &stream, unsigned level)
     }
 }
 
-
-void LuaHelper::DumpValue(lua_State *L, int index, std::ostream &stream,unsigned int depth, unsigned level)
+void LuaHelper::DumpValue(lua_State *L, int index, std::ostream &stream, unsigned int depth, unsigned level)
 {
     const int type = lua_type(L, index);
     switch (type) {
-        case LUA_TNIL:stream << "nil";
-            break;
+    case LUA_TNIL:stream << "nil";
+        break;
 
-        case LUA_TBOOLEAN:stream << (lua_toboolean(L, index) ? "true" : "false");
-            break;
+    case LUA_TBOOLEAN:stream << (lua_toboolean(L, index) ? "true" : "false");
+        break;
 
-        case LUA_TNUMBER:stream << lua_tonumber(L, index);
-            break;
+    case LUA_TNUMBER:stream << lua_tonumber(L, index);
+        break;
 
-        case LUA_TSTRING:stream << '"' << lua_tostring(L, index) << '"';
-            break;
+    case LUA_TSTRING:stream << '"' << lua_tostring(L, index) << '"';
+        break;
 
-        case LUA_TFUNCTION:
-            if (lua_iscfunction(L, index)) {
-                stream << "cfunction@" << lua_topointer(L, index);
-            }
-            else {
-                stream << "function@" << lua_topointer(L, index);
-            }
-            break;
+    case LUA_TFUNCTION:
+        if (lua_iscfunction(L, index)) {
+            stream << "cfunction@" << lua_topointer(L, index);
+        }
+        else {
+            stream << "function@" << lua_topointer(L, index);
+        }
+        break;
 
-        case LUA_TTHREAD:stream << "thread@" << lua_tothread(L, index);
-            break;
+    case LUA_TTHREAD:stream << "thread@" << lua_tothread(L, index);
+        break;
 
-        case LUA_TLIGHTUSERDATA:stream << "lightuserdata@" << lua_touserdata(L, index);
-            break;
+    case LUA_TLIGHTUSERDATA:stream << "lightuserdata@" << lua_touserdata(L, index);
+        break;
 
-        case LUA_TTABLE:
-            DumpTable(L, index, stream, depth,level);
-            break;
+    case LUA_TTABLE:DumpTable(L, index, stream, depth, level);
+        break;
 
-        case LUA_TUSERDATA:stream << "userdata@" << lua_touserdata(L, index);
-            break;
+    case LUA_TUSERDATA:stream << "userdata@" << lua_touserdata(L, index);
+        break;
 
-        default:stream << lua_typename(L, type);;
-            break;
+    default:stream << lua_typename(L, type);;
+        break;
     }
 }
 
-void LuaHelper::DumpTable(lua_State *L, int index, std::ostream &stream, unsigned depth,unsigned int level)
+void LuaHelper::DumpTable(lua_State *L, int index, std::ostream &stream, unsigned depth, unsigned int level)
 {
     stream << "table@" << lua_topointer(L, index);
     if (level >= depth) {
@@ -442,29 +440,28 @@ void LuaHelper::DumpTable(lua_State *L, int index, std::ostream &stream, unsigne
     while (lua_next(L, index)) {
         stream << "\n";
         PutIndent(stream, level + 1);
-        DumpValue(L, -2, stream, depth,level + 1); // Key
+        DumpValue(L, -2, stream, depth, level + 1); // Key
         stream << ": ";
-        DumpValue(L, -1, stream, depth,level + 1); // Value
+        DumpValue(L, -1, stream, depth, level + 1); // Value
         lua_pop(L, 1); // Value
     }
     PutIndent(stream, level);
-    if (level == 0)
-    {
+    if (level == 0) {
         stream << "\n}\n";
-    }else
-    {
+    }
+    else {
         stream << "\n";
         PutIndent(stream, level);
         stream << "}";
     }
 }
 
-void LuaHelper::DumpState(lua_State *L, std::ostream &stream ,unsigned int depth,unsigned int level)
+void LuaHelper::DumpState(lua_State *L, std::ostream &stream, unsigned int depth, unsigned int level)
 {
     int top = lua_gettop(L);
     for (int i = 1; i <= top; ++i) {
         stream << "stack #" << i << ": ";
-        DumpValue(L, i, stream,depth,level);
+        DumpValue(L, i, stream, depth, level);
         stream << "\n";
     }
 }

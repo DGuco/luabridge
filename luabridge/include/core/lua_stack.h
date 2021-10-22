@@ -99,7 +99,7 @@ struct Stack<int>
 
     static int get(lua_State *L, int index, bool luaerror = true)
     {
-        LUA_ASSERT_EX(L, LuaHelper::CheckLuaArg_Integer(L, index), "CheckLuaArg_Integer failed",luaerror);
+        LUA_ASSERT_EX(L, LuaHelper::CheckLuaArg_Integer(L, index), "CheckLuaArg_Integer failed", luaerror);
         return static_cast<int>(lua_tointeger(L, index));
     }
 };
@@ -121,7 +121,7 @@ struct Stack<unsigned int>
      */
     static unsigned int get(lua_State *L, int index, bool luaerror = true)
     {
-        LUA_ASSERT_EX(L, LuaHelper::CheckLuaArg_Integer(L, index), "CheckLuaArg_Integer failed",luaerror);
+        LUA_ASSERT_EX(L, LuaHelper::CheckLuaArg_Integer(L, index), "CheckLuaArg_Integer failed", luaerror);
         return static_cast<unsigned int>(lua_tointeger(L, index));
     }
 };
@@ -143,7 +143,7 @@ struct Stack<unsigned char>
      */
     static unsigned char get(lua_State *L, int index, bool luaerror = true)
     {
-        LUA_ASSERT_EX(L, LuaHelper::CheckLuaArg_Integer(L, index), "CheckLuaArg_Integer failed",luaerror);
+        LUA_ASSERT_EX(L, LuaHelper::CheckLuaArg_Integer(L, index), "CheckLuaArg_Integer failed", luaerror);
         return static_cast <unsigned char> (luaL_checkinteger(L, index));
     }
 };
@@ -165,7 +165,7 @@ struct Stack<short>
      */
     static short get(lua_State *L, int index, bool luaerror = true)
     {
-        LUA_ASSERT_EX(L, LuaHelper::CheckLuaArg_Integer(L, index), "CheckLuaArg_Integer failed",luaerror);
+        LUA_ASSERT_EX(L, LuaHelper::CheckLuaArg_Integer(L, index), "CheckLuaArg_Integer failed", luaerror);
         return static_cast <short> (luaL_checkinteger(L, index));
     }
 };
@@ -187,7 +187,7 @@ struct Stack<unsigned short>
     */
     static unsigned short get(lua_State *L, int index, bool luaerror = true)
     {
-        LUA_ASSERT_EX(L, LuaHelper::CheckLuaArg_Integer(L, index), "CheckLuaArg_Integer failed",luaerror);
+        LUA_ASSERT_EX(L, LuaHelper::CheckLuaArg_Integer(L, index), "CheckLuaArg_Integer failed", luaerror);
         return static_cast <unsigned short> (luaL_checkinteger(L, index));
     }
 };
@@ -209,7 +209,7 @@ struct Stack<long>
     */
     static long get(lua_State *L, int index, bool luaerror = true)
     {
-        LUA_ASSERT_EX(L, LuaHelper::CheckLuaArg_Integer(L, index), "CheckLuaArg_Integer failed",luaerror);
+        LUA_ASSERT_EX(L, LuaHelper::CheckLuaArg_Integer(L, index), "CheckLuaArg_Integer failed", luaerror);
         return static_cast <long> (luaL_checkinteger(L, index));
     }
 };
@@ -231,7 +231,7 @@ struct Stack<unsigned long>
     */
     static unsigned long get(lua_State *L, int index, bool luaerror = true)
     {
-        LUA_ASSERT_EX(L, LuaHelper::CheckLuaArg_Integer(L, index), "CheckLuaArg_Integer failed",luaerror);
+        LUA_ASSERT_EX(L, LuaHelper::CheckLuaArg_Integer(L, index), "CheckLuaArg_Integer failed", luaerror);
         return static_cast <unsigned long> (luaL_checkinteger(L, index));
     }
 };
@@ -253,7 +253,7 @@ struct Stack<long long>
     */
     static long long get(lua_State *L, int index, bool luaerror = true)
     {
-        LUA_ASSERT_EX(L, LuaHelper::CheckLuaArg_Integer(L, index), "CheckLuaArg_Integer failed",luaerror);
+        LUA_ASSERT_EX(L, LuaHelper::CheckLuaArg_Integer(L, index), "CheckLuaArg_Integer failed", luaerror);
         return static_cast <long long> (luaL_checkinteger(L, index));
     }
 };
@@ -271,7 +271,7 @@ struct Stack<unsigned long long>
     }
     static unsigned long long get(lua_State *L, int index, bool luaerror = true)
     {
-        LUA_ASSERT_EX(L, LuaHelper::CheckLuaArg_Integer(L, index), "CheckLuaArg_Integer failed",luaerror);
+        LUA_ASSERT_EX(L, LuaHelper::CheckLuaArg_Integer(L, index), "CheckLuaArg_Integer failed", luaerror);
         return static_cast <unsigned long long> (luaL_checkinteger(L, index));
     }
 };
@@ -290,7 +290,7 @@ struct Stack<float>
 
     static float get(lua_State *L, int index, bool luaerror = true)
     {
-        LUA_ASSERT_EX(L, LuaHelper::CheckLuaArg_Num(L, index), "CheckLuaArg_Num failed",luaerror);
+        LUA_ASSERT_EX(L, LuaHelper::CheckLuaArg_Num(L, index), "CheckLuaArg_Num failed", luaerror);
         return static_cast<float>(lua_tonumber(L, index));
     }
 };
@@ -309,7 +309,7 @@ struct Stack<double>
 
     static double get(lua_State *L, int index, bool luaerror = true)
     {
-        LUA_ASSERT_EX(L, LuaHelper::CheckLuaArg_Num(L, index), "CheckLuaArg_Num failed",luaerror);
+        LUA_ASSERT_EX(L, LuaHelper::CheckLuaArg_Num(L, index), "CheckLuaArg_Num failed", luaerror);
         return static_cast<double>(lua_tonumber(L, index));
     }
 };
@@ -346,9 +346,8 @@ struct Stack<char>
 
     static char get(lua_State *L, int index, bool luaerror = true)
     {
-        LUA_ASSERT_EX(L, LuaHelper::CheckLuaArg_Str(L, index), "CheckLuaArg_Str failed",luaerror);
-        if (lua_isnil(L, index))
-        {
+        LUA_ASSERT_EX(L, LuaHelper::CheckLuaArg_Str(L, index), "CheckLuaArg_Str failed", luaerror);
+        if (lua_isnil(L, index)) {
             return ' ';
         }
         return lua_tostring(L, index)[0];
@@ -372,9 +371,8 @@ struct Stack<const char *>
 
     static const char *get(lua_State *L, int index, bool luaerror = true)
     {
-        LUA_ASSERT_EX(L, LuaHelper::CheckLuaArg_Str(L, index), "CheckLuaArg_Str failed",luaerror);
-        if (lua_isnil(L, index))
-        {
+        LUA_ASSERT_EX(L, LuaHelper::CheckLuaArg_Str(L, index), "CheckLuaArg_Str failed", luaerror);
+        if (lua_isnil(L, index)) {
             return "";
         }
         return lua_tostring(L, index);
@@ -399,9 +397,8 @@ struct Stack<char *>
     static char *get(lua_State *L, int index, bool luaerror = true)
     {
         //抛出c++异常
-        LUA_ASSERT_EX(L, LuaHelper::CheckLuaArg_Str(L, index), "CheckLuaArg_Str failed",luaerror);
-        if (lua_isnil(L, index))
-        {
+        LUA_ASSERT_EX(L, LuaHelper::CheckLuaArg_Str(L, index), "CheckLuaArg_Str failed", luaerror);
+        if (lua_isnil(L, index)) {
             return const_cast<char *>("");
         }
         return const_cast<char *>(lua_tostring(L, index));
@@ -417,19 +414,18 @@ struct Stack<BinaryStr>
 {
     static void push(lua_State *L, BinaryStr pStr)
     {
-        if (pStr.m_pStr != NULL && pStr.m_iLen > 0)
-        {
-            lua_pushlstring(L,pStr.m_pStr,pStr.m_iLen);
+        if (pStr.m_pStr != NULL && pStr.m_iLen > 0) {
+            lua_pushlstring(L, pStr.m_pStr, pStr.m_iLen);
         }
     }
 
     BinaryStr get(lua_State *L, int index, bool luaerror = true)
     {
         //抛出c++异常
-        LUA_ASSERT_EX(L, LuaHelper::CheckLuaArg_Str(L, index), "CheckLuaArg_Str failed",luaerror);
+        LUA_ASSERT_EX(L, LuaHelper::CheckLuaArg_Str(L, index), "CheckLuaArg_Str failed", luaerror);
         size_t len;
         const char *str = lua_tolstring(L, index, &len);
-        return BinaryStr(str,len);
+        return BinaryStr(str, len);
     }
 };
 //------------------------------------------------------------------------------
@@ -446,7 +442,7 @@ struct Stack<std::string>
 
     static std::string get(lua_State *L, int index, bool luaerror = true)
     {
-        LUA_ASSERT_EX(L, LuaHelper::CheckLuaArg_Str(L, index), "CheckLuaArg_Str failed",luaerror);
+        LUA_ASSERT_EX(L, LuaHelper::CheckLuaArg_Str(L, index), "CheckLuaArg_Str failed", luaerror);
         if (lua_isnil(L, index)) {
             return "";
         }
@@ -483,7 +479,7 @@ struct StackOpSelector<T &, false>
 
     static ReturnType get(lua_State *L, int index, bool luaerror = true)
     {
-        return Stack<T>::get(L, index,luaerror);
+        return Stack<T>::get(L, index, luaerror);
     }
 };
 
@@ -499,7 +495,7 @@ struct StackOpSelector<const T &, false>
 
     static ReturnType get(lua_State *L, int index, bool luaerror = true)
     {
-        return Stack<T>::get(L, index,luaerror);
+        return Stack<T>::get(L, index, luaerror);
     }
 };
 
@@ -515,7 +511,7 @@ struct StackOpSelector<T *, false>
 
     static ReturnType get(lua_State *L, int index, bool luaerror = true)
     {
-        return Stack<T>::get(L, index,luaerror);
+        return Stack<T>::get(L, index, luaerror);
     }
 };
 
@@ -531,7 +527,7 @@ struct StackOpSelector<const T *, false>
 
     static ReturnType get(lua_State *L, int index, bool luaerror = true)
     {
-        return Stack<T>::get(L, index,luaerror);
+        return Stack<T>::get(L, index, luaerror);
     }
 };
 
@@ -548,7 +544,7 @@ struct Stack<T &>
 
     static ReturnType get(lua_State *L, int index, bool luaerror = true)
     {
-        return Helper::get(L, index,luaerror);
+        return Helper::get(L, index, luaerror);
     }
 };
 
@@ -565,7 +561,7 @@ struct Stack<const T &>
 
     static ReturnType get(lua_State *L, int index, bool luaerror = true)
     {
-        return Helper::get(L, index,luaerror);
+        return Helper::get(L, index, luaerror);
     }
 };
 
@@ -582,7 +578,7 @@ struct Stack<T *>
 
     static ReturnType get(lua_State *L, int index, bool luaerror = true)
     {
-        return Helper::get(L, index,luaerror);
+        return Helper::get(L, index, luaerror);
     }
 };
 
@@ -599,7 +595,7 @@ struct Stack<const T *>
 
     static ReturnType get(lua_State *L, int index, bool luaerror = true)
     {
-        return Helper::get(L, index,luaerror);
+        return Helper::get(L, index, luaerror);
     }
 };
 

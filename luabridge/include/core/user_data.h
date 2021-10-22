@@ -264,7 +264,7 @@ public:
         UserdataValue<T> *const ud = new(lua_newuserdata(L, sizeof(UserdataValue<T>))) UserdataValue<T>();
         lua_rawgetp(L, LUA_REGISTRYINDEX, ClassInfo<T>::GetClassKey());
         if (!lua_istable(L, -1)) {
-            LUA_ASSERT(L, false,"The class is not registered in LuaBridge")
+            LUA_ASSERT(L, false, "The class is not registered in LuaBridge")
         }
         lua_setmetatable(L, -2);
         return ud;
@@ -423,7 +423,7 @@ struct UserdataSharedHelper
             new(lua_newuserdata(L, sizeof(UserdataShared<C>))) UserdataShared<C>(c);
             lua_rawgetp(L, LUA_REGISTRYINDEX, ClassInfo<T>::GetClassKey());
             // If this goes off it means the class T is unregistered!
-            LUA_ASSERT(L,lua_istable(L, -1), "UserdataSharedHelper::push<C&> lua_istable failed");
+            LUA_ASSERT(L, lua_istable(L, -1), "UserdataSharedHelper::push<C&> lua_istable failed");
             lua_setmetatable(L, -2);
         }
         else {
@@ -437,7 +437,7 @@ struct UserdataSharedHelper
             new(lua_newuserdata(L, sizeof(UserdataShared<C>))) UserdataShared<C>(t);
             lua_rawgetp(L, LUA_REGISTRYINDEX, ClassInfo<T>::GetClassKey());
             // If this goes off it means the class T is unregistered!
-            LUA_ASSERT(L,lua_istable(L, -1), "UserdataSharedHelper::push<T*> lua_istable failed");
+            LUA_ASSERT(L, lua_istable(L, -1), "UserdataSharedHelper::push<T*> lua_istable failed");
             lua_setmetatable(L, -2);
         }
         else {
@@ -678,7 +678,7 @@ struct StackOpSelector<T *, true>
 
     static T *get(lua_State *L, int index, bool luaerror = true)
     {
-        return Userdata::get<T>(L, index, false,luaerror);
+        return Userdata::get<T>(L, index, false, luaerror);
     }
 };
 
@@ -695,7 +695,7 @@ struct StackOpSelector<const T *, true>
 
     static const T *get(lua_State *L, int index, bool luaerror = true)
     {
-        return Userdata::get<T>(L, index, true,luaerror);
+        return Userdata::get<T>(L, index, true, luaerror);
     }
 };
 
@@ -713,7 +713,7 @@ struct StackOpSelector<T &, true>
 
     static ReturnType get(lua_State *L, int index, bool luaerror = true)
     {
-        return Helper::get(L, index,luaerror);
+        return Helper::get(L, index, luaerror);
     }
 };
 
@@ -731,7 +731,7 @@ struct StackOpSelector<const T &, true>
 
     static ReturnType get(lua_State *L, int index, bool luaerror = true)
     {
-        return Helper::get(L, index,luaerror);
+        return Helper::get(L, index, luaerror);
     }
 };
 

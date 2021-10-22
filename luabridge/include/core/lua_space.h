@@ -64,14 +64,13 @@ public:
         m_name = "";
     }
 
-    Namespace(const Namespace& other)
+    Namespace(const Namespace &other)
     {
-       if(&other == this)
-       {
-           return;
-       }
-       this->m_pLuaVm  = other.m_pLuaVm;
-       this->m_name = other.m_name;
+        if (&other == this) {
+            return;
+        }
+        this->m_pLuaVm = other.m_pLuaVm;
+        this->m_name = other.m_name;
     }
 
     /**
@@ -80,9 +79,9 @@ public:
      * @param luaVm
      */
     explicit Namespace(LuaVm *luaVm)
-        : m_pLuaVm(luaVm),m_name("_G")
+        : m_pLuaVm(luaVm), m_name("_G")
     {
-        lua_State * L = m_pLuaVm->LuaState();
+        lua_State *L = m_pLuaVm->LuaState();
         lua_getglobal(L, "_G");
         m_pLuaVm->AddStackSize(1);
     }
@@ -96,11 +95,11 @@ public:
      * @param luaVm
      */
     Namespace(char const *name, LuaVm *luaVm)
-        : m_pLuaVm(luaVm),m_name(name)
+        : m_pLuaVm(luaVm), m_name(name)
     {
-        lua_State * L = m_pLuaVm->LuaState();
+        lua_State *L = m_pLuaVm->LuaState();
 
-        LUA_ASSERT_EX(L,lua_istable(L, -1),"lua_istable(L,-1)",false); // Stack: parent namespace (pns) 一般情况下是_G表
+        LUA_ASSERT_EX(L, lua_istable(L, -1), "lua_istable(L,-1)", false); // Stack: parent namespace (pns) 一般情况下是_G表
 
         LuaHelper::RawGetField(L, -1, name); // Stack: pns, namespace (ns) | nil
 
@@ -144,9 +143,9 @@ public:
      * @param name
      * @return
      */
-    Namespace BeginNamespace (char const* name)
+    Namespace BeginNamespace(char const *name)
     {
-        m_pLuaVm->AssertIsActive ();
+        m_pLuaVm->AssertIsActive();
         return Namespace(name, m_pLuaVm);
     }
 
@@ -161,11 +160,11 @@ public:
     void AddProperty(char const *name, T *pt, bool isWritable = true)
     {
         lua_State *L = m_pLuaVm->LuaState();
-        if (m_pLuaVm->GetStackSize()  == 1) {
-            LUA_ASSERT_EX(L, false,"AddProperty () called on global namespace", false);
+        if (m_pLuaVm->GetStackSize() == 1) {
+            LUA_ASSERT_EX(L, false, "AddProperty () called on global namespace", false);
         }
 
-        LUA_ASSERT_EX (L,lua_istable(L, -1),"lua_istable(L, -1)", false); // Stack: namespace table (ns)
+        LUA_ASSERT_EX (L, lua_istable(L, -1), "lua_istable(L, -1)", false); // Stack: namespace table (ns)
 
         //注册getter方法
         lua_pushlightuserdata(L, pt); // Stack: ns, pointer
@@ -198,7 +197,7 @@ public:
     template<class TG, class TS = TG>
     void AddProperty(char const *name, TG (*get)(), void (*set)(TS) = 0)
     {
-        if (m_pLuaVm->GetStackSize()  == 1) {
+        if (m_pLuaVm->GetStackSize() == 1) {
             throw std::logic_error("AddProperty () called on global namespace");
         }
         lua_State *L = m_pLuaVm->LuaState();
@@ -248,13 +247,12 @@ public:
         }
     }
 
-    
     /**
      * register cfunction
      * @param func func name 函数名
      * @param f
      **/
-    void AddCFunction(const char *func, lua_CFunction fp) 
+    void AddCFunction(const char *func, lua_CFunction fp)
     {
         lua_State *L = m_pLuaVm->LuaState();
 
@@ -272,9 +270,9 @@ public:
      * @param f
      **/
     template<class Func>
-    void AddCFunction(const char *func, Func const fp) 
+    void AddCFunction(const char *func, Func const fp)
     {
-        AddCFunction(func,LuaCFunctionWrap<__COUNTER__>(fp)); 
+        AddCFunction(func, LuaCFunctionWrap<__COUNTER__>(fp));
     }
 
     /**
@@ -283,7 +281,7 @@ public:
      * @param func func name 函数名
      * @param f
      **/
-    static void AddGlobalCFunc(lua_State* L,const char *func, lua_CFunction f) 
+    static void AddGlobalCFunc(lua_State *L, const char *func, lua_CFunction f)
     {
         lua_register(L, func, f);
     }
@@ -296,9 +294,9 @@ public:
      * @param f
      **/
     template<class Func>
-    static void AddGlobalCFunc(lua_State* L,const char *func, Func const fp) 
+    static void AddGlobalCFunc(lua_State *L, const char *func, Func const fp)
     {
-        AddGlobalCFunc(L,func, LuaCFunctionWrap<__COUNTER__>(fp));
+        AddGlobalCFunc(L, func, LuaCFunctionWrap<__COUNTER__>(fp));
     }
 
     //----------------------------------------------------------------------------
@@ -306,10 +304,10 @@ public:
         Open a new or existing class for registrations.
     */
     template<class T>
-    Class<T> BeginClass(char const *name,bool shared)
+    Class<T> BeginClass(char const *name, bool shared)
     {
         m_pLuaVm->AssertIsActive();
-        return Class<T>(name, m_pLuaVm,shared);
+        return Class<T>(name, m_pLuaVm, shared);
     }
 
     //----------------------------------------------------------------------------
@@ -334,17 +332,17 @@ public:
 
     bool IsValid()
     {
-        return  m_pLuaVm != NULL && m_name != "";
+        return m_pLuaVm != NULL && m_name != "";
     }
 
-    const std::string& SpaceName() const
+    const std::string &SpaceName() const
     {
-        return  m_name;
+        return m_name;
     }
 
 private:
-    LuaVm       *m_pLuaVm;
-    std::string  m_name;
+    LuaVm *m_pLuaVm;
+    std::string m_name;
 };
 } // namespace luabridge
 

@@ -70,7 +70,7 @@ struct OuterClass
         printf("*****OuterClass::Say: %s******\n", world);
     }
 public:
-    static  int data;
+    static int data;
 };
 
 struct OuterClass1
@@ -90,14 +90,14 @@ struct OuterClass1
         printf("*****OuterClass1::Say: %s******\n", world);
     }
 public:
-    static  int data;
+    static int data;
 };
 
 int OuterClass::data = 0;
 
 std::function<int(int, int)> func = [](int a, int b) -> int
 {
-    printf("c++ Lambda func add a = %d,b = %d\n",a,b);
+    printf("c++ Lambda func add a = %d,b = %d\n", a, b);
     return a + b;
 };
 
@@ -110,18 +110,17 @@ int LuaFnGetOurterClass(lua_State *L)
 
 int main()
 {
-    try
-    {
+    try {
         lua_State *L = luaL_newstate();
         LuaBridge luaBridge(L);
         luaBridge.LoadFile("../script/111111.lua");
 
-        BEGIN_NAMESPACE(luaBridge,"space")
-            BEGIN_CLASS(luaBridge,OuterClass)
-                LuaHelper::DumpTable(L,-1,std::cout,2);
-                LuaHelper::DumpTable(L,-2,std::cout,2);
-                LuaHelper::DumpTable(L,-3,std::cout,2);
-                LuaHelper::DumpTable(L,-4,std::cout,2);
+        BEGIN_NAMESPACE(luaBridge, "space")
+            BEGIN_CLASS(luaBridge, OuterClass)
+                LuaHelper::DumpTable(L, -1, std::cout, 2);
+                LuaHelper::DumpTable(L, -2, std::cout, 2);
+                LuaHelper::DumpTable(L, -3, std::cout, 2);
+                LuaHelper::DumpTable(L, -4, std::cout, 2);
                 CLASS_ADD_CONSTRUCTOR(void(*)(int))
                 CLASS_ADD_FUNC("Say", &OuterClass::Say)
             END_CLASS
@@ -158,12 +157,12 @@ int main()
         int ret = luaBridge.CallLuaFunc<int>("x11111_callfailedtest", 1, 2, 200, 100, "Hello lua");
         printf("ret = %d\n", ret);
         printf("-------------------\n");
-        ret = luaBridge.CallLuaFunc<int>("x11111_test", 1, 2,BinaryStr("1111111111",11));
+        ret = luaBridge.CallLuaFunc<int>("x11111_test", 1, 2, BinaryStr("1111111111", 11));
         printf("ret = %d\n", ret);
 
-    }catch (std::exception& e)
-    {
-        printf("run catch one execption,msg = %s\n",e.what());
+    }
+    catch (std::exception &e) {
+        printf("run catch one execption,msg = %s\n", e.what());
     }
     g_pt->Say("Cpp hello OuterClass1");
     printf("main end\n");

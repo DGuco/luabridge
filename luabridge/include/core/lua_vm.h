@@ -31,7 +31,7 @@
 
 #include "lua_library.h"
 
-namespace  luabridge
+namespace luabridge
 {
 /**
  * Base for class and namespace registration.
@@ -53,7 +53,6 @@ public:
     {
     }
 
-
     LuaVm(const LuaVm &rhs)
         : L(rhs.L), m_stackSize(rhs.m_stackSize)
     {
@@ -67,7 +66,7 @@ public:
         return *this;
     }
 
-    lua_State * LuaState()
+    lua_State *LuaState()
     {
         return L;
     }
@@ -79,8 +78,10 @@ public:
         }
     }
 
-    void AddStackSize(int value) {m_stackSize = m_stackSize + value;};
-    int GetStackSize()           {return  m_stackSize;}
+    void AddStackSize(int value)
+    { m_stackSize = m_stackSize + value; };
+    int GetStackSize()
+    { return m_stackSize; }
     void AssertIsActive() const
     {
         if (m_stackSize == 0) {
